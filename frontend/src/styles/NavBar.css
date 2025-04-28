@@ -1,0 +1,46 @@
+/* Make navbar stick to top */
+.navbar {
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: #281E1E;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 1000;
+}
+
+.navbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.navbar-logo {
+    font-size: 25px;
+    font-weight: bold;
+    text-decoration: none;
+    color: white;
+}
+
+.navbar-links {
+    display: flex;
+    gap: 3rem;
+}
+
+.navbar-link {
+    text-decoration: none;
+    font-size: 25px;
+    color: white;
+    transition: color 0.3s;
+}
+
+.navbar-link:hover {
+    color: #000;
+}
+
+.logo-link {
+    text-decoration: none;
+    color:white;
+}
