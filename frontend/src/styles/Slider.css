@@ -1,0 +1,45 @@
+@keyframes slide {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+.carousel-container {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    padding: 20px 0;
+    background: rgba(39, 55, 146, 0.17);
+}
+
+.carousel-track {
+    display: flex;
+    width: calc(10 * 140px);
+    animation: slide calc(10 * 2s) linear infinite;
+    gap: 2rem;
+}
+
+.logo-item {
+    width: 100px;
+    height: 100px;
+    margin: 0 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.logo-image {
+    height: 60px;
+    width: 60px;
+    object-fit: contain;
+}
+
+.logo-name {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #FFFFFF;
+}

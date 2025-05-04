@@ -11,10 +11,36 @@
 }
 .circle {
     border-radius: 50%;
-    background-color: #8B3095;
     width: 25px;
     height: 25px;
 }
+
+.red {
+    background-color: red;
+}
+.green {
+    background-color: green;
+}
+.orange {
+    background-color: orange;
+}
+.blue {
+    background-color: blue;
+}
+.light-blue {
+    background-color: lightblue;
+}
+.purple {
+    background-color: #8B3095;
+}
+.yellow {
+    background-color: yellow;
+}
+
+.hero-left {
+    margin-top: 7rem;
+}
+
 .hero-left > p {
     font-size: 20px;
     margin-bottom: 10px ;
@@ -37,12 +63,34 @@
     width:40%;
     height: 3rem;
     background-color: #281E1E;
-    border: 4px solid #8B3095;
     border-radius: 5px;
     color: white;
     padding: 1px;
-    margin-top: 10px;
-    box-shadow: 1px 1px 4px #8B3095;
+    margin-top: 15px;
+    font-weight: bold;
+    font-size: 17px;
+    transition: background-position 0.5s;
+    background-size: 200% auto;
+}
+/* CSS */
+.cta {
+    position: relative;
+    overflow: hidden;
+}
+
+.cta::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0%;
+    height: 2px;
+    background: currentColor;
+    transition: width 0.3s ease;
+}
+
+.cta:hover::after {
+    width: 100%;
 }
 .hero-container {
     display: flex;
@@ -65,12 +113,10 @@
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-
-
 .image-container {
     position: relative;
-    margin-top: 2rem;
-    width: 100%;
+    width: 80%;
+    padding: 2rem;
     height: 400px;
 }
 
@@ -85,7 +131,6 @@
     position: absolute;
     width: 80%;
     height: 100%;
-    background-color: #8B3095;
     z-index: -1;
     transform: rotate(5deg) translate(20px, 20px);
 }
@@ -93,30 +138,154 @@
 
 /* Start of Mouse Icon section */
 
-.mouse-icon-section {
-    display: flex;
+.mouse-icon-section {display: flex;
     justify-content: center;
-    align-items: center;
-    height: 12rem
-}
+    width: 100%;
+    margin: 0 auto;
+    padding: 1rem 0;
+    margin-top: -5rem;
+    margin-bottom: 5rem;}
 .mouse-icon-container {
     display: flex;
-    justify-content: center;
-    align-items: center;
     flex-direction: column;
-    width: 5%;
-    height: 100%;
+    align-items: center;
+    width: fit-content; /* Only as wide as content needs */
+    padding: 1rem; /* Internal spacing */
+    position: relative;
 }
 
 .double-arrow {
     transform: rotate(-180deg);
     scale: 0.7;
-    margin-top: -2rem;
+    position: absolute;
+    top: 4rem;
+}
+
+.double-arrow:hover {
+    transform: rotate(-180deg);
+    top: 5rem;
+    transition-duration: 0.6s;
+    animation: ease-in-out;
 }
 
 .mouse-icon {
     scale: 0.7;
 }
+
+/* End of Mouse Icon section */
+
+
+/* Start of Projects Section*/
+
+.projects-header {
+    text-align: center;
+    max-width: 100%;
+    padding: 1rem; /* Match mouse section padding */
+    margin-bottom: 2rem;
+    font-size: 36px;
+}
+.projects-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 5rem;
+}
+
+.remove-link {
+    text-decoration: none;
+}
+
+/* End of Projects Section */
+
+
+/* Start of Sites Section */
+
+.sites-section {
+    margin-top: 10rem;
+}
+
+.site-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.site-box-image-box {
+    position: relative;
+    margin-top: 2rem;
+    width: 100%;
+    height: 400px;
+}
+.site-box-content {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-left: 2rem;
+}
+
+.sites-links {
+    text-decoration: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    width: fit-content;
+    color: inherit;
+}
+
+.site-cta {
+    border: 3px solid #8B3095;
+    background-color: #100D0D;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 40%;
+    width: 13%;
+    font-size: 1.3rem;
+    gap: 2rem;
+    border-radius: 15px;
+    margin-right: 2rem;
+}
+
+.site-cta:hover {
+    transform: translateY(-2px);
+}
+
+.sites-header {
+    text-align: center;
+    font-size: 36px;
+}
+
+.live-button {
+    margin-top: 0.5rem;
+    scale: 1.3;
+}
+
+.site-box {
+    background-color:  rgba(16, 13, 20, 10);
+    border-radius: 40px;
+    margin-bottom: 7rem;
+}
+
+#title-1 {
+    color:#BBE758;
+}
+
+#title-2 {
+    color:#65E4A3;
+}
+#title-3 {
+    color:#0BBEF2;
+}
+
+
+
+
+
+
 
 @media (max-width: 768px) {
     .hero-container {
@@ -130,4 +299,58 @@
         height: 300px;
         margin-top: 2rem;
     }
+}
+/* End of Sites Section */
+
+/* Start of Tech Stack Section */
+.tech-stack-section {
+    margin-top: 15rem;
+}
+
+.ts-header {
+    text-align: center;
+    font-size: 36px;
+}
+/* Start of Tech Stack Section */
+
+
+/* Start of Contact Section */
+.contact-section {
+    margin-top: 10rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 1rem;
+}
+
+.contact-logo {
+    width :4%;
+}
+
+.logos-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.copyright{
+    margin-top: 6rem;
+}
+
+/* Start of Contact Section */
+
+/* Add to your CSS file */
+.logo-link {
+    width: 5%;   /* or your specific width */
+    height: fit-content;  /* or your specific height */
+}
+
+/* Make sure the image maintains its size */
+.logo-link img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
