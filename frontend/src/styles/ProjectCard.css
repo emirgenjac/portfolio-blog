@@ -1,0 +1,55 @@
+.project-card {
+    background-color: #0D1117;
+    width: 40%;
+    padding: 1rem;
+    border-radius: 10px;
+}
+
+.project-card:hover {
+    opacity: 0.8;
+    box-shadow: 2px 2px 4px #0D1117;
+}
+
+.project-card__upper, .project-card__lower {
+    width: 100%;
+    height: 5rem;
+}
+
+.project-card__upper {
+    padding-bottom: 4rem;
+}
+
+.project-card__lower {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.language {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+
+.visit-gh-project {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    font-size: 20px;
+}
+
+.project-card__title {
+    color: #3673C1;
+}
+
+.project-card__description {
+    width: 100%;
+    margin-top: 2rem;
+}
+.gh-visit-link {
+    text-decoration: none;
+    color: white;
+}

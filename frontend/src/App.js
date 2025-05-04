@@ -6,8 +6,10 @@ import "./styles/App.css";
 
 
 function App() {
+
+
   return (
-    <Router>
+    <>
       <NavBar />
         <main className="content">
       <Routes>
@@ -15,7 +17,7 @@ function App() {
         <Route path="/blog" element={<Blog />} />
       </Routes>
         </main>
-    </Router>
+    </>
   );
 }
 

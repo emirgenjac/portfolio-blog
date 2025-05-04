@@ -1,8 +1,12 @@
 body {
-    background-color: #281E1E;
+    background-color: #100D0D;
     color: white;
-}
+    scroll-behavior: smooth; /* Add this line */
 
+}
+html {
+    scroll-behavior: smooth;
+}
 
 .content {
     padding-left: 90px;

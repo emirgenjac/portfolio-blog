@@ -5,6 +5,12 @@ body {
     padding: 0;
     color: white;
     font-family: "Noto Sans", sans-serif;
+    scroll-behavior: smooth; /* Add this line */
+
+}
+
+html {
+    scroll-behavior: smooth; /* Add this line */
 }
 
 .noto-sans-regular {
