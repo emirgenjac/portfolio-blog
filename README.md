@@ -33,4 +33,6 @@ After that I had to update the BlogPost entity as well as the service.
 All that was left was to create a simple /like endpoint to update the given post.
 Now I will move on to the authentication.
 
-
+### 05.05.2025.
+#### Time: 22:15:00
+I changed the RequestMapping from /api to /blog as it makes more sense and follows Restful naming conventions.
