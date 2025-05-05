@@ -14,7 +14,7 @@ function App() {
         <main className="content">
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/blog" element={<Blog />} />
+        <Route path="/blog/posts" element={<Blog />} />
       </Routes>
         </main>
     </>

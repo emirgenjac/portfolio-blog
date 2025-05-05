@@ -1,6 +1,5 @@
 package com.emirgenjac.blog.controllers;
 
-import com.emirgenjac.blog.repository.AdminRepository;
 import com.emirgenjac.blog.services.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;

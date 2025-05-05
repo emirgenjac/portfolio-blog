@@ -2,9 +2,6 @@ package com.emirgenjac.blog.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Generated;
-import org.hibernate.annotations.CollectionIdJdbcTypeCode;
-
 import java.time.LocalDateTime;
 
 @Entity

@@ -8,21 +8,20 @@ import com.emirgenjac.blog.services.BlogPostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/blog")
 public class BlogPostController {
     @Autowired
     private BlogPostService blogPostService;
     @Autowired
     private AdminRepository adminRepository;
 
-    @GetMapping("/posts")
+    @GetMapping("")
     public List<BlogPost> getAllPosts() {
         List<BlogPost> posts = blogPostService.getAllPosts();
         if (posts.isEmpty()) {
@@ -32,7 +31,7 @@ public class BlogPostController {
         return posts;
     }
 
-    @GetMapping("/posts/{id}")
+    @GetMapping("/{id}")
     public BlogPost getPostById(@PathVariable int id) {
         BlogPost post = blogPostService.getPostById(id);
         if (post == null) {
@@ -64,7 +63,6 @@ public class BlogPostController {
             post.setCoverImageUrl(postDto.getCoverImageUrl());
             post.setAuthor("Emir Genjac");
             post.setAdmin(admin);
-            ResponseEntity.ok().body("Created Post!");
             return blogPostService.createPost(post);
         } catch (RuntimeException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, " Post creation failed");
