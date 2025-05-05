@@ -7,5 +7,4 @@ public class BlogPostDTO {
     private String title;
     private String content;
     private String coverImageUrl;
-    private String author;
 }
