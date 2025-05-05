@@ -38,6 +38,9 @@ public class BlogPost {
     @JsonIgnore
     private Admin admin;
 
+    @Column(name = "likes", nullable = false)
+    private int likes = 0;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
