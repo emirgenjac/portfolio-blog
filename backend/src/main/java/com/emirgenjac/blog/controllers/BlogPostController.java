@@ -21,14 +21,9 @@ public class BlogPostController {
     @Autowired
     private AdminRepository adminRepository;
 
-    @GetMapping("")
+    @GetMapping
     public List<BlogPost> getAllPosts() {
-        List<BlogPost> posts = blogPostService.getAllPosts();
-        if (posts.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, " No posts found");
-        }
-
-        return posts;
+        return blogPostService.getAllPosts();
     }
 
     @GetMapping("/{id}")
@@ -39,7 +34,7 @@ public class BlogPostController {
         }
         return post;
     }
-
+/*
     @PutMapping("/posts/{id}/like")
     public ResponseEntity<String> likePost(@PathVariable int id) {
         BlogPost post = blogPostService.getPostById(id);
@@ -52,13 +47,14 @@ public class BlogPostController {
 
         return ResponseEntity.ok("Liked post with id " + id + ". Total likes: " + post.getLikes());
     }
-
+*/
     @PostMapping("/admin/posts")
     public BlogPost createPost(@RequestBody BlogPostDTO postDto) {
         try {
             Admin admin = adminRepository.findById(1).orElseThrow(() -> new RuntimeException("Admin not found"));
             BlogPost post = new BlogPost();
             post.setTitle(postDto.getTitle());
+            post.setTagline(postDto.getTagline());
             post.setContent(postDto.getContent());
             post.setCoverImageUrl(postDto.getCoverImageUrl());
             post.setAuthor("Emir Genjac");
@@ -72,8 +68,9 @@ public class BlogPostController {
 
     @PutMapping("/admin/posts/{id}")
     public BlogPost updatePost(@PathVariable int id, @RequestBody BlogPostDTO postDto) {
-        BlogPost post = new BlogPost();
+        BlogPost post = getPostById(id);
         post.setTitle(postDto.getTitle());
+        post.setTagline(postDto.getTagline());
         post.setContent(postDto.getContent());
         post.setCoverImageUrl(postDto.getCoverImageUrl());
         post.setAuthor("Emir Genjac");

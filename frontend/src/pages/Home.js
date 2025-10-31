@@ -3,7 +3,7 @@ import {Link} from "react-router-dom";
 
 import "../styles/Home.css";
 
-import HeroPhoto from '../assets/hero-photo.jpg';
+import HeroPhoto from '../assets/Untitled.png';
 import DoubleArrow from '../assets/DoubleArrow.svg';
 import MouseIcon from '../assets/MouseIcon.svg'
 import LazorSports from '../assets/lazor.png';
@@ -77,18 +77,18 @@ function Home() {
     return <>
         <div className="hero-container">
             <div className="hero-left">
-                <p>Hello! I am</p>
-                <p>Emir Genjac</p>
+                <h1>Hello! I am</h1>
+                <h1>Emir Genjac</h1>
                 <div className="title-container">
                     <p>Software Engineer</p>
-                    <div className="circle purple"></div>
+                    <div className="circle"></div>
                     <p>Full-Stack Developer</p>
                 </div>
 
                 <p className="p-information">
-                    I am a passionate Software Engineer and Full-Stack Developer based in Bosnia & Herzegovina, I have a strong interest in back-end engineering. I am committed to creating visually stunning and user-friendly websites. I can bring your ideas to light and elevate your business with a website.
+                    Web Developer and a very result-driven person who prides themselves in delivering top-notch quality projects.
                 </p>
-                <button className="cta">Contact Me</button>
+                <div className="cta">Contact Me</div>
             </div>
 
             <div className="hero-right">
@@ -142,7 +142,7 @@ function Home() {
                             <p className={"site-description"}>Website for a gaming organization</p>
                             </div>
                             <div className="site-cta" id="site-1">
-                                <a href={"https://lazor-sports-emir.webflow.io"} className={"sites-links"}> <p>Visit</p>
+                                <a href={"https://lazor-sports-emir.webflow.io"} className={"sites-links"}> <p>VISIT</p>
                                 <div className={"visit-site"} >
                                     <img className={"live-button"} src={Live}/>
                                 </div></a>
@@ -168,7 +168,7 @@ function Home() {
                             </div>
                             <div className="site-cta" id="site-1">
                                 <a href={"https://boldoofficial.webflow.io"} className={"sites-links"}>
-                                <p>Visit</p>
+                                <p>VISIT</p>
                                 <div className={"visit-site"} >
                                     <img className={"live-button"} src={Live}/>
                                 </div></a>
@@ -195,7 +195,7 @@ function Home() {
                             </div>
                             <div className="site-cta" id="site-1">
                                 <a href={"https://chatapp-g3njac.webflow.io"} className={"sites-links"}>
-                                <p>Visit</p>
+                                <p>VISIT</p>
                                 <div className={"visit-site"} >
                                     <img className={"live-button"} src={Live}/>
                                 </div></a>
