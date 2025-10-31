@@ -36,3 +36,14 @@ Now I will move on to the authentication.
 ### 05.05.2025.
 #### Time: 22:15:00
 I changed the RequestMapping from /api to /blog as it makes more sense and follows Restful naming conventions.
+
+### 31.10.2025
+#### Time: 21:57:00
+So, after a long break where I had to focus on some other stuff, I came back to this project.
+I got a new laptop, so I had to migrate everything to it.
+After that, I first adjusted the database, because I didn't like some things that I overlooked earlier.
+I removed the like function, as I didn't want to bind the like to each user, because I don't want users logging in.
+I revamped the UI to make it more modern, with a new color palette and some new UI elements.
+The biggest change was setting up the Blog page where all blog posts are displayed, as well as the individual page for each post.
+All of the CRUD functionalities are working correctly right now, so the next step will probably be to create a page through which the admin will be able to create posts.
+After that I will setup the authentication and authorization.
