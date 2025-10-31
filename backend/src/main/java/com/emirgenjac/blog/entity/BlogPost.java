@@ -16,7 +16,10 @@ public class BlogPost {
     @Column(name = "title")
     private String title;
 
-    @Column(name = "content")
+    @Column(name = "tagline")
+    private String tagline;
+
+    @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
     @Column(name = "cover_image_url")
@@ -35,9 +38,6 @@ public class BlogPost {
     @JoinColumn(name = "admin_id", referencedColumnName = "id")
     @JsonIgnore
     private Admin admin;
-
-    @Column(name = "likes", nullable = false)
-    private int likes = 0;
 
     @PrePersist
     protected void onCreate() {

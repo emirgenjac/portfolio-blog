@@ -36,7 +36,6 @@ public class BlogPostService {
         post.setTitle(updatedPost.getTitle());
         post.setContent(updatedPost.getContent());
         post.setCoverImageUrl(updatedPost.getCoverImageUrl());
-        post.setLikes(updatedPost.getLikes());
         return blogPostRepository.save(post);
     }
 

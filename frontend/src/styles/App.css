@@ -1,5 +1,6 @@
 body {
-    background-color: #100D0D;
+    margin: 0 auto;
+    background-color: #050D1E;
     color: white;
     scroll-behavior: smooth; /* Add this line */
 
