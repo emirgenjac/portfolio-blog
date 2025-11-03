@@ -12,11 +12,29 @@ function PostDetail() {
     const [post, setPost] = useState(null);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
+    const [showModal, setShowModal] = useState(false);
+
+
+    const goToEdit = () => {
+        navigate(`/blog/admin/posts/${id}/edit`);
+    };
+
+
+    const handleDelete = async(e) => {
+        try {
+            await axios.delete(`http://localhost:8080/blog/admin/posts/${id}`);
+            alert("Post successfully deleted!");
+            navigate("/blog");
+        } catch (error) {
+            console.error("Error deleting post", error);
+            alert("Error deleting post!")
+        }
+    }
 
 
     useEffect(() => {
         axios
-            .get(`http://localhost:8080/blog/${id}`) // ← direct call
+            .get(`http://localhost:8080/blog/${id}`)
             .then(res => setPost(res.data))
             .catch(err => {
                 console.error(err);
@@ -36,7 +54,21 @@ function PostDetail() {
             <img src={post.coverImageUrl} alt="Cover" className="post-cover-image" />
             <h1 className={"post-title"}>{post.title}</h1>
             <p className={"post-content"}>{post.content}</p>
-            <div className={"post-metadata"}>
+                <div className={"actions"}>
+                    <button id={"editBtn"} onClick={goToEdit}>EDIT</button>
+                    <button id={"deleteBtn"} onClick={() => setShowModal(true)}>DELETE</button>
+                </div>
+                {showModal && (
+                    <div className="modal-overlay">
+                        <div className="modal">
+                            <h2>Are you sure you want to delete this post?</h2>
+                            <button className={"delete-confirm"} onClick={handleDelete}>Yes, delete</button>
+                            <button className={"delete-cancel"} onClick={() => setShowModal(false)}>Cancel</button>
+                        </div>
+                    </div>
+                )}
+
+                <div className={"post-metadata"}>
                 <div className={"author-data"}>
                     <img src={AuthorImage} className={"author-image"}/>
                     <p className={"author-name"}>Emir Genjac</p>
