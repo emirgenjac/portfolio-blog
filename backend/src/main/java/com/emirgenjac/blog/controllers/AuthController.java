@@ -23,23 +23,19 @@ public class AuthController {
     public ResponseEntity<String> login(@RequestBody AdminLoginDTO loginDto) {
             String response;
 
-        // 1. Retrieve the user from the database using the provided email.
-        Admin admin = adminRepository.findByEmail(loginDto.getEmail()); // Assuming you have this repository
+
+        Admin admin = adminRepository.findByEmail(loginDto.getEmail());
 
         if (admin != null) {
-            // 2. Check if the provided password matches the stored password.
-            //    You should use a PasswordEncoder (like BCryptPasswordEncoder) to compare passwords.
             if (passwordEncoder.matches(loginDto.getPassword(), admin.getPassword())) {
                 response = "success, email: " + admin.getEmail() + " , password: " + admin.getPassword();
                 return new ResponseEntity<>(response, HttpStatus.OK);
 
             } else {
-                // 4. If the password doesn't match, return an error.
                 response = "Invalid password";
                 return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
             }
         } else {
-            // 5. If the user with the given email is not found, return an error.
             response = "Invalid email";
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }

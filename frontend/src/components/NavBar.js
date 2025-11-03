@@ -27,6 +27,7 @@ function NavBar() {
                     <Link to="/" onClick={scrollToProjects} className="navbar-link">Projects</Link>
                     <Link to="/blog" className="navbar-link">Blog</Link>
                     <Link to="/" className="navbar-link">Contact</Link>
+                    <Link to="/blog/admin/posts" className="navbar-link">Create</Link>
                 </div>
             </div>
         </nav>
