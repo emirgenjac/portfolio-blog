@@ -53,3 +53,7 @@ After that I will setup the authentication and authorization.
 I added an edit and delete button to the PostDetail page, which makes it available for each post. When the delete button is clicked, the user is prompted if they are sure, and then the post is deleted.
 When clicking the Edit button, the user is redirected to a new page where a form is displayed and the user can edit the post from there. After some thinking, I decided that having two separate forms for creating and editing was not a good decision, so I created a PostForm component which was used in both creating and editing posts, depending on the passed parameters.
 Now, I think most, if not all, functionalities are completed. The only thing left to do is admin authentication and authorization and hiding certain functions and endpoints from regular users.
+
+### 06.11.2025.
+#### Time: 18:15
+Added JWT authentication and authorization. This was the hardest thing I ever did and it took a lot of time and debugging. Creating a token is complex, as well as comparing all the data and sending it back and forth. After this, most of the backend stuff is done. I need to apply the login context to the frontend next.
