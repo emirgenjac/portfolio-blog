@@ -22,7 +22,7 @@ public class BlogPost {
     @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
-    @Column(name = "cover_image_url")
+    @Column(name = "cover_image_url", columnDefinition = "TEXT")
     private String coverImageUrl;
 
     @Column(name = "author")
