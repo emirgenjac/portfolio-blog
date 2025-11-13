@@ -6,6 +6,7 @@
     import PostDetail from "./pages/PostDetail";
     import CreatePost from "./pages/CreatePost";
     import EditPost from "./pages/EditPost";
+    import LoginPage from "./pages/LoginPage";
 
 
     function App() {
@@ -21,7 +22,7 @@
               <Route path="/blog/:id" element={<PostDetail />} />
               <Route path={"/blog/admin/posts"} element={<CreatePost />} />
               <Route path="/blog/admin/posts/:id/edit" element={<EditPost />} />
-
+              <Route path="/auth/login" element={<LoginPage />} />
           </Routes>
             </main>
         </>
