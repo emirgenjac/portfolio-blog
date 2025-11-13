@@ -33,6 +33,7 @@ function LoginForm() {
 
     return (
         <div className="main-container">
+            <h2 style={{ marginBottom : "5rem" }}>Login</h2>
             <form className="container" onSubmit={handleSubmit}>
                 <label>Email</label>
                 <input
