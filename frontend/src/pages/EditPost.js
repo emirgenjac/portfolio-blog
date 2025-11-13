@@ -17,13 +17,39 @@ function EditPost() {
     }, [id]);
 
     const handleUpdate = async (formData) => {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            alert("You must be logged in to edit a post!");
+            navigate("/auth/login");
+            return;
+        }
         try {
-            await axios.put(`http://localhost:8080/blog/admin/posts/${id}`, formData);
-            alert("Post updated successfully!");
-            navigate(`/blog/${id}`);
+            const response = await axios.put(
+                `http://localhost:8080/blog/admin/posts/${id}`,
+                formData,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`, // <-- Add this
+                    },
+                }
+            );
+
+            if (response.status === 200 || response.status === 201) {
+                alert("Post updated successfully!");
+                navigate(`/blog/${id}`);
+            }
         } catch (err) {
-            console.error(err);
-            alert("Failed to update post");
+            console.error("Error updating post:", err);
+
+            if (err.response?.status === 401 || err.response?.status === 403) {
+                alert("Session expired. Please log in again.");
+                localStorage.removeItem("token");
+                navigate("/auth/login");
+            } else {
+                alert("Failed to update post");
+            }
         }
     };
 

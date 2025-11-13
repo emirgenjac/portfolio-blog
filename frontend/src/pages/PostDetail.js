@@ -23,13 +23,38 @@ function PostDetail() {
 
 
     const handleDelete = async(e) => {
+        const token = localStorage.getItem("token")
+
+        if (!token) {
+            alert("Unauthorized!")
+            navigate("/auth/login")
+            return;
+        }
+
         try {
-            await axios.delete(`http://localhost:8080/blog/admin/posts/${id}`);
-            alert("Post successfully deleted!");
-            navigate("/blog");
-        } catch (error) {
-            console.error("Error deleting post", error);
-            alert("Error deleting post!")
+            const response = await axios.delete(
+                `http://localhost:8080/blog/admin/posts/${id}`,
+                {
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (response.status === 200 || response.status === 204) {
+                alert("Post deleted successfully!");
+                navigate("/blog");
+            }
+        } catch (err) {
+            console.error("Error deleting post:", err);
+
+            if (err.response?.status === 401 || err.response?.status === 403) {
+                alert("Session expired. Please log in again.");
+                localStorage.removeItem("token");
+                navigate("/auth/login");
+            } else {
+                alert("Failed to delete post");
+            }
         }
     }
 
