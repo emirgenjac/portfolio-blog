@@ -9,13 +9,38 @@ function CreatePost() {
     const navigate = useNavigate();
 
     const handleCreate = async (formData) => {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            alert("You must be logged in to create a post!")
+            navigate("/auth/login");
+            return;
+        }
+
         try {
-            await axios.post("http://localhost:8080/blog/admin/posts", formData);
-            alert("Post created!");
-            navigate("/blog");
+            const response = await axios.post("http://localhost:8080/blog/admin/posts",
+                formData, {
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+
+                },
+                }
+                );
+                if (response.status === 200 || response.status === 201) {
+                    alert("Post Created!");
+                    navigate("/blog");
+                }
         } catch (error) {
-            console.error(error);
-            alert("Unexpected error occurred!");
+            console.error("Error creating post " , error);
+
+            if (error.response?.status === 401 || error.response?.status === 403) {
+                alert("Session expired. Please log in again.");
+                localStorage.removeItem("token");
+                navigate("/auth/login");
+            } else {
+                alert("Unexpected error occurred!");
+            }
         }
     };
 

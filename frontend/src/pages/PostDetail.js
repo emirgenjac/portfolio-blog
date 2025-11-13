@@ -13,6 +13,8 @@ function PostDetail() {
     const [error, setError] = useState(null);
     const navigate = useNavigate();
     const [showModal, setShowModal] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
+
 
 
     const goToEdit = () => {
@@ -54,10 +56,10 @@ function PostDetail() {
             <img src={post.coverImageUrl} alt="Cover" className="post-cover-image" />
             <h1 className={"post-title"}>{post.title}</h1>
             <p className={"post-content"}>{post.content}</p>
-                <div className={"actions"}>
+                {isLoggedIn && <div className={"actions"}>
                     <button id={"editBtn"} onClick={goToEdit}>EDIT</button>
                     <button id={"deleteBtn"} onClick={() => setShowModal(true)}>DELETE</button>
-                </div>
+                </div> }
                 {showModal && (
                     <div className="modal-overlay">
                         <div className="modal">
