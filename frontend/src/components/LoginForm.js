@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "../styles/PostForm.css"; // reuse same styling for consistency
+import "../styles/LoginForm.css";
 import { useNavigate } from "react-router-dom";
 
 function LoginForm() {
@@ -32,9 +32,10 @@ function LoginForm() {
     };
 
     return (
-        <div className="main-container">
-            <h2 style={{ marginBottom : "5rem" }}>Login</h2>
-            <form className="container" onSubmit={handleSubmit}>
+        <div className="login-form-card">
+            <h2 className="login-form-heading">Login</h2>
+
+            <form className="login-form" onSubmit={handleSubmit}>
                 <label>Email</label>
                 <input
                     type="email"
@@ -51,7 +52,7 @@ function LoginForm() {
                     required
                 />
 
-                <button className="submitBtn" type="submit">
+                <button className="login-submit-btn" type="submit">
                     Login
                 </button>
             </form>

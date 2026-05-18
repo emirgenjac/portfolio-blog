@@ -1,4 +1,4 @@
-import {useNavigate, useParams} from 'react-router-dom';
+import {useNavigate, useParams, Link} from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import AuthorImage from "../assets/eeeeee.png";
@@ -80,6 +80,7 @@ function PostDetail() {
             <div className="post-detail">
             <img src={post.coverImageUrl} alt="Cover" className="post-cover-image" />
             <h1 className={"post-title"}>{post.title}</h1>
+                <hr className={"line"}/>
             <p className={"post-content"}>{post.content}</p>
                 {isLoggedIn && <div className={"actions"}>
                     <button id={"editBtn"} onClick={goToEdit}>EDIT</button>
@@ -95,13 +96,13 @@ function PostDetail() {
                     </div>
                 )}
 
-                <div className={"post-metadata"}>
-                <div className={"author-data"}>
+                <div className={"post-metadata-details"}>
+                <div className={"author-data-details"}>
                     <img src={AuthorImage} className={"author-image"}/>
                     <p className={"author-name"}>Emir Genjac</p>
                     <div className={"svgs-container"}>
-                        <img className={"svgs"} src={GitHub}/>
-                        <img className={"svgs"} src={LinkedIn}/>
+                        <Link to={"https://github.com/emirgenjac"} target="_blank"><img className={"svgs"} src={GitHub}/></Link>
+                        <Link to={"https://www.linkedin.com/in/emirgenjac"} target="_blank"><img className={"svgs"} src={LinkedIn}/></Link>
                     </div>
                 </div>
 
