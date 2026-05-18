@@ -7,6 +7,7 @@
     import CreatePost from "./pages/CreatePost";
     import EditPost from "./pages/EditPost";
     import LoginPage from "./pages/LoginPage";
+    import ProtectedRoute from "./components/ProtectedRoute";
 
 
     function App() {
@@ -20,8 +21,8 @@
             <Route path="/" element={<Home />} />
             <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:id" element={<PostDetail />} />
-              <Route path={"/blog/admin/posts"} element={<CreatePost />} />
-              <Route path="/blog/admin/posts/:id/edit" element={<EditPost />} />
+              <Route path={"/blog/admin/posts"} element={<ProtectedRoute><CreatePost /></ProtectedRoute>} />
+              <Route path="/blog/admin/posts/:id/edit" element={<ProtectedRoute><EditPost /></ProtectedRoute>} />
               <Route path="/auth/login" element={<LoginPage />} />
           </Routes>
             </main>
