@@ -61,3 +61,14 @@ Added JWT authentication and authorization. This was the hardest thing I ever di
 ### 18.05.2026.
 #### Time : 23:07
 After a long break where I focused on other projects, I finally got back to this one. Today I redesigned most of the blog part and almost finished it. I need to redesign the home page too. After that I need to cover all the edge-cases and test the app. When I'm done with that only hosting will be left.
+
+### 18.05.2026.
+#### Time : 23:25
+I protected admin routes on the frontend.
+
+TODO: 
+1. Migrate token from localStorage to HttpOnly(or something else)
+2. Global Exception Handling
+3. Updating the DTOs to match the form fields
+4. Dockerize
+5. Deploy
