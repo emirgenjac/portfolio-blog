@@ -61,7 +61,7 @@
     align-items: center;
     gap: 1rem;
     font-size: 20px;
-    color:#146CFF;
+    color:black;
 }
 .cta {
     display: flex;
@@ -81,6 +81,7 @@
     background-size: 200% auto;
     position: relative;
     overflow: hidden;
+    box-shadow: #0D1117 2px 2px;
 }
 .cta::after {
     content: '';
@@ -94,6 +95,7 @@
 }
 .cta:hover::after {
     width: 100%;
+
 }
 
 .cta:active {
@@ -140,6 +142,7 @@
     height: 100%;
     z-index: -1;
     transform: rotate(5deg) translate(20px, 20px);
+    background-color: black;
 }
 /* End of Hero section */
 

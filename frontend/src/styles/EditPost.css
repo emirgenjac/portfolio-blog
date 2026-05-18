@@ -1,3 +1,17 @@
 .edit-post-header {
     margin-top: 5rem;
 }
+/* EditPost.css — header / page-level tweaks */
+
+.edit-post-header {
+  margin: 1.5rem 0 1rem 0;
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: black;
+  text-align: center;
+  letter-spacing: 0.2px;
+}
+
+/* If the page background is light, you can change color to a dark shade:
+   .edit-post-header { color: #0C182E; }
+*/
