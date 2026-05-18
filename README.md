@@ -57,3 +57,7 @@ Now, I think most, if not all, functionalities are completed. The only thing lef
 ### 06.11.2025.
 #### Time: 18:15
 Added JWT authentication and authorization. This was the hardest thing I ever did and it took a lot of time and debugging. Creating a token is complex, as well as comparing all the data and sending it back and forth. After this, most of the backend stuff is done. I need to apply the login context to the frontend next.
+
+### 18.05.2026.
+#### Time : 23:07
+After a long break where I focused on other projects, I finally got back to this one. Today I redesigned most of the blog part and almost finished it. I need to redesign the home page too. After that I need to cover all the edge-cases and test the app. When I'm done with that only hosting will be left.
