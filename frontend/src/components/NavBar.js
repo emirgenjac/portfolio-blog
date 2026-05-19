@@ -50,7 +50,7 @@ function NavBar() {
 
                     {!loading && isBlogPage && (
                         isAuthenticated ? (
-                            <button className="navbar-link" onClick={handleLogout} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                            <button className="navbar-link" onClick={handleLogout} style={{ background: 'none', fontSize: '25px', border: 'none', cursor: 'pointer' }}>
                                 Logout
                             </button>
                         ) : (
