@@ -8,6 +8,7 @@
     import EditPost from "./pages/EditPost";
     import LoginPage from "./pages/LoginPage";
     import ProtectedRoute from "./components/ProtectedRoute";
+    import { AuthProvider } from './context/AuthContext';
 
 
     function App() {
@@ -15,7 +16,8 @@
 
       return (
         <>
-          <NavBar />
+            <AuthProvider>
+            <NavBar />
             <main className="content">
           <Routes>
             <Route path="/" element={<Home />} />
@@ -26,6 +28,7 @@
               <Route path="/auth/login" element={<LoginPage />} />
           </Routes>
             </main>
+            </AuthProvider>
         </>
       );
     }

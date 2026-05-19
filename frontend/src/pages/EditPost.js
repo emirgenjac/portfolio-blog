@@ -1,7 +1,7 @@
 // src/pages/EditPost.jsx
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import API from "../api/axios";
 import PostForm from "../components/PostForm";
 import "../styles/EditPost.css"
 
@@ -11,27 +11,19 @@ function EditPost() {
     const [postData, setPostData] = useState(null);
 
     useEffect(() => {
-        axios.get(`http://localhost:8080/blog/${id}`)
+        API.get(`/blog/${id}`)
             .then(res => setPostData(res.data))
             .catch(err => console.error(err));
     }, [id]);
 
     const handleUpdate = async (formData) => {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            alert("You must be logged in to edit a post!");
-            navigate("/auth/login");
-            return;
-        }
         try {
-            const response = await axios.put(
-                `http://localhost:8080/blog/admin/posts/${id}`,
+            const response = await API.put(
+                `/blog/admin/posts/${id}`,
                 formData,
                 {
                     headers: {
                         "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}`, // <-- Add this
                     },
                 }
             );
@@ -45,7 +37,6 @@ function EditPost() {
 
             if (err.response?.status === 401 || err.response?.status === 403) {
                 alert("Session expired. Please log in again.");
-                localStorage.removeItem("token");
                 navigate("/auth/login");
             } else {
                 alert("Failed to update post");

@@ -5,22 +5,34 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const navigate = useNavigate();
-    const [user, setUser] = useState(() => localStorage.getItem('token'));
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [loading, setLoading] = useState(true);
 
-    const login = (token) => {
-        localStorage.setItem('token', token);
-        setUser(token);
+    useEffect(() => {
+        fetch("http://localhost:8080/auth/me", {
+            credentials: "include",
+        }).then(res => {
+            if (res.ok) setIsAuthenticated(true);
+        })
+        .finally(() => setLoading(false));
+    }, []);
+
+    const login = () => {
+        setIsAuthenticated(true)
         navigate('/blog');
     };
 
-    const logout = () => {
-        localStorage.removeItem('token');
-        setUser(null);
+    const logout = async () => {
+        await fetch("http://localhost:8080/auth/logout", {
+            method: "POST",
+            credentials: "include",
+        });
+        setIsAuthenticated(false);
         navigate('/auth/login');
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout }}>
+        <AuthContext.Provider value={{ isAuthenticated, login, logout, loading }}>
             {children}
         </AuthContext.Provider>
     );

@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+import React, {useContext, useState} from "react";
 import "../styles/LoginForm.css";
 import { useNavigate } from "react-router-dom";
+import {AuthContext} from "../context/AuthContext";
 
 function LoginForm() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
+    const { login } = useContext(AuthContext);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -15,13 +17,11 @@ function LoginForm() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, password }),
+                credentials: "include",
             });
 
             if (response.ok) {
-                const data = await response.json();
-                localStorage.setItem("token", data.token);
-                alert("Login successful!");
-                navigate("/blog");
+                login();
             } else {
                 alert("Invalid credentials. Please try again.");
             }

@@ -1,9 +1,10 @@
 package com.emirgenjac.blog.controllers;
 
 import com.emirgenjac.blog.model.AuthRequest;
-import com.emirgenjac.blog.model.AuthResponse;
 import com.emirgenjac.blog.services.AdminService;
 import com.emirgenjac.blog.services.JwtService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +20,7 @@ public class AuthController {
     private JwtService jwtService;
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
+    public ResponseEntity<?> login(@RequestBody AuthRequest request, HttpServletResponse response) {
         System.out.println("Login request received: " + request.getEmail());
 
         boolean authenticated = adminService.authenticate(request.getEmail(), request.getPassword());
@@ -33,6 +34,31 @@ public class AuthController {
         String token = jwtService.generateToken(request.getEmail());
         System.out.println("Token generated: " + token);
 
-        return ResponseEntity.ok(new AuthResponse(token));
+        Cookie cookie = new Cookie("jwt", token);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false);
+        cookie.setPath("/");
+        cookie.setMaxAge(7 * 24 * 60 * 60);
+
+        response.addCookie(cookie);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+        Cookie cookie = new Cookie("jwt", null);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+
+        response.addCookie(cookie);
+        return ResponseEntity.ok().build();
+    }
+
+
+    @GetMapping("/me")
+    public ResponseEntity<?> me() {
+        return ResponseEntity.ok().build();
     }
 }
