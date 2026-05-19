@@ -1,11 +1,13 @@
 import {useNavigate, useParams, Link} from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import API from '../api/axios';
 import AuthorImage from "../assets/eeeeee.png";
 import GitHub from "../assets/github.svg"
 import LinkedIn from "../assets/linkedin-svgrepo-com (1).svg"
 import BackArrow from "../assets/arrow-left.svg"
 import '../styles/PostDetail.css';
+import { useContext } from 'react';
+import { AuthContext } from '../context/AuthContext'; // provjeri putanju
 
 function PostDetail() {
     const { id } = useParams();
@@ -13,8 +15,7 @@ function PostDetail() {
     const [error, setError] = useState(null);
     const navigate = useNavigate();
     const [showModal, setShowModal] = useState(false);
-    const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
-
+    const { isAuthenticated } = useContext(AuthContext);
 
 
     const goToEdit = () => {
@@ -23,23 +24,8 @@ function PostDetail() {
 
 
     const handleDelete = async(e) => {
-        const token = localStorage.getItem("token")
-
-        if (!token) {
-            alert("Unauthorized!")
-            navigate("/auth/login")
-            return;
-        }
-
         try {
-            const response = await axios.delete(
-                `http://localhost:8080/blog/admin/posts/${id}`,
-                {
-                    headers: {
-                        "Authorization": `Bearer ${token}`,
-                    },
-                }
-            );
+            const response = await API.delete(`http://localhost:8080/blog/admin/posts/${id}`);
 
             if (response.status === 200 || response.status === 204) {
                 alert("Post deleted successfully!");
@@ -50,7 +36,6 @@ function PostDetail() {
 
             if (err.response?.status === 401 || err.response?.status === 403) {
                 alert("Session expired. Please log in again.");
-                localStorage.removeItem("token");
                 navigate("/auth/login");
             } else {
                 alert("Failed to delete post");
@@ -60,7 +45,7 @@ function PostDetail() {
 
 
     useEffect(() => {
-        axios
+        API
             .get(`http://localhost:8080/blog/${id}`)
             .then(res => setPost(res.data))
             .catch(err => {
@@ -82,7 +67,7 @@ function PostDetail() {
             <h1 className={"post-title"}>{post.title}</h1>
                 <hr className={"line"}/>
             <p className={"post-content"}>{post.content}</p>
-                {isLoggedIn && <div className={"actions"}>
+                {isAuthenticated && <div className={"actions"}>
                     <button id={"editBtn"} onClick={goToEdit}>EDIT</button>
                     <button id={"deleteBtn"} onClick={() => setShowModal(true)}>DELETE</button>
                 </div> }

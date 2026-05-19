@@ -1,23 +1,13 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import '../styles/NavBar.css';
-import { useEffect, useState } from 'react';
+import {AuthContext} from "../context/AuthContext";
+import { useContext } from 'react';
 
 function NavBar() {
     const navigate = useNavigate();
     const location = useLocation();
-    const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
+    const { isAuthenticated, logout, loading } = useContext(AuthContext);
 
-    useEffect(() => {
-        // Listen for login/logout changes from other components
-        const handleStorageChange = () => setIsLoggedIn(!!localStorage.getItem("token"));
-        window.addEventListener("storage", handleStorageChange);
-        return () => window.removeEventListener("storage", handleStorageChange);
-    }, []);
-
-    useEffect(() => {
-        // Update login state whenever location changes
-        setIsLoggedIn(!!localStorage.getItem("token"));
-    }, [location.pathname]);
 
     const scrollToProjects = () => {
         if (window.location.pathname !== "/") {
@@ -34,9 +24,7 @@ function NavBar() {
 
     const handleLogout = () => {
         if (window.confirm("Are you sure you want to log out?")) {
-            localStorage.removeItem("token");
-            setIsLoggedIn(false);
-            navigate("/blog");
+            logout();
         }
     };
 
@@ -56,12 +44,12 @@ function NavBar() {
                     <Link to="/blog" className="navbar-link">Blog</Link>
                     <Link to="/" className="navbar-link">Contact</Link>
 
-                    {isLoggedIn && (
+                    {!loading && isAuthenticated && isBlogPage && (
                         <Link to="/blog/admin/posts" className="navbar-link">Create</Link>
                     )}
 
-                    {isBlogPage && (
-                        isLoggedIn ? (
+                    {!loading && isBlogPage && (
+                        isAuthenticated ? (
                             <button className="navbar-link" onClick={handleLogout} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
                                 Logout
                             </button>
