@@ -1,15 +1,20 @@
 .project-card {
-    background-color: #0D1117;
-    width: 40%;
-    padding: 1rem;
-    border-radius: 10px;
-    box-shadow: 0px 2px 6px 3px rgba(255,255,255,0.2)
-;
+    background-color: #0C182E;
+    color: white;
+    border-radius: 18px;
+    padding: 1.5rem;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    border: 1px solid rgba(255,255,255,0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .project-card:hover {
-    opacity: 0.8;
-    box-shadow: 0px 2px 6px 3px rgba(255,255,255,0.2)
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.18);
 }
 
 .project-card:active {
@@ -27,9 +32,10 @@
 
 .project-card__lower {
     display: flex;
-    flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    gap: 1rem;
+    margin-top: auto;
 }
 
 .language {
@@ -49,11 +55,14 @@
 
 .project-card__title {
     color: #3673C1;
+    font-size: 1.3rem;
+    margin: 0 0 0.75rem;
 }
 
 .project-card__description {
-    width: 100%;
-    margin-top: 2rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    color: rgba(255,255,255,0.9);
 }
 .gh-visit-link {
     text-decoration: none;

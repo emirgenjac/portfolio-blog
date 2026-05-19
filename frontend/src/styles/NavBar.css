@@ -7,7 +7,8 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     z-index: 1000;
     border-bottom: 0.01rem solid white;
-    height: 15vh;
+    height: 72px;
+    padding: 0 1rem;
     display: flex;
     align-items: center;
     justify-content: space-around;
@@ -24,19 +25,31 @@
 }
 
 .navbar-logo > p {
-    font-size: 25px;
-    font-weight: bold;
+    margin: 0;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+}
+
+.navbar .logo-link {
+    width: auto !important;
+    height: auto !important;
+    padding: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    display: inline-flex;
+    align-items: center;
     text-decoration: none;
-    color: blue;
 }
 
 .logo-letters {
-    color:black;
+    color: black;
+    transition: color 0.35s ease;
+    animation: none;
 }
 .logo-letters:hover {
     color: blue;
-    transition-duration: 0.4s;
-    animation: ease-in-out 2s infinite;
+    transform: translateY(-2px);
 }
 
 .navbar-links {
@@ -50,6 +63,8 @@
     font-size: 25px;
     color: black;
     transition: color 0.3s;
+    line-height: normal;
+    font-family: inherit;
 }
 
 .navbar-link:hover {

@@ -12,7 +12,7 @@
     overflow: hidden;
     position: relative;
     padding: 20px 0;
-    background: rgba(39, 55, 146, 0.17);
+    background-color: #050D1E;
 }
 
 .carousel-track {
