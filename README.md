@@ -6,13 +6,17 @@ This is a project I decided to make to showcase my skills. For a long time now I
 
 ## TODO
 
-- [ ] Migrate token from localStorage to HttpOnly (or something else)
+- [x] Migrate token from localStorage to HttpOnly (or something else)
 - [ ] Global Exception Handling
 - [ ] Update the DTOs to match the form fields
 - [ ] Dockerize
 - [ ] Deploy
 
 ---
+### 20.05.2026.
+
+#### Time: 00:17
+I took on the first feature from the todo list. I migrated the unsafe localStorage-kept JWT token, to a HttpOnly cookie. This way, the JavaScript doesnt even see the token. The backend handles it fully, it is not included in the response. This is much safer and a better practice overall. I had to do a lot of code refactoring to delete the LS tokens and apply the cookies, but that's my own fault since I didn't do that from the start. Atleast I learned something.
 
 ### 18.05.2026.
 
