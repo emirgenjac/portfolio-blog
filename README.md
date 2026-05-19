@@ -1,74 +1,76 @@
-This is a project I decided to make to showcase my skills.
-For a long time now I have been learning react and, more recently, Spring Boot.
-This is a portfolio, with an added functionality of a blog.
-Users can view the blog posts I create, like and share them.
-Only I can create blog posts. 
+# Portfolio & Blog
 
+This is a project I decided to make to showcase my skills. For a long time now I have been learning React and, more recently, Spring Boot. This is a portfolio, with an added functionality of a blog. Users can view the blog posts I create, like and share them. Only I can create blog posts.
 
-### 27.04.2025.
-I started off by creating the home page in react.
-I created routing using react-router. I used many components, most notably the NavBar because it will be reused in other pages.
-Another interesting component is the animated Slider.
+---
 
-### 04.05.2025.
-I finished the entire home page. Everything is done and very smooth. I have to add responsiveness but I will do that for the whole app once I finish everything.
-Now I will move onto the backend. Where I will create a REST API to handle all of the requests.
+## TODO
 
-### 05.05.2025.
-#### Time:  01:29
-Added JWT Authentication. It is the best option, given that I need to stay logged in for prolonged periods of time. Basic auth would not work, so session-based is the way.
+- [ ] Migrate token from localStorage to HttpOnly (or something else)
+- [ ] Global Exception Handling
+- [ ] Update the DTOs to match the form fields
+- [ ] Dockerize
+- [ ] Deploy
 
-### 05.05.2025.
-#### Time:  21:33
-So I realized that adding authentication so early was a huge mistake, but atleast I learned something. I also learned that JWT is very hard to implement.
-I am temporarily removing the authentication, so I can ensure that the endpoint operations are working well and also have quality error handling.
+---
 
-### 05.05.2025.
-#### Time: 22:00
-I finished the endpoints, I also added the like counter which I previously forgot. First I had to manually insert the new column into the table.
-```sql
-ALTER TABLE blog_post ADD COLUMN likes INT NOT NULL DEFAULT 0;
-```
-After that I had to update the BlogPost entity as well as the service.
-All that was left was to create a simple /like endpoint to update the given post.
-Now I will move on to the authentication.
+### 18.05.2026.
 
-### 05.05.2025.
-#### Time: 22:15
-I changed the RequestMapping from /api to /blog as it makes more sense and follows Restful naming conventions.
+#### Time: 23:25
+I protected admin routes on the frontend.
 
-### 31.10.2025
-#### Time: 21:57
-So, after a long break where I had to focus on some other stuff, I came back to this project.
-I got a new laptop, so I had to migrate everything to it.
-After that, I first adjusted the database, because I didn't like some things that I overlooked earlier.
-I removed the like function, as I didn't want to bind the like to each user, because I don't want users logging in.
-I revamped the UI to make it more modern, with a new color palette and some new UI elements.
-The biggest change was setting up the Blog page where all blog posts are displayed, as well as the individual page for each post.
-All of the CRUD functionalities are working correctly right now, so the next step will probably be to create a page through which the admin will be able to create posts.
-After that I will setup the authentication and authorization.
+#### Time: 23:07
+After a long break where I focused on other projects, I finally got back to this one. Today I redesigned most of the blog part and almost finished it. I need to redesign the home page too. After that I need to cover all the edge-cases and test the app. When I'm done with that only hosting will be left.
 
-### 03.11.2025.
-#### Time: 22:34
-I added an edit and delete button to the PostDetail page, which makes it available for each post. When the delete button is clicked, the user is prompted if they are sure, and then the post is deleted.
-When clicking the Edit button, the user is redirected to a new page where a form is displayed and the user can edit the post from there. After some thinking, I decided that having two separate forms for creating and editing was not a good decision, so I created a PostForm component which was used in both creating and editing posts, depending on the passed parameters.
-Now, I think most, if not all, functionalities are completed. The only thing left to do is admin authentication and authorization and hiding certain functions and endpoints from regular users.
+---
 
 ### 06.11.2025.
+
 #### Time: 18:15
 Added JWT authentication and authorization. This was the hardest thing I ever did and it took a lot of time and debugging. Creating a token is complex, as well as comparing all the data and sending it back and forth. After this, most of the backend stuff is done. I need to apply the login context to the frontend next.
 
-### 18.05.2026.
-#### Time : 23:07
-After a long break where I focused on other projects, I finally got back to this one. Today I redesigned most of the blog part and almost finished it. I need to redesign the home page too. After that I need to cover all the edge-cases and test the app. When I'm done with that only hosting will be left.
+---
 
-### 18.05.2026.
-#### Time : 23:25
-I protected admin routes on the frontend.
+### 03.11.2025.
 
-TODO: 
-1. Migrate token from localStorage to HttpOnly(or something else)
-2. Global Exception Handling
-3. Updating the DTOs to match the form fields
-4. Dockerize
-5. Deploy
+#### Time: 22:34
+I added an edit and delete button to the PostDetail page, which makes it available for each post. When the delete button is clicked, the user is prompted if they are sure, and then the post is deleted. When clicking the Edit button, the user is redirected to a new page where a form is displayed and the user can edit the post from there. After some thinking, I decided that having two separate forms for creating and editing was not a good decision, so I created a PostForm component which was used in both creating and editing posts, depending on the passed parameters. Now, I think most, if not all, functionalities are completed. The only thing left to do is admin authentication and authorization and hiding certain functions and endpoints from regular users.
+
+---
+
+### 31.10.2025.
+
+#### Time: 21:57
+So, after a long break where I had to focus on some other stuff, I came back to this project. I got a new laptop, so I had to migrate everything to it. After that, I first adjusted the database, because I didn't like some things that I overlooked earlier. I removed the like function, as I didn't want to bind the like to each user, because I don't want users logging in. I revamped the UI to make it more modern, with a new color palette and some new UI elements. The biggest change was setting up the Blog page where all blog posts are displayed, as well as the individual page for each post. All of the CRUD functionalities are working correctly right now, so the next step will probably be to create a page through which the admin will be able to create posts. After that I will setup the authentication and authorization.
+
+---
+
+### 05.05.2025.
+
+#### Time: 22:15
+I changed the RequestMapping from `/api` to `/blog` as it makes more sense and follows RESTful naming conventions.
+
+#### Time: 22:00
+I finished the endpoints, I also added the like counter which I previously forgot. First I had to manually insert the new column into the table.
+
+```sql
+ALTER TABLE blog_post ADD COLUMN likes INT NOT NULL DEFAULT 0;
+```
+
+After that I had to update the BlogPost entity as well as the service. All that was left was to create a simple `/like` endpoint to update the given post. Now I will move on to the authentication.
+
+#### Time: 21:33
+So I realized that adding authentication so early was a huge mistake, but at least I learned something. I also learned that JWT is very hard to implement. I am temporarily removing the authentication, so I can ensure that the endpoint operations are working well and also have quality error handling.
+
+#### Time: 01:29
+Added JWT Authentication. It is the best option, given that I need to stay logged in for prolonged periods of time. Basic auth would not work, so session-based is the way.
+
+---
+
+### 04.05.2025.
+I finished the entire home page. Everything is done and very smooth. I have to add responsiveness but I will do that for the whole app once I finish everything. Now I will move onto the backend, where I will create a REST API to handle all of the requests.
+
+---
+
+### 27.04.2025.
+I started off by creating the home page in React. I created routing using react-router. I used many components, most notably the NavBar because it will be reused in other pages. Another interesting component is the animated Slider.
