@@ -66,6 +66,7 @@ function PostDetail() {
             <img src={post.coverImageUrl} alt="Cover" className="post-cover-image" />
             <h1 className={"post-title"}>{post.title}</h1>
                 <hr className={"line"}/>
+            {/* React text children escape HTML — never use dangerouslySetInnerHTML for post body */}
             <p className={"post-content"}>{post.content}</p>
                 {isAuthenticated && <div className={"actions"}>
                     <button id={"editBtn"} onClick={goToEdit}>EDIT</button>
