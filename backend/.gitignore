@@ -3,7 +3,12 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-src/main/resources/application.properties
+
+# Secrets / machine-specific overrides (never commit)
+src/main/resources/application-local.properties
+.env
+.env.*
+!.env.example
 
 ### STS ###
 .apt_generated
@@ -32,5 +37,3 @@ build/
 
 ### VS Code ###
 .vscode/
-src/main/resources/application.properties
-target/

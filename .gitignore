@@ -1,0 +1,11 @@
+# Local agent / collaborator notes (not for the public repo)
+AGENTS.md
+
+# Secrets / env files at repo root
+.env
+.env.*
+!.env.example
+
+# IDE (also ignored under backend/; keep root clean)
+.idea/
+*.iml
