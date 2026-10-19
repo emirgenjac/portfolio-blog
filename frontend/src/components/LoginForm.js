@@ -2,6 +2,7 @@ import React, {useContext, useState} from "react";
 import "../styles/LoginForm.css";
 import { useNavigate } from "react-router-dom";
 import {AuthContext} from "../context/AuthContext";
+import API from "../api/axios";
 
 function LoginForm() {
     const [email, setEmail] = useState("");
@@ -13,21 +14,14 @@ function LoginForm() {
         e.preventDefault();
 
         try {
-            const response = await fetch("http://localhost:8080/auth/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password }),
-                credentials: "include",
-            });
+            const response = await API.post("/auth/login", { email, password });
 
-            if (response.ok) {
+            if (response.status === 200) {
                 login();
-            } else {
-                alert("Invalid credentials. Please try again.");
             }
         } catch (error) {
             console.log("Login error:", error);
-            alert("Something went wrong. Try again later.");
+            alert("Invalid credentials. Please try again.");
         }
     };
 

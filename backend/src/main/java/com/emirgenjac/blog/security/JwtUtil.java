@@ -17,7 +17,6 @@ public class JwtUtil {
 
     public JwtUtil(@Value("${jwt.secret}") String secret) {
         this.key = Keys.hmacShaKeyFor(secret.getBytes());
-        System.out.println("JWT Loaded Successfully!");
     }
 
     public String generateToken(String email) {

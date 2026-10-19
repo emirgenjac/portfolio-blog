@@ -1,10 +1,12 @@
 package com.emirgenjac.blog.controllers;
 
-import com.emirgenjac.blog.model.AuthRequest;
+import com.emirgenjac.blog.dto.AdminLoginDTO;
 import com.emirgenjac.blog.services.AdminService;
 import com.emirgenjac.blog.services.JwtService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,19 +22,13 @@ public class AuthController {
     private JwtService jwtService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthRequest request, HttpServletResponse response) {
-        System.out.println("Login request received: " + request.getEmail());
-
+    public ResponseEntity<?> login(@jakarta.validation.Valid @RequestBody AdminLoginDTO request, HttpServletResponse response) {
         boolean authenticated = adminService.authenticate(request.getEmail(), request.getPassword());
-        System.out.println("Authenticated: " + authenticated);
         if (!authenticated) {
-            System.out.println("Login failed: wrong credentials");
-
             return ResponseEntity.status(401).build();
         }
 
         String token = jwtService.generateToken(request.getEmail());
-        System.out.println("Token generated: " + token);
 
         Cookie cookie = new Cookie("jwt", token);
         cookie.setHttpOnly(true);
@@ -58,7 +54,11 @@ public class AuthController {
 
 
     @GetMapping("/me")
-    public ResponseEntity<?> me() {
+    public ResponseEntity<?> me(Authentication authentication) {
+        if (authentication == null || authentication instanceof AnonymousAuthenticationToken || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(401).build();
+        }
+
         return ResponseEntity.ok().build();
     }
 }

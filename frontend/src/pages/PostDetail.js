@@ -25,7 +25,7 @@ function PostDetail() {
 
     const handleDelete = async(e) => {
         try {
-            const response = await API.delete(`http://localhost:8080/blog/admin/posts/${id}`);
+            const response = await API.delete(`/blog/admin/posts/${id}`);
 
             if (response.status === 200 || response.status === 204) {
                 alert("Post deleted successfully!");
@@ -46,7 +46,7 @@ function PostDetail() {
 
     useEffect(() => {
         API
-            .get(`http://localhost:8080/blog/${id}`)
+            .get(`/blog/${id}`)
             .then(res => setPost(res.data))
             .catch(err => {
                 console.error(err);

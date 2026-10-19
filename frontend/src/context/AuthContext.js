@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import API from '../api/axios';
 
 export const AuthContext = createContext();
 
@@ -9,12 +10,21 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch("http://localhost:8080/auth/me", {
-            credentials: "include",
-        }).then(res => {
-            if (res.ok) setIsAuthenticated(true);
-        })
-        .finally(() => setLoading(false));
+        console.log('[auth] Checking /auth/me');
+        API.get("/auth/me")
+            .then(res => {
+                console.log('[auth] /auth/me response', res.status, res.data);
+                if (res.status === 200) {
+                    setIsAuthenticated(true);
+                } else {
+                    setIsAuthenticated(false);
+                }
+            })
+            .catch(err => {
+                console.log('[auth] /auth/me failed', err?.response?.status ?? 'no-response', err?.message ?? err);
+                setIsAuthenticated(false);
+            })
+            .finally(() => setLoading(false));
     }, []);
 
     const login = () => {
@@ -23,10 +33,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = async () => {
-        await fetch("http://localhost:8080/auth/logout", {
-            method: "POST",
-            credentials: "include",
-        });
+        await API.post("/auth/logout");
         setIsAuthenticated(false);
         navigate('/auth/login');
     };
@@ -37,3 +44,5 @@ export const AuthProvider = ({ children }) => {
         </AuthContext.Provider>
     );
 };
+
+

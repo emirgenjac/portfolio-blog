@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import API from '../api/axios';
 import '../styles/Blog.css';
 import AuthorImage from '../assets/eeeeee.png';
 import {useNavigate} from "react-router-dom";
@@ -10,7 +10,7 @@ const Blog = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        axios.get('http://localhost:8080/blog')
+        API.get('/blog')
             .then(response => setPosts(response.data))
             .catch(err => {
                 console.error(err);
@@ -24,7 +24,7 @@ const Blog = () => {
             <h1 className={"main-title"}>Blog Posts</h1>
         <div className="posts-container">
             {posts.map(post => (
-                <div key={post.id} className="blog_post" key={post.id} onClick={() => navigate(`/blog/${post.id}`)}>
+                <div key={post.id} className="blog_post" onClick={() => navigate(`/blog/${post.id}`)}>
                     <img src={post.coverImageUrl} alt="Cover" className={"post-cover-image"}/>
                     <h2 className={"post-title"}>{post.title}</h2>
                     <hr className={"hr"}/>

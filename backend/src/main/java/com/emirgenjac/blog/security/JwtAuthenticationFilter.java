@@ -30,22 +30,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = null;
         String email = null;
 
-        System.out.println("=== JWT FILTER ===");
-        System.out.println("Request: " + request.getMethod() + " " + request.getRequestURI());
-        System.out.println("Cookies null: " + (request.getCookies() == null));
-        if (request.getCookies() != null) {
-            for (Cookie c : request.getCookies()) {
-                System.out.println("Cookie: " + c.getName() + " = " + c.getValue());
-            }
-        }
-
         if (request.getCookies() != null) {
             token = Arrays.stream(request.getCookies())
                     .filter(cookie -> "jwt".equals(cookie.getName()))
                     .map(Cookie::getValue)
                     .findFirst()
                     .orElse(null);
-            System.out.println("JWT cookie found: " + (token != null ? "YES" : "NO")); // DODAJ OVO
 
         }
 

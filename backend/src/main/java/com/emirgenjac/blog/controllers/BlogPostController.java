@@ -49,7 +49,7 @@ public class BlogPostController {
     }
 */
     @PostMapping("/admin/posts")
-    public BlogPost createPost(@RequestBody BlogPostDTO postDto) {
+    public BlogPost createPost(@jakarta.validation.Valid @RequestBody BlogPostDTO postDto) {
         try {
             Admin admin = adminRepository.findById(1).orElseThrow(() -> new RuntimeException("Admin not found"));
             BlogPost post = new BlogPost();
@@ -67,7 +67,7 @@ public class BlogPostController {
     }
 
     @PutMapping("/admin/posts/{id}")
-    public BlogPost updatePost(@PathVariable int id, @RequestBody BlogPostDTO postDto) {
+    public BlogPost updatePost(@PathVariable int id, @jakarta.validation.Valid @RequestBody BlogPostDTO postDto) {
         BlogPost post = getPostById(id);
         post.setTitle(postDto.getTitle());
         post.setTagline(postDto.getTagline());
