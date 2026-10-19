@@ -1,8 +1,9 @@
 import axios from 'axios';
 
+// CRA embeds REACT_APP_* at build time. Local default keeps npm start working with no .env.
 const API = axios.create({
-    baseURL: 'http://localhost:8080',
-    withCredentials: true,
+    baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8080',
+    withCredentials: true, // send/receive cookies (jwt + XSRF-TOKEN) cross-origin
     xsrfCookieName: 'XSRF-TOKEN',
     xsrfHeaderName: 'X-XSRF-TOKEN',
 });
