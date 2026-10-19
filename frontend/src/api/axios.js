@@ -3,13 +3,35 @@ import axios from 'axios';
 const API = axios.create({
     baseURL: 'http://localhost:8080',
     withCredentials: true,
+    xsrfCookieName: 'XSRF-TOKEN',
+    xsrfHeaderName: 'X-XSRF-TOKEN',
+});
+
+const SAFE_METHODS = new Set(['get', 'head', 'options', 'trace']);
+
+function readCookie(name) {
+    if (typeof document === 'undefined') return null;
+    const match = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/([.$?*|{}()[\]\\/+^])/g, '\\$1') + '=([^;]*)'));
+    return match ? decodeURIComponent(match[1]) : null;
+}
+
+// Cross-port localhost: axios same-origin XSRF helpers may skip; copy cookie → header ourselves.
+API.interceptors.request.use(config => {
+    const method = (config.method || 'get').toLowerCase();
+    if (!SAFE_METHODS.has(method)) {
+        const csrfToken = readCookie('XSRF-TOKEN');
+        if (csrfToken) {
+            config.headers['X-XSRF-TOKEN'] = csrfToken;
+        }
+    }
+    return config;
 });
 
 const isDev = process.env.NODE_ENV !== 'production';
 
 // Dev-only request/response logging (never in production builds)
 if (isDev) {
-    const SENSITIVE_KEYS = ['password', 'token', 'jwt', 'accessToken', 'refreshToken', 'authorization', 'auth'];
+    const SENSITIVE_KEYS = ['password', 'token', 'jwt', 'accessToken', 'refreshToken', 'authorization', 'auth', 'xsrf'];
 
     function redact(value) {
         if (value == null) return value;
