@@ -8,12 +8,15 @@ This is a project I decided to make to showcase my skills. For a long time now I
 
 - [x] Migrate token from localStorage to HttpOnly (or something else)
 - [x] Global Exception Handling
-- [ ] Update the DTOs to match the form fields
+- [x] Update the DTOs to match the form fields
 - [ ] Dockerize
 - [ ] Deploy
 
 ---
 ### 19.10.2026.
+
+#### Time: 11:47
+Updated the DTOs so they actually match what the forms send. `BlogPostDTO` now requires title, tagline, content, and cover image URL, with size limits on each field. `AdminLoginDTO` validates email and password the same way. Together with the global exception handler, bad input now comes back as clear 400 responses instead of failing in a random way.
 
 #### Time: 11:41
 Added global exception handling on the backend. Instead of every controller returning errors in its own way, there is now a `GlobalExceptionHandler` that catches things like validation failures, missing posts, bad request bodies, and unexpected errors, and returns a consistent `ErrorResponse` JSON. Controllers can still throw `ResponseStatusException` when something is wrong; the handler takes care of the response shape. This should make debugging and the frontend error handling a lot cleaner.
