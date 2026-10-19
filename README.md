@@ -13,6 +13,12 @@ This is a project I decided to make to showcase my skills. For a long time now I
 - [ ] Deploy
 
 ---
+### 19.10.2026.
+
+#### Time: 11:15
+Got back to this project after a while. Today I cleaned up the backend config so it's ready for hosting later. I split `application.properties` into separate profiles for development and production, and moved local overrides into a gitignored `application-local.properties`. Sensitive values like the database password and JWT secret now come from environment variables. I also added a `.env.example` so I know which variables I need when I set things up again. Next I want to finish the remaining hosting prep and then finally deploy.
+
+---
 ### 20.05.2026.
 
 #### Time: 00:17
