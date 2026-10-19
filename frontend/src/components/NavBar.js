@@ -2,30 +2,45 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import '../styles/NavBar.css';
 import {AuthContext} from "../context/AuthContext";
 import { useContext } from 'react';
+import { useModal } from "../context/ModalContext";
 
 function NavBar() {
     const navigate = useNavigate();
     const location = useLocation();
     const { isAuthenticated, logout, loading } = useContext(AuthContext);
+    const { showConfirm } = useModal();
 
+    const scrollToSection = (sectionId) => {
+        const run = () => {
+            const element = document.getElementById(sectionId);
+            if (!element) return;
+            const top = element.getBoundingClientRect().top + window.scrollY - 80;
+            window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+        };
 
-    const scrollToProjects = () => {
-        if (window.location.pathname !== "/") {
-            navigate("/");
-            setTimeout(() => {
-                const element = document.getElementById("projects-section");
-                if (element) element.scrollIntoView({ behavior: "smooth" });
-            }, 100);
+        if (location.pathname !== "/") {
+            navigate("/", { state: { scrollTo: sectionId } });
+            // Home mounts after navigation — give it a beat to paint
+            setTimeout(run, 150);
         } else {
-            const element = document.getElementById("projects-section");
-            if (element) element.scrollIntoView({ behavior: "smooth" });
+            run();
         }
     };
 
-    const handleLogout = () => {
-        if (window.confirm("Are you sure you want to log out?")) {
-            logout();
-        }
+    const handleSectionClick = (sectionId) => (e) => {
+        e.preventDefault();
+        scrollToSection(sectionId);
+    };
+
+    const handleLogout = async () => {
+        const confirmed = await showConfirm({
+            title: "Log out?",
+            message: "Are you sure you want to log out?",
+            confirmLabel: "Log out",
+            cancelLabel: "Cancel",
+            variant: "confirm",
+        });
+        if (confirmed) logout();
     };
 
     const isBlogPage = location.pathname.startsWith("/blog");
@@ -40,9 +55,9 @@ function NavBar() {
                 </h1>
 
                 <div className="navbar-links">
-                    <Link to="/" onClick={scrollToProjects} className="navbar-link">Projects</Link>
+                    <a href="#projects-section" onClick={handleSectionClick("projects-section")} className="navbar-link">Projects</a>
                     <Link to="/blog" className="navbar-link">Blog</Link>
-                    <Link to="/" className="navbar-link">Contact</Link>
+                    <a href="#contact-section" onClick={handleSectionClick("contact-section")} className="navbar-link">Contact</a>
 
                     {!loading && isAuthenticated && isBlogPage && (
                         <Link to="/blog/admin/posts" className="navbar-link">Create</Link>
@@ -50,7 +65,7 @@ function NavBar() {
 
                     {!loading && isBlogPage && (
                         isAuthenticated ? (
-                            <button className="navbar-link" onClick={handleLogout} style={{ background: 'none', fontSize: '25px', border: 'none', cursor: 'pointer' }}>
+                            <button type="button" className="navbar-link" onClick={handleLogout}>
                                 Logout
                             </button>
                         ) : (

@@ -1,48 +1,103 @@
 import {useNavigate, useParams, Link} from 'react-router-dom';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useContext } from 'react';
 import API from '../api/axios';
 import AuthorImage from "../assets/eeeeee.png";
 import GitHub from "../assets/github.svg"
 import LinkedIn from "../assets/linkedin-svgrepo-com (1).svg"
 import BackArrow from "../assets/arrow-left.svg"
 import '../styles/PostDetail.css';
-import { useContext } from 'react';
-import { AuthContext } from '../context/AuthContext'; // provjeri putanju
+import { AuthContext } from '../context/AuthContext';
+import { useModal } from '../context/ModalContext';
 
 function PostDetail() {
     const { id } = useParams();
     const [post, setPost] = useState(null);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
-    const [showModal, setShowModal] = useState(false);
+    const [shareOpen, setShareOpen] = useState(false);
+    const [copyLabel, setCopyLabel] = useState("Copy link");
+    const shareRef = useRef(null);
     const { isAuthenticated } = useContext(AuthContext);
-
+    const { showAlert, showConfirm } = useModal();
 
     const goToEdit = () => {
         navigate(`/blog/admin/posts/${id}/edit`);
     };
 
+    const requestDelete = async () => {
+        const confirmed = await showConfirm({
+            title: "Delete post?",
+            message: "Are you sure you want to delete this post? This cannot be undone.",
+            confirmLabel: "Yes, delete",
+            cancelLabel: "Cancel",
+            variant: "danger",
+        });
+        if (!confirmed) return;
 
-    const handleDelete = async(e) => {
         try {
             const response = await API.delete(`/blog/admin/posts/${id}`);
 
             if (response.status === 200 || response.status === 204) {
-                alert("Post deleted successfully!");
+                await showAlert({
+                    title: "Post deleted",
+                    message: "The post was deleted successfully.",
+                    variant: "success",
+                });
                 navigate("/blog");
             }
         } catch (err) {
             console.error("Error deleting post:", err);
 
             if (err.response?.status === 401 || err.response?.status === 403) {
-                alert("Session expired. Please log in again.");
+                await showAlert({
+                    title: "Session expired",
+                    message: "Please log in again.",
+                    variant: "error",
+                });
                 navigate("/auth/login");
             } else {
-                alert("Failed to delete post");
+                await showAlert({
+                    title: "Delete failed",
+                    message: "Failed to delete post",
+                    variant: "error",
+                });
             }
         }
-    }
+    };
 
+    const getPostUrl = () => window.location.href;
+
+    const handleCopyLink = async () => {
+        const url = getPostUrl();
+        try {
+            if (navigator.clipboard?.writeText) {
+                await navigator.clipboard.writeText(url);
+            } else {
+                const input = document.createElement("input");
+                input.value = url;
+                document.body.appendChild(input);
+                input.select();
+                document.execCommand("copy");
+                document.body.removeChild(input);
+            }
+            setCopyLabel("Copied!");
+            setTimeout(() => setCopyLabel("Copy link"), 1800);
+        } catch (err) {
+            console.error("Copy failed:", err);
+            setCopyLabel("Copy failed");
+            setTimeout(() => setCopyLabel("Copy link"), 1800);
+        }
+    };
+
+    const handleShareLinkedIn = () => {
+        const url = encodeURIComponent(getPostUrl());
+        window.open(
+            `https://www.linkedin.com/sharing/share-offsite/?url=${url}`,
+            "_blank",
+            "noopener,noreferrer"
+        );
+        setShareOpen(false);
+    };
 
     useEffect(() => {
         API
@@ -54,12 +109,25 @@ function PostDetail() {
             });
     }, [id]);
 
+    useEffect(() => {
+        if (!shareOpen) return;
+
+        const onPointerDown = (e) => {
+            if (shareRef.current && !shareRef.current.contains(e.target)) {
+                setShareOpen(false);
+            }
+        };
+
+        document.addEventListener("pointerdown", onPointerDown);
+        return () => document.removeEventListener("pointerdown", onPointerDown);
+    }, [shareOpen]);
+
     if (error) return <p>{error}</p>;
     if (!post) return <p>Loading...</p>;
 
     return (<>
             <div className="back-btn" onClick={() => navigate(`/blog`)}>
-                <img src={BackArrow}/>
+                <img src={BackArrow} alt=""/>
                 <p>Back</p>
             </div>
             <div className="post-detail">
@@ -70,25 +138,47 @@ function PostDetail() {
             <p className={"post-content"}>{post.content}</p>
                 {isAuthenticated && <div className={"actions"}>
                     <button id={"editBtn"} onClick={goToEdit}>EDIT</button>
-                    <button id={"deleteBtn"} onClick={() => setShowModal(true)}>DELETE</button>
+                    <button id={"deleteBtn"} onClick={requestDelete}>DELETE</button>
                 </div> }
-                {showModal && (
-                    <div className="modal-overlay">
-                        <div className="modal">
-                            <h2>Are you sure you want to delete this post?</h2>
-                            <button className={"delete-confirm"} onClick={handleDelete}>Yes, delete</button>
-                            <button className={"delete-cancel"} onClick={() => setShowModal(false)}>Cancel</button>
-                        </div>
-                    </div>
-                )}
 
                 <div className={"post-metadata-details"}>
                 <div className={"author-data-details"}>
-                    <img src={AuthorImage} className={"author-image"}/>
-                    <p className={"author-name"}>Emir Genjac</p>
+                    <img src={AuthorImage} className={"author-image"} alt=""/>
+                    <div className="author-meta">
+                        <p className={"author-name"}>Emir Genjac</p>
+                        {post.createdAt && (
+                            <time className="post-created-at" dateTime={post.createdAt}>
+                                {new Date(post.createdAt).toLocaleString(undefined, {
+                                    dateStyle: "medium",
+                                    timeStyle: "short",
+                                })}
+                            </time>
+                        )}
+                    </div>
                     <div className={"svgs-container"}>
-                        <Link to={"https://github.com/emirgenjac"} target="_blank"><img className={"svgs"} src={GitHub}/></Link>
-                        <Link to={"https://www.linkedin.com/in/emirgenjac"} target="_blank"><img className={"svgs"} src={LinkedIn}/></Link>
+                        <div className="share-menu" ref={shareRef}>
+                            <button
+                                type="button"
+                                className={`share-btn${shareOpen ? " share-btn--open" : ""}`}
+                                aria-expanded={shareOpen}
+                                aria-haspopup="menu"
+                                onClick={() => setShareOpen((open) => !open)}
+                            >
+                                Share
+                            </button>
+                            {shareOpen && (
+                                <div className="share-dropdown" role="menu">
+                                    <button type="button" role="menuitem" onClick={handleCopyLink}>
+                                        {copyLabel}
+                                    </button>
+                                    <button type="button" role="menuitem" onClick={handleShareLinkedIn}>
+                                        LinkedIn
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                        <Link to={"https://github.com/emirgenjac"} target="_blank" rel="noopener noreferrer"><img className={"svgs"} src={GitHub} alt="GitHub"/></Link>
+                        <Link to={"https://www.linkedin.com/in/emirgenjac"} target="_blank" rel="noopener noreferrer"><img className={"svgs"} src={LinkedIn} alt="LinkedIn"/></Link>
                     </div>
                 </div>
 

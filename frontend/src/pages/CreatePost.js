@@ -4,9 +4,11 @@ import API from "../api/axios";
 import PostForm from "../components/PostForm";
 import { useNavigate } from "react-router-dom";
 import "../styles/CreatePost.css"
+import { useModal } from "../context/ModalContext";
 
 function CreatePost() {
     const navigate = useNavigate();
+    const { showAlert } = useModal();
 
     const handleCreate = async (formData) => {
         try {
@@ -18,17 +20,30 @@ function CreatePost() {
                 }
                 );
                 if (response.status === 200 || response.status === 201) {
-                    alert("Post Created!");
+                    await showAlert({
+                        title: "Post created",
+                        message: "Your post was published successfully.",
+                        variant: "success",
+                    });
                     navigate("/blog");
                 }
         } catch (error) {
             console.error("Error creating post " , error);
 
             if (error.response?.status === 401 || error.response?.status === 403) {
-                alert("Session expired. Please log in again.");
+                await showAlert({
+                    title: "Session expired",
+                    message: "Please log in again.",
+                    variant: "error",
+                });
                 navigate("/auth/login");
             } else {
-                alert("Unexpected error occurred!");
+                const serverMessage = error.response?.data?.message;
+                await showAlert({
+                    title: "Could not create post",
+                    message: serverMessage || "Unexpected error occurred!",
+                    variant: "error",
+                });
             }
         }
     };

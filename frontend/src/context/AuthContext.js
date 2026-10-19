@@ -33,9 +33,15 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = async () => {
-        await API.post("/auth/logout");
-        setIsAuthenticated(false);
-        navigate('/auth/login');
+        try {
+            await API.post("/auth/logout");
+        } catch (err) {
+            // Still clear local auth if API is down / CSRF fails (e.g. backend restart)
+            console.warn('[auth] logout request failed', err?.message ?? err);
+        } finally {
+            setIsAuthenticated(false);
+            navigate('/auth/login');
+        }
     };
 
     return (

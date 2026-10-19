@@ -1,0 +1,107 @@
+.app-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(18, 21, 28, 0.55);
+  backdrop-filter: blur(4px);
+  animation: rise-in 0.2s var(--ease) both;
+}
+
+.app-modal {
+  width: min(100%, 420px);
+  background: var(--surface-raised);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 1.5rem 1.4rem 1.25rem;
+}
+
+.app-modal__title {
+  margin: 0 0 0.65rem;
+  font-size: 1.2rem;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.app-modal__message {
+  margin: 0 0 1.35rem;
+  color: var(--ink-soft);
+  font-size: 0.98rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.app-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.app-modal__btn {
+  appearance: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 0.65rem 1.05rem;
+  cursor: pointer;
+  transition: transform 0.15s var(--ease), background 0.15s var(--ease), border-color 0.15s var(--ease);
+}
+
+.app-modal__btn:hover {
+  transform: translateY(-1px);
+}
+
+.app-modal__btn--ghost {
+  background: transparent;
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+
+.app-modal__btn--ghost:hover {
+  background: var(--bg);
+}
+
+.app-modal__btn--primary {
+  background: var(--ink);
+  color: #fff;
+  box-shadow: 3px 3px 0 var(--signal);
+}
+
+.app-modal__btn--success {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  box-shadow: 3px 3px 0 var(--signal);
+}
+
+.app-modal__btn--error,
+.app-modal__btn--danger {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+  box-shadow: none;
+}
+
+.app-modal__btn--confirm {
+  background: var(--ink);
+  color: #fff;
+}
+
+@media (max-width: 480px) {
+  .app-modal__actions {
+    flex-direction: column-reverse;
+  }
+
+  .app-modal__btn {
+    width: 100%;
+  }
+}

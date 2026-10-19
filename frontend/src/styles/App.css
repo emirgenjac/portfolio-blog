@@ -3,16 +3,24 @@
 .content {
   width: min(1180px, calc(100% - 2.5rem));
   margin: 0 auto;
-  padding: 0 0 4rem;
+  padding: 0 0 calc(6rem + env(safe-area-inset-bottom, 0px));
+  min-width: 0;
 }
 
 .main-container {
   width: 100%;
+  min-width: 0;
 }
 
 @media (max-width: 640px) {
   .content {
-    width: min(1180px, calc(100% - 1.5rem));
-    padding-bottom: 3rem;
+    width: min(1180px, calc(100% - 1.25rem));
+    padding-bottom: calc(7rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (max-width: 380px) {
+  .content {
+    width: calc(100% - 1rem);
   }
 }

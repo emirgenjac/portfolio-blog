@@ -1,14 +1,14 @@
 import React, {useContext, useState} from "react";
 import "../styles/LoginForm.css";
-import { useNavigate } from "react-router-dom";
 import {AuthContext} from "../context/AuthContext";
+import { useModal } from "../context/ModalContext";
 import API from "../api/axios";
 
 function LoginForm() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const navigate = useNavigate();
     const { login } = useContext(AuthContext);
+    const { showAlert } = useModal();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -22,13 +22,35 @@ function LoginForm() {
         } catch (error) {
             const status = error.response?.status;
             const serverMessage = error.response?.data?.message;
+            const isRawValidation =
+                typeof serverMessage === "string" &&
+                /validation failed for object=/i.test(serverMessage);
 
             if (status === 429) {
-                alert(serverMessage || "Too many login attempts. Please try again later.");
-            } else if (status === 401) {
-                alert("Invalid credentials. Please try again.");
+                await showAlert({
+                    title: "Too many attempts",
+                    message: serverMessage || "Too many login attempts. Please try again later.",
+                    variant: "error",
+                });
+            } else if (status === 401 || status === 400) {
+                // 400 can be DTO validation; never show Spring's raw object dump
+                await showAlert({
+                    title: "Login failed",
+                    message:
+                        status === 400 && serverMessage && !isRawValidation
+                            ? serverMessage
+                            : "Invalid credentials. Please try again.",
+                    variant: "error",
+                });
             } else {
-                alert(serverMessage || "Login failed. Please try again.");
+                await showAlert({
+                    title: "Login failed",
+                    message:
+                        serverMessage && !isRawValidation
+                            ? serverMessage
+                            : "Login failed. Please try again.",
+                    variant: "error",
+                });
             }
         }
     };

@@ -5,6 +5,7 @@
 
 .carousel-container {
   width: 100%;
+  max-width: 100%;
   overflow: hidden;
   position: relative;
   padding: 1.75rem 0;
@@ -12,6 +13,8 @@
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-tight);
+  /* isolate layout so the max-content track cannot widen the page */
+  contain: inline-size;
 }
 
 .carousel-container::before,
@@ -66,4 +69,30 @@
   letter-spacing: 0.02em;
   color: var(--muted);
   text-align: center;
+}
+
+@media (max-width: 600px) {
+  .carousel-container {
+    padding: 1.25rem 0;
+  }
+
+  .carousel-container::before,
+  .carousel-container::after {
+    width: 36px;
+  }
+
+  .carousel-track {
+    gap: 1.25rem;
+  }
+
+  .logo-item {
+    width: 88px;
+    height: 88px;
+    margin: 0 6px;
+  }
+
+  .logo-image {
+    height: 36px;
+    width: 36px;
+  }
 }

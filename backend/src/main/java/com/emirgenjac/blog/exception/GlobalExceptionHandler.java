@@ -1,5 +1,6 @@
 package com.emirgenjac.blog.exception;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -42,7 +42,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest request) {
         String message = ex.getBindingResult().getFieldErrors().stream()
                 .map(FieldError::getDefaultMessage)
+                .filter(msg -> msg != null && !msg.isBlank())
                 .collect(Collectors.joining("; "));
+
+        if (message.isBlank()) {
+            message = "Invalid request";
+        }
 
         log.warn("Validation failed for {} {}: {}", request.getMethod(), request.getRequestURI(), message);
 

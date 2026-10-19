@@ -93,6 +93,14 @@
 }
 
 @media (max-width: 480px) {
+  .login-page-title {
+    margin-top: 1.35rem;
+  }
+
+  .login-form-card {
+    padding: 1.25rem;
+  }
+
   .login-submit-btn {
     width: 100%;
     align-self: stretch;

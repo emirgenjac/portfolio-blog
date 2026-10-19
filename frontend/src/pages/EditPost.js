@@ -1,14 +1,15 @@
-// src/pages/EditPost.jsx
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import API from "../api/axios";
 import PostForm from "../components/PostForm";
 import "../styles/EditPost.css"
+import { useModal } from "../context/ModalContext";
 
 function EditPost() {
     const { id } = useParams();
     const navigate = useNavigate();
     const [postData, setPostData] = useState(null);
+    const { showAlert } = useModal();
 
     useEffect(() => {
         API.get(`/blog/${id}`)
@@ -29,22 +30,34 @@ function EditPost() {
             );
 
             if (response.status === 200 || response.status === 201) {
-                alert("Post updated successfully!");
+                await showAlert({
+                    title: "Post updated",
+                    message: "Your changes were saved successfully.",
+                    variant: "success",
+                });
                 navigate(`/blog/${id}`);
             }
         } catch (err) {
             console.error("Error updating post:", err);
 
             if (err.response?.status === 401 || err.response?.status === 403) {
-                alert("Session expired. Please log in again.");
+                await showAlert({
+                    title: "Session expired",
+                    message: "Please log in again.",
+                    variant: "error",
+                });
                 navigate("/auth/login");
             } else {
-                alert("Failed to update post");
+                const serverMessage = err.response?.data?.message;
+                await showAlert({
+                    title: "Could not update post",
+                    message: serverMessage || "Failed to update post",
+                    variant: "error",
+                });
             }
         }
     };
 
-    // Wait for post data to load
     if (!postData) return <p>Loading...</p>;
 
     return (

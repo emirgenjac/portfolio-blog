@@ -19,7 +19,7 @@
 .posts-container {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
   gap: 1.35rem;
   justify-content: stretch;
   align-items: stretch;
@@ -68,6 +68,8 @@
   letter-spacing: -0.03em;
   line-height: 1.2;
   color: var(--ink);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .hr {
@@ -129,9 +131,32 @@
 @media (max-width: 520px) {
   .main-title {
     margin-top: 1.5rem;
+    font-size: clamp(1.85rem, 9vw, 2.4rem);
+  }
+
+  .posts-container {
+    gap: 1rem;
   }
 
   .blog_post .post-cover-image {
-    height: 180px;
+    height: 170px;
+  }
+
+  .blog_post .post-title,
+  .post-tagline,
+  .post-metadata {
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+
+  .hr {
+    width: calc(100% - 2rem);
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+
+  .post-metadata {
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 }
