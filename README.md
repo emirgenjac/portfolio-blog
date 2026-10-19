@@ -14,45 +14,67 @@ This is a project I decided to make to showcase my skills. For a long time now I
 - [ ] Deploy
 
 ---
+
 ### 19.10.2026.
 
 #### Time: 18:40
 Wired the login form to the new rate-limit response. Before, every failed login showed "Invalid credentials", even when the backend returned 429. Now 401 still means wrong password, and 429 shows a clear "too many attempts" message. Also added unit tests for the rate limiter, including a concurrent case so the per-IP limit cannot be bypassed by parallel requests. It was interesting to see how data structures such as a ConcurrentHashMap and a Deque could be used together to solve a problem.
 
+---
+
 #### Time: 18:30
 Added login rate limiting on the backend. `LoginRateLimitService` tracks attempts per client IP in a rolling window (default 5 tries per 60 seconds) and returns 429 when someone spams `/auth/login`. This is an in-memory limiter for a single app instance, which is enough for now. I verified it in the browser and with the new tests.
+
+---
 
 #### Time: 16:10
 Made CORS and the frontend API base URL configurable for hosting. The backend now reads allowed origins from config/env instead of hardcoding localhost, and I removed the duplicate `CorsConfig` so Spring Security is the single CORS source. On the frontend, axios uses `REACT_APP_API_URL` (with a localhost fallback). Local login still returns the expected CORS headers and sets the JWT cookie as before.
 
+---
+
 #### Time: 15:55
 Turned CSRF protection back on for the cookie-based auth. The JWT cookie alone is not enough, because the browser sends it automatically. Now the backend also sets an `XSRF-TOKEN` cookie that the frontend reads and sends back as an `X-XSRF-TOKEN` header on POST/PUT/DELETE. That way a random site cannot forge admin requests even if it somehow tricks the browser into calling my API. Login, create, edit and delete still work after a refresh.
+
+---
 
 #### Time: 15:35
 Hardened the JWT cookies for hosting. Login and logout now use `ResponseCookie` with explicit `SameSite` settings. In development it stays `SameSite=Lax` without `Secure` so localhost keeps working. In the production profile the cookie is `Secure` and `SameSite=None`, which is what you need when the frontend and API are on different HTTPS domains. I verified both with curl.
 
+---
+
 #### Time: 15:28
 Small cleanup on the frontend API client: the axios request/response console logging only runs in development now, so production builds will not spam the browser console.
+
+---
 
 #### Time: 11:47
 Updated the DTOs so they actually match what the forms send. `BlogPostDTO` now requires title, tagline, content, and cover image URL, with size limits on each field. `AdminLoginDTO` validates email and password the same way. Together with the global exception handler, bad input now comes back as clear 400 responses instead of failing in a random way.
 
+---
+
 #### Time: 11:41
 Added global exception handling on the backend. Instead of every controller returning errors in its own way, there is now a `GlobalExceptionHandler` that catches things like validation failures, missing posts, bad request bodies, and unexpected errors, and returns a consistent `ErrorResponse` JSON. Controllers can still throw `ResponseStatusException` when something is wrong; the handler takes care of the response shape. This should make debugging and the frontend error handling a lot cleaner.
+
+---
 
 #### Time: 11:15
 Got back to this project after a while. Today I cleaned up the backend config so it's ready for hosting later. I split `application.properties` into separate profiles for development and production, and moved local overrides into a gitignored `application-local.properties`. Sensitive values like the database password and JWT secret now come from environment variables. I also added a `.env.example` so I know which variables I need when I set things up again. Next I want to finish the remaining hosting prep and then finally deploy.
 
 ---
+
 ### 20.05.2026.
 
 #### Time: 00:17
 I took on the first feature from the todo list. I migrated the unsafe localStorage-kept JWT token, to a HttpOnly cookie. This way, the JavaScript doesnt even see the token. The backend handles it fully, it is not included in the response. This is much safer and a better practice overall. I had to do a lot of code refactoring to delete the LS tokens and apply the cookies, but that's my own fault since I didn't do that from the start. Atleast I learned something.
 
+---
+
 ### 18.05.2026.
 
 #### Time: 23:25
 I protected admin routes on the frontend.
+
+---
 
 #### Time: 23:07
 After a long break where I focused on other projects, I finally got back to this one. Today I redesigned most of the blog part and almost finished it. I need to redesign the home page too. After that I need to cover all the edge-cases and test the app. When I'm done with that only hosting will be left.
@@ -85,6 +107,8 @@ So, after a long break where I had to focus on some other stuff, I came back to 
 #### Time: 22:15
 I changed the RequestMapping from `/api` to `/blog` as it makes more sense and follows RESTful naming conventions.
 
+---
+
 #### Time: 22:00
 I finished the endpoints, I also added the like counter which I previously forgot. First I had to manually insert the new column into the table.
 
@@ -94,8 +118,12 @@ ALTER TABLE blog_post ADD COLUMN likes INT NOT NULL DEFAULT 0;
 
 After that I had to update the BlogPost entity as well as the service. All that was left was to create a simple `/like` endpoint to update the given post. Now I will move on to the authentication.
 
+---
+
 #### Time: 21:33
 So I realized that adding authentication so early was a huge mistake, but at least I learned something. I also learned that JWT is very hard to implement. I am temporarily removing the authentication, so I can ensure that the endpoint operations are working well and also have quality error handling.
+
+---
 
 #### Time: 01:29
 Added JWT Authentication. It is the best option, given that I need to stay logged in for prolonged periods of time. Basic auth would not work, so session-based is the way.
