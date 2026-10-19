@@ -10,12 +10,37 @@ This is a project I decided to make to showcase my skills. For a long time now I
 - [x] Global Exception Handling
 - [x] Update the DTOs to match the form fields
 - [x] Replace `alert()` / `confirm()` with a proper modal UI
-- [ ] Dockerize
+- [x] Dockerize
 - [ ] Deploy
 
 ---
 
+## Run with Docker
+
+Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/) (or Docker Engine + Compose).
+
+```bash
+# From the repo root
+cp .env.example .env   # Windows: copy .env.example .env
+docker compose up --build
+```
+
+| Service   | URL / port                          |
+|-----------|-------------------------------------|
+| Frontend  | http://localhost:3000               |
+| Backend   | http://localhost:8080               |
+| Postgres  | `localhost:5433` → container `5432` |
+
+The first backend start creates tables via Hibernate (`ddl-auto=update` on the `dev` profile). Seed an admin row yourself before logging in (empty DB has no users). Stop with `Ctrl+C` or `docker compose down`.
+
+---
+
 ### 19.10.2026.
+
+#### Time: 22:45
+Dockerized the stack for local parity. Multi-stage `Dockerfile`s for the Spring backend (Maven → JRE 24) and the React frontend (npm build → nginx with SPA fallback), plus a root `docker-compose.yml` that wires Postgres, API, and the static UI. Compose uses host ports 3000 / 8080 / 5433 and env from `.env.example`. Next up is Flyway so prod does not depend on Hibernate inventing the schema.
+
+---
 
 #### Time: 22:25
 Cleaned up login and error handling after the modal work. Softened `AdminLoginDTO` so empty password does not dump Spring's raw validation text into the UI, and `LoginForm` maps 400/401 to clearer messages. Raised `BlogPostDTO` cover image size so base64 uploads on edit no longer fail with 400. Hardened logout in `AuthContext` so a dead backend does not leave the UI hanging on a Network Error. Also tightened `GlobalExceptionHandler` / `ErrorResponse` so validation and unexpected failures keep a consistent JSON shape.

@@ -1,0 +1,11 @@
+target/
+.idea/
+*.iml
+.env
+.env.*
+!.env.example
+src/main/resources/application-local.properties
+.git/
+.gitignore
+HELP.md
+*.md
