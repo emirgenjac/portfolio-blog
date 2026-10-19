@@ -7,13 +7,16 @@ This is a project I decided to make to showcase my skills. For a long time now I
 ## TODO
 
 - [x] Migrate token from localStorage to HttpOnly (or something else)
-- [ ] Global Exception Handling
+- [x] Global Exception Handling
 - [ ] Update the DTOs to match the form fields
 - [ ] Dockerize
 - [ ] Deploy
 
 ---
 ### 19.10.2026.
+
+#### Time: 11:41
+Added global exception handling on the backend. Instead of every controller returning errors in its own way, there is now a `GlobalExceptionHandler` that catches things like validation failures, missing posts, bad request bodies, and unexpected errors, and returns a consistent `ErrorResponse` JSON. Controllers can still throw `ResponseStatusException` when something is wrong; the handler takes care of the response shape. This should make debugging and the frontend error handling a lot cleaner.
 
 #### Time: 11:15
 Got back to this project after a while. Today I cleaned up the backend config so it's ready for hosting later. I split `application.properties` into separate profiles for development and production, and moved local overrides into a gitignored `application-local.properties`. Sensitive values like the database password and JWT secret now come from environment variables. I also added a `.env.example` so I know which variables I need when I set things up again. Next I want to finish the remaining hosting prep and then finally deploy.
