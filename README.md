@@ -15,6 +15,15 @@ This is a project I decided to make to showcase my skills. For a long time now I
 ---
 ### 19.10.2026.
 
+#### Time: 15:55
+Turned CSRF protection back on for the cookie-based auth. The JWT cookie alone is not enough, because the browser sends it automatically. Now the backend also sets an `XSRF-TOKEN` cookie that the frontend reads and sends back as an `X-XSRF-TOKEN` header on POST/PUT/DELETE. That way a random site cannot forge admin requests even if it somehow tricks the browser into calling my API. Login, create, edit and delete still work after a refresh.
+
+#### Time: 15:35
+Hardened the JWT cookies for hosting. Login and logout now use `ResponseCookie` with explicit `SameSite` settings. In development it stays `SameSite=Lax` without `Secure` so localhost keeps working. In the production profile the cookie is `Secure` and `SameSite=None`, which is what you need when the frontend and API are on different HTTPS domains. I verified both with curl.
+
+#### Time: 15:28
+Small cleanup on the frontend API client: the axios request/response console logging only runs in development now, so production builds will not spam the browser console.
+
 #### Time: 11:47
 Updated the DTOs so they actually match what the forms send. `BlogPostDTO` now requires title, tagline, content, and cover image URL, with size limits on each field. `AdminLoginDTO` validates email and password the same way. Together with the global exception handler, bad input now comes back as clear 400 responses instead of failing in a random way.
 
