@@ -11,6 +11,7 @@ This is a project I decided to make to showcase my skills. For a long time now I
 - [x] Update the DTOs to match the form fields
 - [x] Replace `alert()` / `confirm()` with a proper modal UI
 - [x] Dockerize
+- [x] Flyway migrations (schema no longer from Hibernate `ddl-auto=update`)
 - [ ] Deploy
 
 ---
@@ -31,14 +32,21 @@ docker compose up --build
 | Backend   | http://localhost:8080               |
 | Postgres  | `localhost:5433` → container `5432` |
 
-The first backend start creates tables via Hibernate (`ddl-auto=update` on the `dev` profile). Seed an admin row yourself before logging in (empty DB has no users). Stop with `Ctrl+C` or `docker compose down`.
+The first backend start applies Flyway migration `V1__baseline_schema.sql` (Hibernate uses `ddl-auto=validate` only). Seed an admin row yourself before logging in (empty DB has no users; password must be BCrypt-hashed). Stop with `Ctrl+C` or `docker compose down`.
+
+---
+
+### 20.10.2026.
+
+#### Time: 00:00
+Moved schema ownership off Hibernate. Added Flyway with a baseline migration for `admin` and `blog_post`, switched the `dev` profile to `ddl-auto=validate`, and confirmed it on a fresh Docker volume: Flyway applied V1, then login, create post, logout, and login again all worked after seeding a BCrypt admin.
 
 ---
 
 ### 19.10.2026.
 
 #### Time: 22:45
-Dockerized the stack for local parity. Multi-stage `Dockerfile`s for the Spring backend (Maven → JRE 24) and the React frontend (npm build → nginx with SPA fallback), plus a root `docker-compose.yml` that wires Postgres, API, and the static UI. Compose uses host ports 3000 / 8080 / 5433 and env from `.env.example`. Next up is Flyway so prod does not depend on Hibernate inventing the schema.
+Dockerized the stack for local parity. Multi-stage `Dockerfile`s for the Spring backend (Maven → JRE 24) and the React frontend (npm build → nginx with SPA fallback), plus a root `docker-compose.yml` that wires Postgres, API, and the static UI. Compose uses host ports 3000 / 8080 / 5433 and env from `.env.example`.
 
 ---
 
