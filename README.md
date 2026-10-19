@@ -16,6 +16,15 @@ This is a project I decided to make to showcase my skills. For a long time now I
 ---
 ### 19.10.2026.
 
+#### Time: 18:40
+Wired the login form to the new rate-limit response. Before, every failed login showed "Invalid credentials", even when the backend returned 429. Now 401 still means wrong password, and 429 shows a clear "too many attempts" message. Also added unit tests for the rate limiter, including a concurrent case so the per-IP limit cannot be bypassed by parallel requests. It was interesting to see how data structures such as a ConcurrentHashMap and a Deque could be used together to solve a problem.
+
+#### Time: 18:30
+Added login rate limiting on the backend. `LoginRateLimitService` tracks attempts per client IP in a rolling window (default 5 tries per 60 seconds) and returns 429 when someone spams `/auth/login`. This is an in-memory limiter for a single app instance, which is enough for now. I verified it in the browser and with the new tests.
+
+#### Time: 16:10
+Made CORS and the frontend API base URL configurable for hosting. The backend now reads allowed origins from config/env instead of hardcoding localhost, and I removed the duplicate `CorsConfig` so Spring Security is the single CORS source. On the frontend, axios uses `REACT_APP_API_URL` (with a localhost fallback). Local login still returns the expected CORS headers and sets the JWT cookie as before.
+
 #### Time: 15:55
 Turned CSRF protection back on for the cookie-based auth. The JWT cookie alone is not enough, because the browser sends it automatically. Now the backend also sets an `XSRF-TOKEN` cookie that the frontend reads and sends back as an `X-XSRF-TOKEN` header on POST/PUT/DELETE. That way a random site cannot forge admin requests even if it somehow tricks the browser into calling my API. Login, create, edit and delete still work after a refresh.
 
