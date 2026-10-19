@@ -9,6 +9,7 @@ This is a project I decided to make to showcase my skills. For a long time now I
 - [x] Migrate token from localStorage to HttpOnly (or something else)
 - [x] Global Exception Handling
 - [x] Update the DTOs to match the form fields
+- [ ] Replace `alert()` / `confirm()` with a proper modal UI
 - [ ] Dockerize
 - [ ] Deploy
 

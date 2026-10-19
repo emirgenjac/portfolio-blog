@@ -20,8 +20,16 @@ function LoginForm() {
                 login();
             }
         } catch (error) {
-            console.log("Login error:", error);
-            alert("Invalid credentials. Please try again.");
+            const status = error.response?.status;
+            const serverMessage = error.response?.data?.message;
+
+            if (status === 429) {
+                alert(serverMessage || "Too many login attempts. Please try again later.");
+            } else if (status === 401) {
+                alert("Invalid credentials. Please try again.");
+            } else {
+                alert(serverMessage || "Login failed. Please try again.");
+            }
         }
     };
 

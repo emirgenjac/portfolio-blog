@@ -3,15 +3,19 @@ package com.emirgenjac.blog.controllers;
 import com.emirgenjac.blog.dto.AdminLoginDTO;
 import com.emirgenjac.blog.services.AdminService;
 import com.emirgenjac.blog.services.JwtService;
+import com.emirgenjac.blog.services.LoginRateLimitService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/auth")
@@ -25,6 +29,9 @@ public class AuthController {
     @Autowired
     private JwtService jwtService;
 
+    @Autowired
+    private LoginRateLimitService loginRateLimitService;
+
     @Value("${app.cookie.secure:false}")
     private boolean cookieSecure;
 
@@ -35,7 +42,18 @@ public class AuthController {
     private long cookieMaxAgeSeconds;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@jakarta.validation.Valid @RequestBody AdminLoginDTO request, HttpServletResponse response) {
+    public ResponseEntity<?> login(
+            @jakarta.validation.Valid @RequestBody AdminLoginDTO request,
+            HttpServletRequest httpRequest,
+            HttpServletResponse response) {
+
+        String clientKey = resolveClientKey(httpRequest);
+        if (!loginRateLimitService.allowAttempt(clientKey)) {
+            throw new ResponseStatusException(
+                    HttpStatus.TOO_MANY_REQUESTS,
+                    "Too many login attempts. Please try again later.");
+        }
+
         boolean authenticated = adminService.authenticate(request.getEmail(), request.getPassword());
         if (!authenticated) {
             return ResponseEntity.status(401).build();
@@ -70,5 +88,17 @@ public class AuthController {
                 .sameSite(cookieSameSite)
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+    }
+
+    /**
+     * Prefer first X-Forwarded-For hop when behind a reverse proxy (Render, etc.);
+     * otherwise use the direct remote address.
+     */
+    private String resolveClientKey(HttpServletRequest request) {
+        String forwarded = request.getHeader("X-Forwarded-For");
+        if (forwarded != null && !forwarded.isBlank()) {
+            return forwarded.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
     }
 }
