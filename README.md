@@ -1,6 +1,6 @@
 # Portfolio & Blog
 
-This is a project I decided to make to showcase my skills. For a long time now I have been learning React and, more recently, Spring Boot. This is a portfolio, with an added functionality of a blog. Users can view the blog posts I create, like and share them. Only I can create blog posts.
+This is a project I decided to make to showcase my skills. For a long time now I have been learning React and, more recently, Spring Boot. This is a portfolio, with an added functionality of a blog. Users can view the blog posts I create and share them. Only I can create blog posts.
 
 ---
 
@@ -9,13 +9,38 @@ This is a project I decided to make to showcase my skills. For a long time now I
 - [x] Migrate token from localStorage to HttpOnly (or something else)
 - [x] Global Exception Handling
 - [x] Update the DTOs to match the form fields
-- [ ] Replace `alert()` / `confirm()` with a proper modal UI
+- [x] Replace `alert()` / `confirm()` with a proper modal UI
 - [ ] Dockerize
 - [ ] Deploy
 
 ---
 
 ### 19.10.2026.
+
+#### Time: 22:25
+Cleaned up login and error handling after the modal work. Softened `AdminLoginDTO` so empty password does not dump Spring's raw validation text into the UI, and `LoginForm` maps 400/401 to clearer messages. Raised `BlogPostDTO` cover image size so base64 uploads on edit no longer fail with 400. Hardened logout in `AuthContext` so a dead backend does not leave the UI hanging on a Network Error. Also tightened `GlobalExceptionHandler` / `ErrorResponse` so validation and unexpected failures keep a consistent JSON shape.
+
+---
+
+#### Time: 22:05
+Replaced every browser `alert()` / `confirm()` with a reusable `AppModal` and `ModalContext` (`showAlert` / `showConfirm`). Login errors, create/edit feedback, ProtectedRoute notices, and logout confirmation all go through the same UI now. This was the last big UX debt item on the todo list before Docker and deploy.
+
+---
+
+#### Time: 21:40
+Added Share on `PostDetail`: copy link to clipboard, plus open LinkedIn's share composer with the current post URL. Still need to verify both on a real HTTPS URL after deploy (localhost share previews are limited). Also dropped the leftover likes UI from the post meta and kept `createdAt` only.
+
+---
+
+#### Time: 21:10
+Refreshed the portfolio content on Home. GitHub projects and Sites now lead with real work (FAZUOI catalog live site, Heronn, Emirdev / Webflow, Boldo) and I removed older practice cards (ChatApp, Lazor). Added preview assets for FAZUOI and Emirdev so the cards match what people actually see online.
+
+---
+
+#### Time: 20:30
+Polish pass on the CSS redesign: title wrapping, killed the green logo hover, tighter nav/logout on small screens, iPhone-safe contact reachability and hero centering, and a shorter author bar on posts. Mostly layout and overflow fixes so the new look holds up on mobile.
+
+---
 
 #### Time: 18:40
 Wired the login form to the new rate-limit response. Before, every failed login showed "Invalid credentials", even when the backend returned 429. Now 401 still means wrong password, and 429 shows a clear "too many attempts" message. Also added unit tests for the rate limiter, including a concurrent case so the per-IP limit cannot be bypassed by parallel requests. It was interesting to see how data structures such as a ConcurrentHashMap and a Deque could be used together to solve a problem.
