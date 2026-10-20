@@ -13,6 +13,7 @@ This is a project I decided to make to showcase my skills. For a long time now I
 - [x] Dockerize
 - [x] Flyway migrations (schema no longer from Hibernate `ddl-auto=update`)
 - [x] Health endpoint (`/actuator/health`)
+- [x] Automated auth / validation tests (backend + frontend ProtectedRoute / Create link)
 - [ ] Deploy
 
 ---
@@ -38,6 +39,21 @@ The first backend start applies Flyway migration `V1__baseline_schema.sql` (Hibe
 ---
 
 ### 20.10.2026.
+
+#### Time: 15:10
+After finishing the security work, especially the testing part, I finally learned what testing is actually all about: preventing broken behavior from staying broken unnoticed, and failing loudly so you cannot miss it. That ties straight into CI, which is the next step and something I have wanted to learn for a while. On the backend I used JUnit, H2, and Spring Test for unit and integration tests; on the frontend I added Jest / Testing Library smoke tests for ProtectedRoute and the Create link. I also verified the full stack by hand with Docker (login, create post, logout) — not automated E2E, but a real end-to-end check of the running app.
+
+---
+
+#### Time: 14:50
+Added frontend smoke tests so the UX guards stay locked in: `ProtectedRoute` still redirects logged-out users away from create/edit, and the nav Create link only shows when authenticated on blog routes. Wired Testing Library for CRA + react-router v7 (`npm run test:ci`).
+
+---
+
+#### Time: 14:30
+Added a small high-signal backend test suite on an H2 `test` profile: login success/fail, `/me` with and without the JWT cookie, admin CRUD without JWT returns 401, and invalid DTOs return the shared `ErrorResponse` JSON. Also set a 401 entry point for unauthenticated admin routes so missing JWT is not a 403.
+
+---
 
 #### Time: 14:15
 Added a locked-down health check for deploy probes. Spring Actuator is on the classpath, but only `/actuator/health` is exposed, details are hidden, and the path is public in SecurityConfig so hosts like Render can ping it without auth.
