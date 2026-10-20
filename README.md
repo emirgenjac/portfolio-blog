@@ -1,5 +1,7 @@
 # Portfolio & Blog
 
+[![CI](https://github.com/emirgenjac/portfolio-blog/actions/workflows/ci.yml/badge.svg)](https://github.com/emirgenjac/portfolio-blog/actions/workflows/ci.yml)
+
 This is a project I decided to make to showcase my skills. For a long time now I have been learning React and, more recently, Spring Boot. This is a portfolio, with an added functionality of a blog. Users can view the blog posts I create and share them. Only I can create blog posts.
 
 ---
@@ -14,6 +16,7 @@ This is a project I decided to make to showcase my skills. For a long time now I
 - [x] Flyway migrations (schema no longer from Hibernate `ddl-auto=update`)
 - [x] Health endpoint (`/actuator/health`)
 - [x] Automated auth / validation tests (backend + frontend ProtectedRoute / Create link)
+- [x] GitHub Actions CI
 - [ ] Deploy
 
 ---
@@ -39,6 +42,11 @@ The first backend start applies Flyway migration `V1__baseline_schema.sql` (Hibe
 ---
 
 ### 20.10.2026.
+
+#### Time: 19:15
+Set up GitHub Actions CI. On every push to `main` and every pull request, two jobs run in parallel on clean Ubuntu VMs: backend `./mvnw test` (Java 24, Maven cache) and frontend `npm ci` + `npm run test:ci` + `npm run build` (Node 22, npm cache). If either job fails, the workflow goes red. Added a CI status badge at the top of this README. Deploy/CD is still later — this step only verifies the code automatically.
+
+---
 
 #### Time: 15:10
 After finishing the security work, especially the testing part, I finally learned what testing is actually all about: preventing broken behavior from staying broken unnoticed, and failing loudly so you cannot miss it. That ties straight into CI, which is the next step and something I have wanted to learn for a while. On the backend I used JUnit, H2, and Spring Test for unit and integration tests; on the frontend I added Jest / Testing Library smoke tests for ProtectedRoute and the Create link. I also verified the full stack by hand with Docker (login, create post, logout) — not automated E2E, but a real end-to-end check of the running app.
