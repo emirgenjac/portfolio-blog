@@ -31,7 +31,7 @@ const Blog = () => {
                     <p className="post-tagline">{post.tagline}</p>
                     <div className={"post-metadata"}>
                     <div className={"author-data"}>
-                        <img src={AuthorImage} className={"author-image"}/>
+                        <img src={AuthorImage} alt="Emir Genjac" className={"author-image"}/>
                         <p>Emir Genjac</p>
                     </div>
 

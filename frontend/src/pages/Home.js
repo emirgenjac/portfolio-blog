@@ -249,10 +249,10 @@ function Home() {
         <section className="contact-section" id="contact-section">
             <h1 className="ts-header">Contact</h1>
             <div className="logos-container">
-                <Link to={"https://github.com/emirgenjac"} className={"logo-link"}><img src={GitHub} className={"contact-logo"}/></Link>
-                <Link to={"https://www.instagram.com/g3njac/"} className={"logo-link"}><img src={Instagram} className={"contact-logo"}/></Link>
-                <Link to={"https://www.linkedin.com/in/emir-genjac-710918192/"} className={"logo-link"}><img src={Linkedin} className={"contact-logo"}/></Link>
-                <a href="mailto:genjacemir5@gmail.com" className={"logo-link"}><img src={Mail} className={"contact-logo"}/></a>
+                <Link to={"https://github.com/emirgenjac"} className={"logo-link"}><img src={GitHub} alt="GitHub" className={"contact-logo"}/></Link>
+                <Link to={"https://www.instagram.com/g3njac/"} className={"logo-link"}><img src={Instagram} alt="Instagram" className={"contact-logo"}/></Link>
+                <Link to={"https://www.linkedin.com/in/emir-genjac-710918192/"} className={"logo-link"}><img src={Linkedin} alt="LinkedIn" className={"contact-logo"}/></Link>
+                <a href="mailto:genjacemir5@gmail.com" className={"logo-link"}><img src={Mail} alt="Email" className={"contact-logo"}/></a>
             </div>
             <h4 className={"copyright"}>Emir Genjac 2025 - Present</h4>
         </section>
