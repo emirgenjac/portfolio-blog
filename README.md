@@ -12,6 +12,7 @@ This is a project I decided to make to showcase my skills. For a long time now I
 - [x] Replace `alert()` / `confirm()` with a proper modal UI
 - [x] Dockerize
 - [x] Flyway migrations (schema no longer from Hibernate `ddl-auto=update`)
+- [x] Health endpoint (`/actuator/health`)
 - [ ] Deploy
 
 ---
@@ -37,6 +38,11 @@ The first backend start applies Flyway migration `V1__baseline_schema.sql` (Hibe
 ---
 
 ### 20.10.2026.
+
+#### Time: 14:15
+Added a locked-down health check for deploy probes. Spring Actuator is on the classpath, but only `/actuator/health` is exposed, details are hidden, and the path is public in SecurityConfig so hosts like Render can ping it without auth.
+
+---
 
 #### Time: 00:00
 Moved schema ownership off Hibernate. Added Flyway with a baseline migration for `admin` and `blog_post`, switched the `dev` profile to `ddl-auto=validate`, and confirmed it on a fresh Docker volume: Flyway applied V1, then login, create post, logout, and login again all worked after seeding a BCrypt admin.
