@@ -20,6 +20,7 @@ function renderBlog() {
 
 beforeEach(() => {
   API.get.mockReset();
+  window.localStorage.clear();
 });
 
 test('shows a loading status while posts are fetching', async () => {
@@ -37,6 +38,24 @@ test('shows a loading status while posts are fetching', async () => {
   await waitFor(() => {
     expect(screen.getByText('No posts yet.')).toBeInTheDocument();
   });
+});
+
+test('shows cached posts immediately while a refresh is in flight', () => {
+  window.localStorage.setItem('pb.blog.list', JSON.stringify({
+    savedAt: Date.now(),
+    data: [{
+      id: 2,
+      title: 'Cached post',
+      tagline: 'From last visit',
+      coverImageUrl: 'cached.png',
+    }],
+  }));
+  API.get.mockReturnValue(new Promise(() => {}));
+
+  renderBlog();
+
+  expect(screen.getByText('Cached post')).toBeInTheDocument();
+  expect(screen.queryByRole('status')).not.toBeInTheDocument();
 });
 
 test('lists posts after a successful fetch', async () => {

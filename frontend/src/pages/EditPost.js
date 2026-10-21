@@ -7,6 +7,7 @@ import { useModal } from "../context/ModalContext";
 import ApiLoading from "../components/ApiLoading";
 import { useDocumentMeta } from "../seo/useDocumentMeta";
 import { DEFAULT_DESCRIPTION, pageTitle } from "../seo/site";
+import { writeCachedPost } from "../api/blogCache";
 
 function EditPost() {
     const { id } = useParams();
@@ -45,6 +46,7 @@ function EditPost() {
             );
 
             if (response.status === 200 || response.status === 201) {
+                writeCachedPost(response.data);
                 await showAlert({
                     title: "Post updated",
                     message: "Your changes were saved successfully.",

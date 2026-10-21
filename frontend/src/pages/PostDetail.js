@@ -11,10 +11,11 @@ import { useModal } from '../context/ModalContext';
 import ApiLoading from '../components/ApiLoading';
 import { useDocumentMeta } from '../seo/useDocumentMeta';
 import { DEFAULT_DESCRIPTION, pageTitle } from '../seo/site';
+import { readCachedPost, removeCachedPost, writeCachedPost } from '../api/blogCache';
 
 function PostDetail() {
     const { id } = useParams();
-    const [post, setPost] = useState(null);
+    const [post, setPost] = useState(() => readCachedPost(id));
     const [error, setError] = useState(null);
     const navigate = useNavigate();
     const [shareOpen, setShareOpen] = useState(false);
@@ -48,6 +49,7 @@ function PostDetail() {
             const response = await API.delete(`/blog/admin/posts/${id}`);
 
             if (response.status === 200 || response.status === 204) {
+                removeCachedPost(id);
                 await showAlert({
                     title: "Post deleted",
                     message: "The post was deleted successfully.",
@@ -110,14 +112,20 @@ function PostDetail() {
     };
 
     useEffect(() => {
-        setPost(null);
+        const cached = readCachedPost(id);
+        setPost(cached);
         setError(null);
         API
             .get(`/blog/${id}`)
-            .then(res => setPost(res.data))
+            .then(res => {
+                writeCachedPost(res.data);
+                setPost(res.data);
+            })
             .catch(err => {
                 console.error(err);
-                setError('Could not fetch post. The server may be waking up — wait a moment and refresh.');
+                if (!readCachedPost(id)) {
+                    setError('Could not fetch post. The server may be waking up — wait a moment and refresh.');
+                }
             });
     }, [id]);
 

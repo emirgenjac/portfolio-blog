@@ -7,6 +7,7 @@ import "../styles/CreatePost.css"
 import { useModal } from "../context/ModalContext";
 import { useDocumentMeta } from "../seo/useDocumentMeta";
 import { DEFAULT_DESCRIPTION, pageTitle } from "../seo/site";
+import { writeCachedPost } from "../api/blogCache";
 
 function CreatePost() {
     const navigate = useNavigate();
@@ -28,6 +29,7 @@ function CreatePost() {
                 }
                 );
                 if (response.status === 200 || response.status === 201) {
+                    writeCachedPost(response.data);
                     await showAlert({
                         title: "Post created",
                         message: "Your post was published successfully.",

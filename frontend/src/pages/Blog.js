@@ -6,10 +6,12 @@ import {useNavigate} from "react-router-dom";
 import ApiLoading from '../components/ApiLoading';
 import { useDocumentMeta } from '../seo/useDocumentMeta';
 import { DEFAULT_DESCRIPTION, pageTitle } from '../seo/site';
+import { readCachedPosts, writeCachedPosts } from '../api/blogCache';
 
 const Blog = () => {
-    const [posts, setPosts] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const cachedPosts = readCachedPosts();
+    const [posts, setPosts] = useState(cachedPosts || []);
+    const [loading, setLoading] = useState(!cachedPosts);
     const [error, setError] = useState('');
     const navigate = useNavigate();
     useDocumentMeta({
@@ -20,10 +22,17 @@ const Blog = () => {
 
     useEffect(() => {
         API.get('/blog')
-            .then(response => setPosts(Array.isArray(response.data) ? response.data : []))
+            .then(response => {
+                const next = Array.isArray(response.data) ? response.data : [];
+                writeCachedPosts(next);
+                setPosts(next);
+                setError('');
+            })
             .catch(err => {
                 console.error(err);
-                setError('Could not fetch posts. The server may be waking up — wait a moment and refresh.');
+                if (!readCachedPosts()) {
+                    setError('Could not fetch posts. The server may be waking up — wait a moment and refresh.');
+                }
             })
             .finally(() => setLoading(false));
     }, []);
