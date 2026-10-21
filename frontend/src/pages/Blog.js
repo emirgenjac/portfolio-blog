@@ -3,22 +3,41 @@ import API from '../api/axios';
 import '../styles/Blog.css';
 import AuthorImage from '../assets/eeeeee.png';
 import {useNavigate} from "react-router-dom";
+import ApiLoading from '../components/ApiLoading';
 
 const Blog = () => {
     const [posts, setPosts] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
         API.get('/blog')
-            .then(response => setPosts(response.data))
+            .then(response => setPosts(Array.isArray(response.data) ? response.data : []))
             .catch(err => {
                 console.error(err);
-                setError('Could not fetch posts.');
-            });
+                setError('Could not fetch posts. The server may be waking up — wait a moment and refresh.');
+            })
+            .finally(() => setLoading(false));
     }, []);
 
-    if (error) return <p>{error}</p>;
+    if (loading) return <ApiLoading title="Blog Posts" />;
+    if (error) {
+        return (
+            <>
+                <h1 className="main-title">Blog Posts</h1>
+                <p>{error}</p>
+            </>
+        );
+    }
+    if (posts.length === 0) {
+        return (
+            <>
+                <h1 className="main-title">Blog Posts</h1>
+                <p>No posts yet.</p>
+            </>
+        );
+    }
 
     return (<>
             <h1 className={"main-title"}>Blog Posts</h1>

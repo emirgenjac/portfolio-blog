@@ -8,6 +8,7 @@ import BackArrow from "../assets/arrow-left.svg"
 import '../styles/PostDetail.css';
 import { AuthContext } from '../context/AuthContext';
 import { useModal } from '../context/ModalContext';
+import ApiLoading from '../components/ApiLoading';
 
 function PostDetail() {
     const { id } = useParams();
@@ -100,12 +101,14 @@ function PostDetail() {
     };
 
     useEffect(() => {
+        setPost(null);
+        setError(null);
         API
             .get(`/blog/${id}`)
             .then(res => setPost(res.data))
             .catch(err => {
                 console.error(err);
-                setError('Could not fetch post');
+                setError('Could not fetch post. The server may be waking up — wait a moment and refresh.');
             });
     }, [id]);
 
@@ -123,7 +126,7 @@ function PostDetail() {
     }, [shareOpen]);
 
     if (error) return <p>{error}</p>;
-    if (!post) return <p>Loading...</p>;
+    if (!post) return <ApiLoading />;
 
     return (<>
             <div className="back-btn" onClick={() => navigate(`/blog`)}>

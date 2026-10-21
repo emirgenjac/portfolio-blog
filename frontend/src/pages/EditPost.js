@@ -4,17 +4,24 @@ import API from "../api/axios";
 import PostForm from "../components/PostForm";
 import "../styles/EditPost.css"
 import { useModal } from "../context/ModalContext";
+import ApiLoading from "../components/ApiLoading";
 
 function EditPost() {
     const { id } = useParams();
     const navigate = useNavigate();
     const [postData, setPostData] = useState(null);
+    const [loadError, setLoadError] = useState("");
     const { showAlert } = useModal();
 
     useEffect(() => {
+        setPostData(null);
+        setLoadError("");
         API.get(`/blog/${id}`)
             .then(res => setPostData(res.data))
-            .catch(err => console.error(err));
+            .catch(err => {
+                console.error(err);
+                setLoadError("Could not load this post. The server may be waking up — wait a moment and refresh.");
+            });
     }, [id]);
 
     const handleUpdate = async (formData) => {
@@ -58,7 +65,8 @@ function EditPost() {
         }
     };
 
-    if (!postData) return <p>Loading...</p>;
+    if (loadError) return <p>{loadError}</p>;
+    if (!postData) return <ApiLoading title="Edit Post" />;
 
     return (
         <div className="main-container">

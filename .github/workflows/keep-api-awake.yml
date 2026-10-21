@@ -1,0 +1,31 @@
+# Ping the public health endpoint so Render's free instance sleeps less often.
+# GitHub cron can drift by several minutes; that is still better than a cold JVM.
+# After this lands on main: Actions → Keep API awake → Run workflow (first ping).
+# Override the URL with repo variable API_HEALTH_URL if the Render hostname changes.
+
+name: Keep API awake
+
+on:
+  schedule:
+    - cron: "*/12 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: keep-api-awake
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    name: Ping /actuator/health
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Wake Render
+        env:
+          HEALTH_URL: ${{ vars.API_HEALTH_URL }}
+        run: |
+          URL="${HEALTH_URL:-https://portfolio-blog-it8m.onrender.com/actuator/health}"
+          curl -fsS --retry 2 --retry-all-errors --retry-delay 15 --max-time 90 "$URL"
