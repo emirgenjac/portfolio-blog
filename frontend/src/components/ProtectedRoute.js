@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { useModal } from '../context/ModalContext';
+import ApiLoading from './ApiLoading';
 
 const ProtectedRoute = ({ children }) => {
     const { isAuthenticated, loading } = useContext(AuthContext);
@@ -20,7 +21,7 @@ const ProtectedRoute = ({ children }) => {
         }).finally(() => setRedirect(true));
     }, [loading, isAuthenticated, notified, showAlert]);
 
-    if (loading) return null;
+    if (loading) return <ApiLoading />;
 
     if (!isAuthenticated) {
         if (redirect) return <Navigate to="/auth/login" replace />;

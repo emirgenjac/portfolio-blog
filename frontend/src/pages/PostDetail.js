@@ -9,6 +9,8 @@ import '../styles/PostDetail.css';
 import { AuthContext } from '../context/AuthContext';
 import { useModal } from '../context/ModalContext';
 import ApiLoading from '../components/ApiLoading';
+import { useDocumentMeta } from '../seo/useDocumentMeta';
+import { DEFAULT_DESCRIPTION, pageTitle } from '../seo/site';
 
 function PostDetail() {
     const { id } = useParams();
@@ -20,6 +22,13 @@ function PostDetail() {
     const shareRef = useRef(null);
     const { isAuthenticated } = useContext(AuthContext);
     const { showAlert, showConfirm } = useModal();
+    useDocumentMeta({
+        title: post ? pageTitle(post.title) : pageTitle('Post'),
+        description: post?.tagline || DEFAULT_DESCRIPTION,
+        path: `/blog/${id}`,
+        image: post?.coverImageUrl,
+        type: 'article',
+    });
 
     const goToEdit = () => {
         navigate(`/blog/admin/posts/${id}/edit`);
@@ -134,7 +143,7 @@ function PostDetail() {
                 <p>Back</p>
             </div>
             <div className="post-detail">
-            <img src={post.coverImageUrl} alt="Cover" className="post-cover-image" />
+            <img src={post.coverImageUrl} alt={post.title || 'Cover'} className="post-cover-image" />
             <h1 className={"post-title"}>{post.title}</h1>
                 <hr className={"line"}/>
             {/* React text children escape HTML — never use dangerouslySetInnerHTML for post body */}
@@ -146,7 +155,7 @@ function PostDetail() {
 
                 <div className={"post-metadata-details"}>
                 <div className={"author-data-details"}>
-                    <img src={AuthorImage} className={"author-image"} alt=""/>
+                    <img src={AuthorImage} className={"author-image"} alt="Emir Genjac"/>
                     <div className="author-meta">
                         <p className={"author-name"}>Emir Genjac</p>
                         {post.createdAt && (

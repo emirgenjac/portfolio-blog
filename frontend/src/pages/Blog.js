@@ -4,12 +4,19 @@ import '../styles/Blog.css';
 import AuthorImage from '../assets/eeeeee.png';
 import {useNavigate} from "react-router-dom";
 import ApiLoading from '../components/ApiLoading';
+import { useDocumentMeta } from '../seo/useDocumentMeta';
+import { DEFAULT_DESCRIPTION, pageTitle } from '../seo/site';
 
 const Blog = () => {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    useDocumentMeta({
+        title: pageTitle('Blog'),
+        description: DEFAULT_DESCRIPTION,
+        path: '/blog',
+    });
 
     useEffect(() => {
         API.get('/blog')
@@ -44,7 +51,7 @@ const Blog = () => {
         <div className="posts-container">
             {posts.map(post => (
                 <div key={post.id} className="blog_post" onClick={() => navigate(`/blog/${post.id}`)}>
-                    <img src={post.coverImageUrl} alt="Cover" className={"post-cover-image"}/>
+                    <img src={post.coverImageUrl} alt={post.title || 'Cover'} className={"post-cover-image"} loading="lazy" decoding="async"/>
                     <h2 className={"post-title"}>{post.title}</h2>
                     <hr className={"hr"}/>
                     <p className="post-tagline">{post.tagline}</p>

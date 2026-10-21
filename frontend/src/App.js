@@ -1,15 +1,18 @@
+import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
-import Blog from './pages/Blog';
 import NavBar from "./components/NavBar";
 import "./styles/App.css";
-import PostDetail from "./pages/PostDetail";
-import CreatePost from "./pages/CreatePost";
-import EditPost from "./pages/EditPost";
-import LoginPage from "./pages/LoginPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from './context/AuthContext';
 import { ModalProvider } from './context/ModalContext';
+import ApiLoading from './components/ApiLoading';
+
+const Blog = lazy(() => import('./pages/Blog'));
+const PostDetail = lazy(() => import('./pages/PostDetail'));
+const CreatePost = lazy(() => import('./pages/CreatePost'));
+const EditPost = lazy(() => import('./pages/EditPost'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
 
 function App() {
   return (
@@ -17,14 +20,16 @@ function App() {
       <ModalProvider>
         <NavBar />
         <main className="content">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/blog/:id" element={<PostDetail />} />
-            <Route path="/blog/admin/posts" element={<ProtectedRoute><CreatePost /></ProtectedRoute>} />
-            <Route path="/blog/admin/posts/:id/edit" element={<ProtectedRoute><EditPost /></ProtectedRoute>} />
-            <Route path="/auth/login" element={<LoginPage />} />
-          </Routes>
+          <Suspense fallback={<ApiLoading />}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:id" element={<PostDetail />} />
+              <Route path="/blog/admin/posts" element={<ProtectedRoute><CreatePost /></ProtectedRoute>} />
+              <Route path="/blog/admin/posts/:id/edit" element={<ProtectedRoute><EditPost /></ProtectedRoute>} />
+              <Route path="/auth/login" element={<LoginPage />} />
+            </Routes>
+          </Suspense>
         </main>
       </ModalProvider>
     </AuthProvider>

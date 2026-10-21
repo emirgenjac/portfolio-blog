@@ -1,31 +1,50 @@
 import { createContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import API from '../api/axios';
 
 export const AuthContext = createContext();
 
+function needsSessionCheck(pathname) {
+    return pathname.startsWith('/blog') || pathname.startsWith('/auth');
+}
+
 export const AuthProvider = ({ children }) => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const checkSession = needsSessionCheck(location.pathname);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(checkSession);
 
     useEffect(() => {
-        console.log('[auth] Checking /auth/me');
+        if (!checkSession) {
+            setLoading(false);
+            return undefined;
+        }
+
+        let cancelled = false;
+        setLoading(true);
+
         API.get("/auth/me")
             .then(res => {
-                console.log('[auth] /auth/me response', res.status, res.data);
-                if (res.status === 200) {
-                    setIsAuthenticated(true);
-                } else {
+                if (!cancelled) {
+                    setIsAuthenticated(res.status === 200);
+                }
+            })
+            .catch(() => {
+                if (!cancelled) {
                     setIsAuthenticated(false);
                 }
             })
-            .catch(err => {
-                console.log('[auth] /auth/me failed', err?.response?.status ?? 'no-response', err?.message ?? err);
-                setIsAuthenticated(false);
-            })
-            .finally(() => setLoading(false));
-    }, []);
+            .finally(() => {
+                if (!cancelled) {
+                    setLoading(false);
+                }
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [checkSession]);
 
     const login = () => {
         setIsAuthenticated(true)
@@ -36,8 +55,9 @@ export const AuthProvider = ({ children }) => {
         try {
             await API.post("/auth/logout");
         } catch (err) {
-            // Still clear local auth if API is down / CSRF fails (e.g. backend restart)
-            console.warn('[auth] logout request failed', err?.message ?? err);
+            if (process.env.NODE_ENV !== 'production') {
+                console.warn('[auth] logout request failed', err?.message ?? err);
+            }
         } finally {
             setIsAuthenticated(false);
             navigate('/auth/login');
@@ -50,5 +70,3 @@ export const AuthProvider = ({ children }) => {
         </AuthContext.Provider>
     );
 };
-
-

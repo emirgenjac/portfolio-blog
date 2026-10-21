@@ -5,10 +5,18 @@ import PostForm from "../components/PostForm";
 import { useNavigate } from "react-router-dom";
 import "../styles/CreatePost.css"
 import { useModal } from "../context/ModalContext";
+import { useDocumentMeta } from "../seo/useDocumentMeta";
+import { DEFAULT_DESCRIPTION, pageTitle } from "../seo/site";
 
 function CreatePost() {
     const navigate = useNavigate();
     const { showAlert } = useModal();
+    useDocumentMeta({
+        title: pageTitle("New post"),
+        description: DEFAULT_DESCRIPTION,
+        path: "/blog/admin/posts",
+        robots: "noindex, nofollow",
+    });
 
     const handleCreate = async (formData) => {
         try {

@@ -5,6 +5,8 @@ import PostForm from "../components/PostForm";
 import "../styles/EditPost.css"
 import { useModal } from "../context/ModalContext";
 import ApiLoading from "../components/ApiLoading";
+import { useDocumentMeta } from "../seo/useDocumentMeta";
+import { DEFAULT_DESCRIPTION, pageTitle } from "../seo/site";
 
 function EditPost() {
     const { id } = useParams();
@@ -12,6 +14,12 @@ function EditPost() {
     const [postData, setPostData] = useState(null);
     const [loadError, setLoadError] = useState("");
     const { showAlert } = useModal();
+    useDocumentMeta({
+        title: postData ? pageTitle(`Edit: ${postData.title}`) : pageTitle("Edit post"),
+        description: DEFAULT_DESCRIPTION,
+        path: `/blog/admin/posts/${id}/edit`,
+        robots: "noindex, nofollow",
+    });
 
     useEffect(() => {
         setPostData(null);

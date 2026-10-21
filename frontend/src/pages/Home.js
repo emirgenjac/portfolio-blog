@@ -3,12 +3,12 @@ import {Link, useLocation} from "react-router-dom";
 
 import "../styles/Home.css";
 
-import HeroPhoto from '../assets/Untitled.png';
+import HeroPhoto from '../assets/hero.webp';
 import DoubleArrow from '../assets/DoubleArrow.svg';
 import MouseIcon from '../assets/MouseIcon.svg'
-import Fazuoi from '../assets/fazuoi.jpg';
-import Emirdev from '../assets/emirdev.png';
-import Boldo from '../assets/boldo.png';
+import Fazuoi from '../assets/fazuoi.webp';
+import Emirdev from '../assets/emirdev.webp';
+import Boldo from '../assets/boldo.webp';
 import Live from '../assets/live.svg';
 import Instagram from '../assets/instagram-svgrepo-com.svg';
 import Linkedin from '../assets/linkedin-svgrepo-com (1).svg';
@@ -18,6 +18,8 @@ import GitHub from '../assets/github.svg';
 
 import ProjectCard from "../components/ProjectCard";
 import Slider from "../components/Slider";
+import { useDocumentMeta } from "../seo/useDocumentMeta";
+import { DEFAULT_DESCRIPTION, DEFAULT_TITLE } from "../seo/site";
 
 
 const projects = [
@@ -82,6 +84,11 @@ const projects = [
 
 function Home() {
     const location = useLocation();
+    useDocumentMeta({
+        title: DEFAULT_TITLE,
+        description: DEFAULT_DESCRIPTION,
+        path: "/",
+    });
 
     const scrollToProjects = useCallback(() => {
         const element = document.getElementById('projects-section');
@@ -129,7 +136,7 @@ function Home() {
 
                     {/* Main image box */}
                     <div className="image-box">
-                        <img src={HeroPhoto} className="hero-photo" alt="Emir Genjac"/>
+                        <img src={HeroPhoto} className="hero-photo" alt="Emir Genjac" width={840} height={1050} fetchPriority="high" decoding="async"/>
                     </div>
                 </div>
             </div>
@@ -168,7 +175,7 @@ function Home() {
                 <div className="site-box">
                     <div className="site-box-left">
                         <div className="site-box-image-box site-box-image-box--logo">
-                            <img className="site-image site-image--logo" src={Fazuoi} alt={"Digital Seized Assets Catalogue"}/>
+                            <img className="site-image site-image--logo" src={Fazuoi} alt="Digital Seized Assets Catalogue" width={800} height={380} loading="lazy" decoding="async"/>
                         </div>
                     </div>
                     <div className="site-box-right">
@@ -192,7 +199,7 @@ function Home() {
                 <div className="site-box">
                     <div className="site-box-left">
                         <div className="site-box-image-box">
-                            <img className="site-image" src={Emirdev} alt="Emirdev Webflow portfolio"/>
+                            <img className="site-image" src={Emirdev} alt="Emirdev Webflow portfolio" width={1200} height={380} loading="lazy" decoding="async"/>
                         </div>
                     </div>
                     <div className="site-box-right">
@@ -216,7 +223,7 @@ function Home() {
                 <div className="site-box">
                     <div className="site-box-left">
                         <div className="site-box-image-box">
-                            <img className="site-image" src={Boldo} id="boldo" alt="Boldo"/>
+                            <img className="site-image" src={Boldo} id="boldo" alt="Boldo" width={1200} height={380} loading="lazy" decoding="async"/>
                         </div>
                     </div>
                     <div className="site-box-right">

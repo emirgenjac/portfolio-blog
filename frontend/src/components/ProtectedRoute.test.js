@@ -69,9 +69,10 @@ test('renders children when authenticated', async () => {
   expect(mockShowAlert).not.toHaveBeenCalled();
 });
 
-test('renders nothing while auth is loading', async () => {
+test('shows a loading status while auth is loading', async () => {
   renderProtected({ isAuthenticated: false, loading: true });
 
+  expect(screen.getByRole('status')).toHaveTextContent('Loading');
   await waitFor(() => {
     expect(screen.queryByText('Create Post Page')).not.toBeInTheDocument();
     expect(screen.queryByText('Login Page')).not.toBeInTheDocument();
