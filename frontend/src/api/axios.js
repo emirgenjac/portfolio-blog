@@ -16,17 +16,76 @@ function readCookie(name) {
     return match ? decodeURIComponent(match[1]) : null;
 }
 
-// Cross-port localhost: axios same-origin XSRF helpers may skip; copy cookie → header ourselves.
-API.interceptors.request.use(config => {
-    const method = (config.method || 'get').toLowerCase();
-    if (!SAFE_METHODS.has(method)) {
-        const csrfToken = readCookie('XSRF-TOKEN');
+// Cookie read works on localhost (same host, different ports). Cross-site Pages → Render
+// cannot read the API cookie from JS, so we also load the raw token from GET /auth/csrf.
+let csrfToken = null;
+let csrfHeaderName = 'X-XSRF-TOKEN';
+let csrfInflight = null;
+
+function applyCsrfHeader(headers, token) {
+    if (!token) {
+        return;
+    }
+    headers['X-XSRF-TOKEN'] = token;
+    if (csrfHeaderName && csrfHeaderName !== 'X-XSRF-TOKEN') {
+        headers[csrfHeaderName] = token;
+    }
+}
+
+async function resolveCsrfToken({ force = false } = {}) {
+    if (!force) {
+        const fromCookie = readCookie('XSRF-TOKEN');
+        if (fromCookie) {
+            csrfToken = fromCookie;
+            return fromCookie;
+        }
         if (csrfToken) {
-            config.headers['X-XSRF-TOKEN'] = csrfToken;
+            return csrfToken;
         }
     }
+    if (!csrfInflight) {
+        csrfInflight = API.get('/auth/csrf')
+            .then(res => {
+                csrfToken = res.data?.token || null;
+                if (res.data?.headerName) {
+                    csrfHeaderName = res.data.headerName;
+                }
+                return csrfToken;
+            })
+            .finally(() => {
+                csrfInflight = null;
+            });
+    }
+    return csrfInflight;
+}
+
+API.interceptors.request.use(async config => {
+    const method = (config.method || 'get').toLowerCase();
+    if (SAFE_METHODS.has(method)) {
+        return config;
+    }
+    const token = await resolveCsrfToken();
+    applyCsrfHeader(config.headers, token);
     return config;
 });
+
+API.interceptors.response.use(
+    response => response,
+    async error => {
+        const config = error.config;
+        if (error.response?.status === 403 && config && !config._csrfRetry) {
+            config._csrfRetry = true;
+            csrfToken = null;
+            const token = await resolveCsrfToken({ force: true });
+            if (token) {
+                config.headers = config.headers || {};
+                applyCsrfHeader(config.headers, token);
+                return API.request(config);
+            }
+        }
+        return Promise.reject(error);
+    }
+);
 
 const isDev = process.env.NODE_ENV !== 'production';
 

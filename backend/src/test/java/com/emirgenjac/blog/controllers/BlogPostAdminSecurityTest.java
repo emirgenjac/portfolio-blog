@@ -15,7 +15,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -59,8 +58,7 @@ class BlogPostAdminSecurityTest {
 
     @Test
     void createPostWithoutJwtReturns401() throws Exception {
-        mockMvc.perform(post("/blog/admin/posts")
-                        .with(csrf())
+        TestCsrf.perform(mockMvc, post("/blog/admin/posts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(VALID_POST_JSON))
                 .andExpect(status().isUnauthorized());
@@ -68,8 +66,7 @@ class BlogPostAdminSecurityTest {
 
     @Test
     void updatePostWithoutJwtReturns401() throws Exception {
-        mockMvc.perform(put("/blog/admin/posts/1")
-                        .with(csrf())
+        TestCsrf.perform(mockMvc, put("/blog/admin/posts/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(VALID_POST_JSON))
                 .andExpect(status().isUnauthorized());
@@ -77,7 +74,7 @@ class BlogPostAdminSecurityTest {
 
     @Test
     void deletePostWithoutJwtReturns401() throws Exception {
-        mockMvc.perform(delete("/blog/admin/posts/1").with(csrf()))
+        TestCsrf.perform(mockMvc, delete("/blog/admin/posts/1"))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -85,8 +82,7 @@ class BlogPostAdminSecurityTest {
     void createPostWithJwtButInvalidDtoReturns400ErrorResponse() throws Exception {
         Cookie jwt = loginAndGetJwtCookie();
 
-        mockMvc.perform(post("/blog/admin/posts")
-                        .with(csrf())
+        TestCsrf.perform(mockMvc, post("/blog/admin/posts")
                         .cookie(jwt)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -100,8 +96,7 @@ class BlogPostAdminSecurityTest {
     }
 
     private Cookie loginAndGetJwtCookie() throws Exception {
-        MvcResult login = mockMvc.perform(post("/auth/login")
-                        .with(csrf())
+        MvcResult login = TestCsrf.perform(mockMvc, post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"email":"%s","password":"%s"}

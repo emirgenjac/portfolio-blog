@@ -5,33 +5,28 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.csrf.CsrfTokenRequestHandler;
-import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler;
-import org.springframework.util.StringUtils;
 
 import java.util.function.Supplier;
 
 /**
- * SPA-friendly CSRF handler (Spring Security 6 pattern).
- * Ensures the CSRF cookie is written on requests, and accepts the raw token from the
- * {@code X-XSRF-TOKEN} header that the frontend copies from the {@code XSRF-TOKEN} cookie.
+ * SPA CSRF handler. Uses the plain token (not XOR) so GET /auth/csrf, the
+ * {@code XSRF-TOKEN} cookie, and the {@code X-XSRF-TOKEN} header all share one value.
+ * XOR encoding would break cross-origin clients that cannot read the cookie and must
+ * send the JSON token instead. BREACH is not a concern for this JSON API.
  */
 public final class SpaCsrfTokenRequestHandler implements CsrfTokenRequestHandler {
 
     private final CsrfTokenRequestHandler plain = new CsrfTokenRequestAttributeHandler();
-    private final CsrfTokenRequestHandler xor = new XorCsrfTokenRequestAttributeHandler();
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, Supplier<CsrfToken> csrfToken) {
-        xor.handle(request, response, csrfToken);
+        plain.handle(request, response, csrfToken);
         // Force token load so CookieCsrfTokenRepository can add the cookie to the response
         csrfToken.get();
     }
 
     @Override
     public String resolveCsrfTokenValue(HttpServletRequest request, CsrfToken csrfToken) {
-        if (StringUtils.hasText(request.getHeader(csrfToken.getHeaderName()))) {
-            return plain.resolveCsrfTokenValue(request, csrfToken);
-        }
-        return xor.resolveCsrfTokenValue(request, csrfToken);
+        return plain.resolveCsrfTokenValue(request, csrfToken);
     }
 }

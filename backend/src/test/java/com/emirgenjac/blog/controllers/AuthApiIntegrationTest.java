@@ -10,11 +10,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import com.jayway.jsonpath.JsonPath;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
@@ -49,8 +51,7 @@ class AuthApiIntegrationTest {
 
     @Test
     void loginSuccessSetsHttpOnlyJwtCookie() throws Exception {
-        mockMvc.perform(post("/auth/login")
-                        .with(csrf())
+        TestCsrf.perform(mockMvc, post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"email":"%s","password":"%s"}
@@ -62,8 +63,7 @@ class AuthApiIntegrationTest {
 
     @Test
     void loginFailReturns401() throws Exception {
-        mockMvc.perform(post("/auth/login")
-                        .with(csrf())
+        TestCsrf.perform(mockMvc, post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"email":"%s","password":"wrong-password"}
@@ -79,8 +79,7 @@ class AuthApiIntegrationTest {
 
     @Test
     void meWithJwtCookieReturns200() throws Exception {
-        MvcResult login = mockMvc.perform(post("/auth/login")
-                        .with(csrf())
+        MvcResult login = TestCsrf.perform(mockMvc, post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"email":"%s","password":"%s"}
@@ -95,9 +94,52 @@ class AuthApiIntegrationTest {
     }
 
     @Test
-    void loginWithInvalidDtoReturns400ErrorResponse() throws Exception {
+    void csrfEndpointReturnsTokenAndCookie() throws Exception {
+        mockMvc.perform(get("/auth/csrf"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").isNotEmpty())
+                .andExpect(jsonPath("$.headerName").value("X-XSRF-TOKEN"))
+                .andExpect(cookie().exists("XSRF-TOKEN"));
+    }
+
+    @Test
+    void loginWithoutCsrfReturns403() throws Exception {
         mockMvc.perform(post("/auth/login")
-                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"%s","password":"%s"}
+                                """.formatted(ADMIN_EMAIL, ADMIN_PASSWORD)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void loginWithCsrfTokenFromEndpointSucceeds() throws Exception {
+        MvcResult csrf = mockMvc.perform(get("/auth/csrf"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").isNotEmpty())
+                .andReturn();
+
+        String token = JsonPath.read(csrf.getResponse().getContentAsString(), "$.token");
+        String headerName = JsonPath.read(csrf.getResponse().getContentAsString(), "$.headerName");
+        jakarta.servlet.http.Cookie xsrfCookie = csrf.getResponse().getCookie("XSRF-TOKEN");
+        assertNotNull(xsrfCookie);
+        assertEquals(token, xsrfCookie.getValue());
+
+        mockMvc.perform(post("/auth/login")
+                        .header(headerName, token)
+                        .header("X-XSRF-TOKEN", token)
+                        .cookie(xsrfCookie)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"%s","password":"%s"}
+                                """.formatted(ADMIN_EMAIL, ADMIN_PASSWORD)))
+                .andExpect(status().isOk())
+                .andExpect(cookie().exists("jwt"));
+    }
+
+    @Test
+    void loginWithInvalidDtoReturns400ErrorResponse() throws Exception {
+        TestCsrf.perform(mockMvc, post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"email":"","password":""}

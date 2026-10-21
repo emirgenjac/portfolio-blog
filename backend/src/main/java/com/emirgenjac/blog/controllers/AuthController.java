@@ -1,6 +1,7 @@
 package com.emirgenjac.blog.controllers;
 
 import com.emirgenjac.blog.dto.AdminLoginDTO;
+import com.emirgenjac.blog.dto.CsrfTokenDTO;
 import com.emirgenjac.blog.services.AdminService;
 import com.emirgenjac.blog.services.JwtService;
 import com.emirgenjac.blog.services.LoginRateLimitService;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -68,6 +70,16 @@ public class AuthController {
     public ResponseEntity<?> logout(HttpServletResponse response) {
         setJwtCookie(response, "", 0);
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * CSRF token for the SPA. JS on a different origin (Pages vs Render) cannot read
+     * the {@code XSRF-TOKEN} cookie via {@code document.cookie}, so it uses this JSON
+     * value as the {@code X-XSRF-TOKEN} header. Same value as the cookie.
+     */
+    @GetMapping("/csrf")
+    public CsrfTokenDTO csrf(CsrfToken csrfToken) {
+        return new CsrfTokenDTO(csrfToken.getToken(), csrfToken.getHeaderName());
     }
 
     @GetMapping("/me")
