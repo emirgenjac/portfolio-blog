@@ -41,6 +41,15 @@ The first backend start applies Flyway migration `V1__baseline_schema.sql` (Hibe
 
 ---
 
+### 22.10.2026.
+
+#### Time: 22:15
+On the live site, every login, logout, create and delete was doing a little dance in the Network tab: the request failed, then it fetched a CSRF token, then it sent the same request again and it worked. That retry was leftover from getting cookies to work across Pages and Render. I made the app grab the token first instead of waiting to fail, so those clicks are one request now. It was an interesting example of how a small detail can speed things up — those actions went from three round trips to one, about two thirds less waiting, roughly three times faster.
+
+GitHub Actions was supposed to ping the API every five minutes so Render wouldn't sleep, but the run history was closer to every few hours. I deleted that workflow and pointed UptimeRobot at `/actuator/health` instead.
+
+---
+
 ### 21.10.2026.
 
 #### Time: 18:40
