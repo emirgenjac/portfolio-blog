@@ -1,13 +1,14 @@
-# Ping the public health endpoint so Render's free instance sleeps less often.
-# GitHub cron can drift by several minutes; that is still better than a cold JVM.
-# After this lands on main: Actions → Keep API awake → Run workflow (first ping).
-# Override the URL with repo variable API_HEALTH_URL if the Render hostname changes.
+# Ping Render so the free instance sleeps less often.
+# GitHub does not start this schedule until it has run at least once on main:
+#   Actions → Keep API awake → Run workflow
+# Cron can still drift; */5 is the shortest GitHub allows vs Render's ~15 min idle sleep.
+# Override URLs with repo variables API_HEALTH_URL / API_BLOG_URL if the hostname changes.
 
 name: Keep API awake
 
 on:
   schedule:
-    - cron: "*/12 * * * *"
+    - cron: "*/5 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -19,13 +20,16 @@ concurrency:
 
 jobs:
   ping:
-    name: Ping /actuator/health
+    name: Ping health and /blog
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 4
     steps:
       - name: Wake Render
         env:
           HEALTH_URL: ${{ vars.API_HEALTH_URL }}
+          BLOG_URL: ${{ vars.API_BLOG_URL }}
         run: |
-          URL="${HEALTH_URL:-https://portfolio-blog-it8m.onrender.com/actuator/health}"
-          curl -fsS --retry 2 --retry-all-errors --retry-delay 15 --max-time 90 "$URL"
+          HEALTH="${HEALTH_URL:-https://portfolio-blog-it8m.onrender.com/actuator/health}"
+          BLOG="${BLOG_URL:-https://portfolio-blog-it8m.onrender.com/blog}"
+          curl -fsS --retry 4 --retry-all-errors --retry-delay 20 --max-time 120 "$HEALTH"
+          curl -fsS --retry 2 --retry-all-errors --retry-delay 15 --max-time 120 -o /dev/null "$BLOG"

@@ -17,7 +17,7 @@ This is a project I decided to make to showcase my skills. For a long time now I
 - [x] Health endpoint (`/actuator/health`)
 - [x] Automated auth / validation tests (backend + frontend ProtectedRoute / Create link)
 - [x] GitHub Actions CI
-- [ ] Deploy
+- [x] Deploy (Cloudflare Pages + Render + Supabase, $0)
 
 ---
 
@@ -41,7 +41,44 @@ The first backend start applies Flyway migration `V1__baseline_schema.sql` (Hibe
 
 ---
 
+### 21.10.2026.
+
+#### Time: 18:40
+Public blog reads now use a `localStorage` stale-while-revalidate cache (`blogCache.js`). `/blog` and `/blog/:id` paint the last successful payload immediately, then refresh in the background; create/edit/delete keep that cache in sync. First visit on a new device still needs a warm API. Tightened the keep-alive cron to every 5 minutes and ping GET `/blog` as well as `/actuator/health` (GitHub still will not schedule it until **Actions → Keep API awake → Run workflow** has run once on `main`).
+
+---
+
+#### Time: 15:03
+Speed and recruiter SEO on the CRA app, still without a rewrite. Homepage no longer calls `/auth/me` (NavBar does not need a session there). Admin/login/blog routes are `React.lazy` chunks. Syne and Figtree are self-hosted `.woff2` files (Google Fonts `@import` gone; CSP `font-src 'self'`). Hero and site screenshots are WebP. Replaced the CRA default `<title>` / description with real copy, Open Graph, Twitter tags, canonical, Person JSON-LD, `sitemap.xml`, and per-route `document.title`. LinkedIn **post** previews still need HTML in the first response (Pages Function / SSR later).
+
+---
+
+#### Time: 14:42
+`/blog` started as `posts = []` with no loading flag, so a sleeping Render looked like an empty list. Added `ApiLoading` (spinner, then a cold-start message after 8s) on Blog, PostDetail, and EditPost, plus an explicit empty state. Added GitHub Action `keep-api-awake.yml` to ping `/actuator/health` on a schedule so the free JVM sleeps less often.
+
+---
+
+#### Time: 13:58
+Live Pages CSP was blocking Syne/Figtree (`style-src` / `font-src` had no Google Fonts). Allowed `fonts.googleapis.com` and `fonts.gstatic.com`. Superseded later the same day when fonts were self-hosted.
+
+---
+
+#### Time: 13:42
+Shipped the frontend to Cloudflare Pages (`portfolio-blog-b33.pages.dev`) against the Render API. Cross-origin login returned 403: the SPA cannot read Render's `XSRF-TOKEN` cookie via `document.cookie`. Added public `GET /auth/csrf` (plain token JSON, not XOR) and had axios send that value as `X-XSRF-TOKEN`, with a one-shot 403 retry. MockMvc `.with(csrf())` had polluted the shared CSRF filter in tests — isolated helper `TestCsrf.perform` instead.
+
+---
+
 ### 20.10.2026.
+
+#### Time: 21:04
+Added `frontend/public/_redirects` so Cloudflare Pages / Netlify rewrite unknown paths to `index.html`. Without it, a refresh or shared `/blog/:id` link is a host 404 instead of React Router.
+
+---
+
+#### Time: 19:39
+Added missing image `alt` text on the portfolio and blog UI so the live pages are usable for screen readers and less empty for crawlers.
+
+---
 
 #### Time: 19:15
 Set up GitHub Actions CI. On every push to `main` and every pull request, two jobs run in parallel on clean Ubuntu VMs: backend `./mvnw test` (Java 24, Maven cache) and frontend `npm ci` + `npm run test:ci` + `npm run build` (Node 22, npm cache). If either job fails, the workflow goes red. Added a CI status badge at the top of this README. Deploy/CD is still later — this step only verifies the code automatically.
