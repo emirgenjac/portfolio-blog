@@ -16,6 +16,7 @@ jest.mock('../api/axios', () => ({
       response: { use: jest.fn() },
     },
   },
+  prefetchCsrf: jest.fn(() => Promise.resolve()),
 }));
 
 jest.mock('../context/ModalContext', () => ({

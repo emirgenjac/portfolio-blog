@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { useContext } from 'react';
 import { AuthContext, AuthProvider } from './AuthContext';
-import API from '../api/axios';
+import API, { prefetchCsrf } from '../api/axios';
 
 jest.mock('../api/axios', () => ({
   __esModule: true,
@@ -10,6 +10,7 @@ jest.mock('../api/axios', () => ({
     get: jest.fn(),
     post: jest.fn(),
   },
+  prefetchCsrf: jest.fn(() => Promise.resolve()),
 }));
 
 function Probe() {
@@ -35,6 +36,8 @@ function renderAt(path) {
 beforeEach(() => {
   API.get.mockReset();
   API.post.mockReset();
+  prefetchCsrf.mockReset();
+  prefetchCsrf.mockResolvedValue(undefined);
 });
 
 test('does not call /auth/me on the homepage', async () => {
@@ -44,6 +47,7 @@ test('does not call /auth/me on the homepage', async () => {
 
   expect(await screen.findByText('ready')).toBeInTheDocument();
   expect(API.get).not.toHaveBeenCalled();
+  expect(prefetchCsrf).not.toHaveBeenCalled();
   expect(screen.getByText('guest')).toBeInTheDocument();
 });
 
@@ -54,4 +58,5 @@ test('checks /auth/me on blog routes', async () => {
 
   expect(await screen.findByText('authed')).toBeInTheDocument();
   expect(API.get).toHaveBeenCalledWith('/auth/me');
+  expect(prefetchCsrf).toHaveBeenCalled();
 });

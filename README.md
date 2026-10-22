@@ -44,7 +44,7 @@ The first backend start applies Flyway migration `V1__baseline_schema.sql` (Hibe
 ### 21.10.2026.
 
 #### Time: 18:40
-Public blog reads now use a `localStorage` stale-while-revalidate cache (`blogCache.js`). `/blog` and `/blog/:id` paint the last successful payload immediately, then refresh in the background; create/edit/delete keep that cache in sync. First visit on a new device still needs a warm API. Tightened the keep-alive cron to every 5 minutes and ping GET `/blog` as well as `/actuator/health` (GitHub still will not schedule it until **Actions → Keep API awake → Run workflow** has run once on `main`).
+Public blog reads now use a `localStorage` stale-while-revalidate cache (`blogCache.js`). `/blog` and `/blog/:id` paint the last successful payload immediately, then refresh in the background; create/edit/delete keep that cache in sync. First visit on a new device still needs a warm API. GitHub Actions cron was too sparse to keep Render awake (hours between runs); that workflow was removed in favor of an external 5-minute health ping.
 
 ---
 

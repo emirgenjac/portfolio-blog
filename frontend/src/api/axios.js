@@ -1,11 +1,20 @@
 import axios from 'axios';
 
 // CRA embeds REACT_APP_* at build time. Local default keeps npm start working with no .env.
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+
 const API = axios.create({
-    baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8080',
+    baseURL: API_BASE_URL,
     withCredentials: true, // send/receive cookies (jwt + XSRF-TOKEN) cross-origin
     xsrfCookieName: 'XSRF-TOKEN',
     xsrfHeaderName: 'X-XSRF-TOKEN',
+});
+
+// Separate instance so GET /auth/csrf is not nested inside API interceptors
+// (that nesting was sending mutations first, getting 403, then retrying).
+const csrfClient = axios.create({
+    baseURL: API_BASE_URL,
+    withCredentials: true,
 });
 
 const SAFE_METHODS = new Set(['get', 'head', 'options', 'trace']);
@@ -17,19 +26,43 @@ function readCookie(name) {
 }
 
 // Cookie read works on localhost (same host, different ports). Cross-site Pages → Render
-// cannot read the API cookie from JS, so we also load the raw token from GET /auth/csrf.
+// cannot read the API cookie from JS, so we load the raw token from GET /auth/csrf.
 let csrfToken = null;
 let csrfHeaderName = 'X-XSRF-TOKEN';
 let csrfInflight = null;
 
 function applyCsrfHeader(headers, token) {
-    if (!token) {
+    if (!token || !headers) {
         return;
     }
-    headers['X-XSRF-TOKEN'] = token;
+    const names = ['X-XSRF-TOKEN'];
     if (csrfHeaderName && csrfHeaderName !== 'X-XSRF-TOKEN') {
-        headers[csrfHeaderName] = token;
+        names.push(csrfHeaderName);
     }
+    names.forEach((name) => {
+        if (typeof headers.set === 'function') {
+            headers.set(name, token);
+        } else {
+            headers[name] = token;
+        }
+    });
+}
+
+function fetchCsrfFromApi() {
+    if (!csrfInflight) {
+        csrfInflight = csrfClient.get('/auth/csrf')
+            .then(res => {
+                csrfToken = res.data?.token || null;
+                if (res.data?.headerName) {
+                    csrfHeaderName = res.data.headerName;
+                }
+                return csrfToken;
+            })
+            .finally(() => {
+                csrfInflight = null;
+            });
+    }
+    return csrfInflight;
 }
 
 async function resolveCsrfToken({ force = false } = {}) {
@@ -43,20 +76,12 @@ async function resolveCsrfToken({ force = false } = {}) {
             return csrfToken;
         }
     }
-    if (!csrfInflight) {
-        csrfInflight = API.get('/auth/csrf')
-            .then(res => {
-                csrfToken = res.data?.token || null;
-                if (res.data?.headerName) {
-                    csrfHeaderName = res.data.headerName;
-                }
-                return csrfToken;
-            })
-            .finally(() => {
-                csrfInflight = null;
-            });
-    }
-    return csrfInflight;
+    return fetchCsrfFromApi();
+}
+
+/** Warm the CSRF token so the first POST/PUT/DELETE is one round trip. */
+export function prefetchCsrf() {
+    return resolveCsrfToken();
 }
 
 API.interceptors.request.use(async config => {

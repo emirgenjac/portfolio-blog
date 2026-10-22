@@ -1,6 +1,6 @@
 import { createContext, useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import API from '../api/axios';
+import API, { prefetchCsrf } from '../api/axios';
 
 export const AuthContext = createContext();
 
@@ -23,6 +23,7 @@ export const AuthProvider = ({ children }) => {
 
         let cancelled = false;
         setLoading(true);
+        prefetchCsrf().catch(() => {});
 
         API.get("/auth/me")
             .then(res => {
