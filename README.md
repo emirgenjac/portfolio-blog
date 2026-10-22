@@ -2,22 +2,55 @@
 
 [![CI](https://github.com/emirgenjac/portfolio-blog/actions/workflows/ci.yml/badge.svg)](https://github.com/emirgenjac/portfolio-blog/actions/workflows/ci.yml)
 
-This is a project I decided to make to showcase my skills. For a long time now I have been learning React and, more recently, Spring Boot. This is a portfolio, with an added functionality of a blog. Users can view the blog posts I create and share them. Only I can create blog posts.
+**Live:** [portfolio-blog-b33.pages.dev](https://portfolio-blog-b33.pages.dev) · API: [portfolio-blog-it8m.onrender.com](https://portfolio-blog-it8m.onrender.com)
+
+This is a project I decided to make to showcase my skills. I have been learning React for a while, and more recently Spring Boot. It is a portfolio site with a blog: anyone can read and share posts, and only I can create or edit them.
+
+Writing everything down from the start mattered as much as the code. Documentation of the whole project is complete. The [development journal](docs/journal.md) has timestamped notes for every change since the first homepage (27.04.2025) — JWT, HttpOnly cookies, CSRF, Docker, deploy, CI/CD, the mistakes included.
 
 ---
 
-## TODO
+## Stack
 
-- [x] Migrate token from localStorage to HttpOnly (or something else)
-- [x] Global Exception Handling
-- [x] Update the DTOs to match the form fields
-- [x] Replace `alert()` / `confirm()` with a proper modal UI
-- [x] Dockerize
-- [x] Flyway migrations (schema no longer from Hibernate `ddl-auto=update`)
-- [x] Health endpoint (`/actuator/health`)
-- [x] Automated auth / validation tests (backend + frontend ProtectedRoute / Create link)
-- [x] GitHub Actions CI
-- [x] Deploy (Cloudflare Pages + Render + Supabase, $0)
+| | |
+|---|---|
+| Frontend | React 19, React Router 7, axios |
+| Backend | Spring Boot 3.4, Java 24, Spring Security, JWT |
+| Database | PostgreSQL, Flyway, Spring Data JPA |
+| Hosting | Cloudflare Pages, Render, Supabase ($0) |
+| CI/CD | GitHub Actions → deploy hooks after green `main` |
+
+---
+
+## How it fits together
+
+The React app is a static SPA. It talks to a Spring REST API:
+
+- `GET /blog`, `GET /blog/{id}` — public
+- `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`, `GET /auth/csrf` — public (login is rate-limited)
+- `POST/PUT/DELETE /blog/admin/**` — JWT required
+
+Business logic sits in services, not controllers. Requests use DTOs with Jakarta Validation. Errors go through `GlobalExceptionHandler` as a shared `ErrorResponse` JSON.
+
+Schema is Flyway (`V1__baseline_schema.sql`). Hibernate is `ddl-auto=validate` in dev and prod.
+
+---
+
+## Security
+
+The JWT used to live in `localStorage`. That was a bad default, so I moved it to an **HttpOnly** cookie. JavaScript never sees the token and it is not returned in the JSON body.
+
+The browser sends that cookie on its own, so CSRF had to come back on. Spring sets an `XSRF-TOKEN` cookie; the SPA sends it back as `X-XSRF-TOKEN` on POST/PUT/DELETE. Pages and Render are different sites, so the frontend cannot read that cookie with `document.cookie`. It loads the token from `GET /auth/csrf` instead (double-submit, not a session stored in JS).
+
+Cookies in prod: `Secure; SameSite=None` (cross-site). Locally: `SameSite=Lax` without `Secure`. CORS origins come from env. Login is limited to 5 attempts per IP per minute. Security headers are set on the API and on the SPA (`_headers`).
+
+---
+
+## CI / CD
+
+Push or PR to `main` runs backend tests (JUnit, H2) and frontend tests + production build in parallel. If both pass on `main`, Actions POSTs deploy hooks from the `production` GitHub Environment — Render for the API, Cloudflare Pages for the UI. Hook URLs are secrets, not in YAML. Host auto-deploy is off, so a red CI does not ship.
+
+The free Render JVM sleeps when idle. UptimeRobot pings `/actuator/health` every 5 minutes so the blog is less likely to cold-start on a first visit.
 
 ---
 
@@ -31,243 +64,45 @@ cp .env.example .env   # Windows: copy .env.example .env
 docker compose up --build
 ```
 
-| Service   | URL / port                          |
-|-----------|-------------------------------------|
-| Frontend  | http://localhost:3000               |
-| Backend   | http://localhost:8080               |
-| Postgres  | `localhost:5433` → container `5432` |
+| Service  | URL / port                          |
+|----------|-------------------------------------|
+| Frontend | http://localhost:3000               |
+| Backend  | http://localhost:8080               |
+| Postgres | `localhost:5433` → container `5432` |
 
-The first backend start applies Flyway migration `V1__baseline_schema.sql` (Hibernate uses `ddl-auto=validate` only). Seed an admin row yourself before logging in (empty DB has no users; password must be BCrypt-hashed). Stop with `Ctrl+C` or `docker compose down`.
+Flyway runs on first boot. The database has no admin user until you insert one (password must be BCrypt-hashed). Stop with `Ctrl+C` or `docker compose down`.
 
----
-
-### 22.10.2026.
-
-#### Time: 22:15
-On the live site, every login, logout, create and delete was doing a little dance in the Network tab: the request failed, then it fetched a CSRF token, then it sent the same request again and it worked. That retry was leftover from getting cookies to work across Pages and Render. I made the app grab the token first instead of waiting to fail, so those clicks are one request now. It was an interesting example of how a small detail can speed things up — those actions went from three round trips to one, about two thirds less waiting, roughly three times faster.
-
-GitHub Actions was supposed to ping the API every five minutes so Render wouldn't sleep, but the run history was closer to every few hours. I deleted that workflow and pointed UptimeRobot at `/actuator/health` instead.
+Without Docker: Postgres on `localhost:5432`, database `blog`, `JWT_SECRET` in the environment, `cd backend && ./mvnw spring-boot:run`, `cd frontend && npm start`.
 
 ---
 
-### 21.10.2026.
+## Environment
 
-#### Time: 18:40
-Public blog reads now use a `localStorage` stale-while-revalidate cache (`blogCache.js`). `/blog` and `/blog/:id` paint the last successful payload immediately, then refresh in the background; create/edit/delete keep that cache in sync. First visit on a new device still needs a warm API. GitHub Actions cron was too sparse to keep Render awake (hours between runs); that workflow was removed in favor of an external 5-minute health ping.
+Do not commit real values. See `.env.example`, `backend/.env.example`, `frontend/.env.example`.
 
----
-
-#### Time: 15:03
-Speed and recruiter SEO on the CRA app, still without a rewrite. Homepage no longer calls `/auth/me` (NavBar does not need a session there). Admin/login/blog routes are `React.lazy` chunks. Syne and Figtree are self-hosted `.woff2` files (Google Fonts `@import` gone; CSP `font-src 'self'`). Hero and site screenshots are WebP. Replaced the CRA default `<title>` / description with real copy, Open Graph, Twitter tags, canonical, Person JSON-LD, `sitemap.xml`, and per-route `document.title`. LinkedIn **post** previews still need HTML in the first response (Pages Function / SSR later).
-
----
-
-#### Time: 14:42
-`/blog` started as `posts = []` with no loading flag, so a sleeping Render looked like an empty list. Added `ApiLoading` (spinner, then a cold-start message after 8s) on Blog, PostDetail, and EditPost, plus an explicit empty state. Added GitHub Action `keep-api-awake.yml` to ping `/actuator/health` on a schedule so the free JVM sleeps less often.
-
----
-
-#### Time: 13:58
-Live Pages CSP was blocking Syne/Figtree (`style-src` / `font-src` had no Google Fonts). Allowed `fonts.googleapis.com` and `fonts.gstatic.com`. Superseded later the same day when fonts were self-hosted.
+| Variable | Where | Purpose |
+|----------|--------|---------|
+| `SPRING_DATASOURCE_URL` | API | JDBC URL |
+| `SPRING_DATASOURCE_USERNAME` / `PASSWORD` | API | DB login |
+| `JWT_SECRET` | API | Signing key (32+ chars) |
+| `SPRING_PROFILES_ACTIVE` | API | `prod` in production |
+| `APP_CORS_ALLOWED_ORIGINS` | API | Frontend origin, no trailing slash |
+| `REACT_APP_API_URL` | SPA build | API origin (baked in at `npm run build`) |
+| `REACT_APP_SITE_URL` | SPA build | Canonical / Open Graph origin |
 
 ---
 
-#### Time: 13:42
-Shipped the frontend to Cloudflare Pages (`portfolio-blog-b33.pages.dev`) against the Render API. Cross-origin login returned 403: the SPA cannot read Render's `XSRF-TOKEN` cookie via `document.cookie`. Added public `GET /auth/csrf` (plain token JSON, not XOR) and had axios send that value as `X-XSRF-TOKEN`, with a one-shot 403 retry. MockMvc `.with(csrf())` had polluted the shared CSRF filter in tests — isolated helper `TestCsrf.perform` instead.
-
----
-
-### 20.10.2026.
-
-#### Time: 21:04
-Added `frontend/public/_redirects` so Cloudflare Pages / Netlify rewrite unknown paths to `index.html`. Without it, a refresh or shared `/blog/:id` link is a host 404 instead of React Router.
-
----
-
-#### Time: 19:39
-Added missing image `alt` text on the portfolio and blog UI so the live pages are usable for screen readers and less empty for crawlers.
-
----
-
-#### Time: 19:15
-Set up GitHub Actions CI. On every push to `main` and every pull request, two jobs run in parallel on clean Ubuntu VMs: backend `./mvnw test` (Java 24, Maven cache) and frontend `npm ci` + `npm run test:ci` + `npm run build` (Node 22, npm cache). If either job fails, the workflow goes red. Added a CI status badge at the top of this README. Deploy/CD is still later — this step only verifies the code automatically.
-
----
-
-#### Time: 15:10
-After finishing the security work, especially the testing part, I finally learned what testing is actually all about: preventing broken behavior from staying broken unnoticed, and failing loudly so you cannot miss it. That ties straight into CI, which is the next step and something I have wanted to learn for a while. On the backend I used JUnit, H2, and Spring Test for unit and integration tests; on the frontend I added Jest / Testing Library smoke tests for ProtectedRoute and the Create link. I also verified the full stack by hand with Docker (login, create post, logout) — not automated E2E, but a real end-to-end check of the running app.
-
----
-
-#### Time: 14:50
-Added frontend smoke tests so the UX guards stay locked in: `ProtectedRoute` still redirects logged-out users away from create/edit, and the nav Create link only shows when authenticated on blog routes. Wired Testing Library for CRA + react-router v7 (`npm run test:ci`).
-
----
-
-#### Time: 14:30
-Added a small high-signal backend test suite on an H2 `test` profile: login success/fail, `/me` with and without the JWT cookie, admin CRUD without JWT returns 401, and invalid DTOs return the shared `ErrorResponse` JSON. Also set a 401 entry point for unauthenticated admin routes so missing JWT is not a 403.
-
----
-
-#### Time: 14:15
-Added a locked-down health check for deploy probes. Spring Actuator is on the classpath, but only `/actuator/health` is exposed, details are hidden, and the path is public in SecurityConfig so hosts like Render can ping it without auth.
-
----
-
-#### Time: 00:00
-Moved schema ownership off Hibernate. Added Flyway with a baseline migration for `admin` and `blog_post`, switched the `dev` profile to `ddl-auto=validate`, and confirmed it on a fresh Docker volume: Flyway applied V1, then login, create post, logout, and login again all worked after seeding a BCrypt admin.
-
----
-
-### 19.10.2026.
-
-#### Time: 22:45
-Dockerized the stack for local parity. Multi-stage `Dockerfile`s for the Spring backend (Maven → JRE 24) and the React frontend (npm build → nginx with SPA fallback), plus a root `docker-compose.yml` that wires Postgres, API, and the static UI. Compose uses host ports 3000 / 8080 / 5433 and env from `.env.example`.
-
----
-
-#### Time: 22:25
-Cleaned up login and error handling after the modal work. Softened `AdminLoginDTO` so empty password does not dump Spring's raw validation text into the UI, and `LoginForm` maps 400/401 to clearer messages. Raised `BlogPostDTO` cover image size so base64 uploads on edit no longer fail with 400. Hardened logout in `AuthContext` so a dead backend does not leave the UI hanging on a Network Error. Also tightened `GlobalExceptionHandler` / `ErrorResponse` so validation and unexpected failures keep a consistent JSON shape.
-
----
-
-#### Time: 22:05
-Replaced every browser `alert()` / `confirm()` with a reusable `AppModal` and `ModalContext` (`showAlert` / `showConfirm`). Login errors, create/edit feedback, ProtectedRoute notices, and logout confirmation all go through the same UI now. This was the last big UX debt item on the todo list before Docker and deploy.
-
----
-
-#### Time: 21:40
-Added Share on `PostDetail`: copy link to clipboard, plus open LinkedIn's share composer with the current post URL. Still need to verify both on a real HTTPS URL after deploy (localhost share previews are limited). Also dropped the leftover likes UI from the post meta and kept `createdAt` only.
-
----
-
-#### Time: 21:10
-Refreshed the portfolio content on Home. GitHub projects and Sites now lead with real work (FAZUOI catalog live site, Heronn, Emirdev / Webflow, Boldo) and I removed older practice cards (ChatApp, Lazor). Added preview assets for FAZUOI and Emirdev so the cards match what people actually see online.
-
----
-
-#### Time: 20:30
-Polish pass on the CSS redesign: title wrapping, killed the green logo hover, tighter nav/logout on small screens, iPhone-safe contact reachability and hero centering, and a shorter author bar on posts. Mostly layout and overflow fixes so the new look holds up on mobile.
-
----
-
-#### Time: 18:40
-Wired the login form to the new rate-limit response. Before, every failed login showed "Invalid credentials", even when the backend returned 429. Now 401 still means wrong password, and 429 shows a clear "too many attempts" message. Also added unit tests for the rate limiter, including a concurrent case so the per-IP limit cannot be bypassed by parallel requests. It was interesting to see how data structures such as a ConcurrentHashMap and a Deque could be used together to solve a problem.
-
----
-
-#### Time: 18:30
-Added login rate limiting on the backend. `LoginRateLimitService` tracks attempts per client IP in a rolling window (default 5 tries per 60 seconds) and returns 429 when someone spams `/auth/login`. This is an in-memory limiter for a single app instance, which is enough for now. I verified it in the browser and with the new tests.
-
----
-
-#### Time: 16:10
-Made CORS and the frontend API base URL configurable for hosting. The backend now reads allowed origins from config/env instead of hardcoding localhost, and I removed the duplicate `CorsConfig` so Spring Security is the single CORS source. On the frontend, axios uses `REACT_APP_API_URL` (with a localhost fallback). Local login still returns the expected CORS headers and sets the JWT cookie as before.
-
----
-
-#### Time: 15:55
-Turned CSRF protection back on for the cookie-based auth. The JWT cookie alone is not enough, because the browser sends it automatically. Now the backend also sets an `XSRF-TOKEN` cookie that the frontend reads and sends back as an `X-XSRF-TOKEN` header on POST/PUT/DELETE. That way a random site cannot forge admin requests even if it somehow tricks the browser into calling my API. Login, create, edit and delete still work after a refresh.
-
----
-
-#### Time: 15:35
-Hardened the JWT cookies for hosting. Login and logout now use `ResponseCookie` with explicit `SameSite` settings. In development it stays `SameSite=Lax` without `Secure` so localhost keeps working. In the production profile the cookie is `Secure` and `SameSite=None`, which is what you need when the frontend and API are on different HTTPS domains. I verified both with curl.
-
----
-
-#### Time: 15:28
-Small cleanup on the frontend API client: the axios request/response console logging only runs in development now, so production builds will not spam the browser console.
-
----
-
-#### Time: 11:47
-Updated the DTOs so they actually match what the forms send. `BlogPostDTO` now requires title, tagline, content, and cover image URL, with size limits on each field. `AdminLoginDTO` validates email and password the same way. Together with the global exception handler, bad input now comes back as clear 400 responses instead of failing in a random way.
-
----
-
-#### Time: 11:41
-Added global exception handling on the backend. Instead of every controller returning errors in its own way, there is now a `GlobalExceptionHandler` that catches things like validation failures, missing posts, bad request bodies, and unexpected errors, and returns a consistent `ErrorResponse` JSON. Controllers can still throw `ResponseStatusException` when something is wrong; the handler takes care of the response shape. This should make debugging and the frontend error handling a lot cleaner.
-
----
-
-#### Time: 11:15
-Got back to this project after a while. Today I cleaned up the backend config so it's ready for hosting later. I split `application.properties` into separate profiles for development and production, and moved local overrides into a gitignored `application-local.properties`. Sensitive values like the database password and JWT secret now come from environment variables. I also added a `.env.example` so I know which variables I need when I set things up again. Next I want to finish the remaining hosting prep and then finally deploy.
-
----
-
-### 20.05.2026.
-
-#### Time: 00:17
-I took on the first feature from the todo list. I migrated the unsafe localStorage-kept JWT token, to a HttpOnly cookie. This way, the JavaScript doesnt even see the token. The backend handles it fully, it is not included in the response. This is much safer and a better practice overall. I had to do a lot of code refactoring to delete the LS tokens and apply the cookies, but that's my own fault since I didn't do that from the start. Atleast I learned something.
-
----
-
-### 18.05.2026.
-
-#### Time: 23:25
-I protected admin routes on the frontend.
-
----
-
-#### Time: 23:07
-After a long break where I focused on other projects, I finally got back to this one. Today I redesigned most of the blog part and almost finished it. I need to redesign the home page too. After that I need to cover all the edge-cases and test the app. When I'm done with that only hosting will be left.
-
----
-
-### 06.11.2025.
-
-#### Time: 18:15
-Added JWT authentication and authorization. This was the hardest thing I ever did and it took a lot of time and debugging. Creating a token is complex, as well as comparing all the data and sending it back and forth. After this, most of the backend stuff is done. I need to apply the login context to the frontend next.
-
----
-
-### 03.11.2025.
-
-#### Time: 22:34
-I added an edit and delete button to the PostDetail page, which makes it available for each post. When the delete button is clicked, the user is prompted if they are sure, and then the post is deleted. When clicking the Edit button, the user is redirected to a new page where a form is displayed and the user can edit the post from there. After some thinking, I decided that having two separate forms for creating and editing was not a good decision, so I created a PostForm component which was used in both creating and editing posts, depending on the passed parameters. Now, I think most, if not all, functionalities are completed. The only thing left to do is admin authentication and authorization and hiding certain functions and endpoints from regular users.
-
----
-
-### 31.10.2025.
-
-#### Time: 21:57
-So, after a long break where I had to focus on some other stuff, I came back to this project. I got a new laptop, so I had to migrate everything to it. After that, I first adjusted the database, because I didn't like some things that I overlooked earlier. I removed the like function, as I didn't want to bind the like to each user, because I don't want users logging in. I revamped the UI to make it more modern, with a new color palette and some new UI elements. The biggest change was setting up the Blog page where all blog posts are displayed, as well as the individual page for each post. All of the CRUD functionalities are working correctly right now, so the next step will probably be to create a page through which the admin will be able to create posts. After that I will setup the authentication and authorization.
-
----
-
-### 05.05.2025.
-
-#### Time: 22:15
-I changed the RequestMapping from `/api` to `/blog` as it makes more sense and follows RESTful naming conventions.
-
----
-
-#### Time: 22:00
-I finished the endpoints, I also added the like counter which I previously forgot. First I had to manually insert the new column into the table.
-
-```sql
-ALTER TABLE blog_post ADD COLUMN likes INT NOT NULL DEFAULT 0;
+## Tests
+
+```bash
+cd backend && ./mvnw test
+cd frontend && npm run test:ci
 ```
 
-After that I had to update the BlogPost entity as well as the service. All that was left was to create a simple `/like` endpoint to update the given post. Now I will move on to the authentication.
+Backend: login success/fail, `/auth/me` with and without the JWT cookie, admin CRUD without JWT → 401, invalid DTOs → 400 `ErrorResponse`, login rate limit. Frontend: `ProtectedRoute` redirect, Create link only when authenticated.
 
 ---
 
-#### Time: 21:33
-So I realized that adding authentication so early was a huge mistake, but at least I learned something. I also learned that JWT is very hard to implement. I am temporarily removing the authentication, so I can ensure that the endpoint operations are working well and also have quality error handling.
+## Journal
 
----
-
-#### Time: 01:29
-Added JWT Authentication. It is the best option, given that I need to stay logged in for prolonged periods of time. Basic auth would not work, so session-based is the way.
-
----
-
-### 04.05.2025.
-I finished the entire home page. Everything is done and very smooth. I have to add responsiveness but I will do that for the whole app once I finish everything. Now I will move onto the backend, where I will create a REST API to handle all of the requests.
-
----
-
-### 27.04.2025.
-I started off by creating the home page in React. I created routing using react-router. I used many components, most notably the NavBar because it will be reused in other pages. Another interesting component is the animated Slider.
+[docs/journal.md](docs/journal.md) — full history of the project, dated and in order.
