@@ -1,10 +1,12 @@
-# CI = Continuous Integration
+# CI = Continuous Integration, plus API CD on green main.
 # On every push to main and every pull request, GitHub spins up clean Linux VMs
 # and re-runs our automated tests. If any job fails (exit code != 0), the check
 # goes red and you know something broke before (or right after) merge.
 #
-# CD (Continuous Delivery/Deployment) comes later in Phase 2 — that would deploy
-# on green main. This file is CI only: verify, don't ship.
+# On push to main only: after both test jobs pass, deploy jobs POST the
+# Render and Cloudflare Pages deploy hooks from the `production` Environment
+# (RENDER_DEPLOY_HOOK, CLOUDFLARE_PAGES_DEPLOY_HOOK). Turn off Git auto-deploy
+# on both hosts so only this workflow ships.
 
 name: CI
 
@@ -84,3 +86,29 @@ jobs:
         env:
           # CRA bakes this in at build time; a placeholder is enough for CI compile
           REACT_APP_API_URL: http://localhost:8080
+
+  # ---------------------------------------------------------------------------
+  # API CD: Render deploy hook (Environment secret). Skipped on pull requests.
+  # ---------------------------------------------------------------------------
+  deploy-api:
+    name: Deploy API
+    needs: [backend, frontend]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Trigger Render
+        run: curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
+
+  # ---------------------------------------------------------------------------
+  # Frontend CD: Cloudflare Pages deploy hook. Skipped on pull requests.
+  # ---------------------------------------------------------------------------
+  deploy-web:
+    name: Deploy frontend
+    needs: [backend, frontend]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Trigger Cloudflare Pages
+        run: curl -fsS -X POST "${{ secrets.CLOUDFLARE_PAGES_DEPLOY_HOOK }}"
