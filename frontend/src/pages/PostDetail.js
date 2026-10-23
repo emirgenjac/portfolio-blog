@@ -10,7 +10,7 @@ import { AuthContext } from '../context/AuthContext';
 import { useModal } from '../context/ModalContext';
 import ApiLoading from '../components/ApiLoading';
 import { useDocumentMeta } from '../seo/useDocumentMeta';
-import { DEFAULT_DESCRIPTION, pageTitle } from '../seo/site';
+import { absoluteUrl, DEFAULT_DESCRIPTION, pageTitle } from '../seo/site';
 import { readCachedPost, removeCachedPost, writeCachedPost } from '../api/blogCache';
 
 function PostDetail() {
@@ -79,6 +79,8 @@ function PostDetail() {
 
     const getPostUrl = () => window.location.href;
 
+    const getShareUrl = () => absoluteUrl(`/blog/${id}`);
+
     const handleCopyLink = async () => {
         const url = getPostUrl();
         try {
@@ -102,9 +104,10 @@ function PostDetail() {
     };
 
     const handleShareLinkedIn = () => {
-        const url = encodeURIComponent(getPostUrl());
+        const postUrl = getShareUrl();
+        const note = [post?.title, postUrl].filter(Boolean).join("\n\n");
         window.open(
-            `https://www.linkedin.com/sharing/share-offsite/?url=${url}`,
+            `https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(note)}`,
             "_blank",
             "noopener,noreferrer"
         );
