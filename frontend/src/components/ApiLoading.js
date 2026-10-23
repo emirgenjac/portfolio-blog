@@ -16,7 +16,7 @@ function ApiLoading({ title }) {
                 <div className="api-loading-spinner" aria-hidden="true" />
                 <p>
                     {slow
-                        ? "Still starting the server — free hosting can take up to a minute."
+                        ? "Still starting the server - free hosting can take up to a minute."
                         : "Loading…"}
                 </p>
             </div>

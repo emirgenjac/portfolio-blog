@@ -29,7 +29,7 @@ function EditPost() {
             .then(res => setPostData(res.data))
             .catch(err => {
                 console.error(err);
-                setLoadError("Could not load this post. The server may be waking up — wait a moment and refresh.");
+                setLoadError("Could not load this post. The server may be waking up - wait a moment and refresh.");
             });
     }, [id]);
 

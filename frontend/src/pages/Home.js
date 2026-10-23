@@ -25,7 +25,7 @@ import { DEFAULT_DESCRIPTION, DEFAULT_TITLE } from "../seo/site";
 const projects = [
     {
         title: "Digital Seized Assets Catalogue",
-        description: "FAZUOI needed a transparent public view of seized assets. Built backend infrastructure — secure data models and APIs — for the Federal Agency’s catalogue as a UN Tech4R volunteer; live on a .gov.ba domain.",
+        description: "FAZUOI needed a transparent public view of seized assets. Built backend infrastructure - secure data models and APIs - for the Federal Agency’s catalogue as a UN Tech4R volunteer; live on a .gov.ba domain.",
         link: "https://katalog.fazuoi.gov.ba/",
         language: "Java",
         color: "orange",
@@ -33,28 +33,28 @@ const projects = [
     },
     {
         title: "Heronn.ai",
-        description: "AI agents can run dangerous shell commands unsupervised. Built a local fail-closed policy daemon that blacklists risky commands, auto-allows safe ones, and parks the rest for human approval — with Cursor and Claude Code integration.",
+        description: "AI agents can run dangerous shell commands unsupervised. Built a local fail-closed policy daemon that blacklists risky commands, auto-allows safe ones, and parks the rest for human approval - with Cursor and Claude Code integration.",
         link: "https://github.com/emirgenjac/Heronn.ai",
         language: "TypeScript",
         color: "blue"
     },
     {
         title: "Portfolio & Blog",
-        description: "Needed a recruiter-ready full-stack showcase. Spring Boot + React app with HttpOnly JWT cookies, CSRF double-submit, rate-limited login, and hardened security headers — this site is the product.",
+        description: "Needed a recruiter-ready full-stack showcase. Spring Boot + React app with HttpOnly JWT cookies, CSRF double-submit, rate-limited login, and hardened security headers - this site is the product.",
         link: "https://github.com/emirgenjac/portfolio-blog",
         language: "JavaScript",
         color: "yellow"
     },
     {
         title: "SMARTBRAIN",
-        description: "Built a full-stack face-detection app: users register, upload an image, and an AI API returns face bounds — auth plus third-party AI in one flow.",
+        description: "Built a full-stack face-detection app: users register, upload an image, and an AI API returns face bounds - auth plus third-party AI in one flow.",
         link: "https://github.com/emirgenjac/SMARTBRAIN",
         language: "JavaScript",
         color: "yellow"
     },
     {
         title: "YOURPLACES",
-        description: "People lose track of places they’ve been. MERN app where users register and save visited spots — classic full-stack CRUD with real user accounts.",
+        description: "People lose track of places they’ve been. MERN app where users register and save visited spots - classic full-stack CRUD with real user accounts.",
         link: "https://github.com/emirgenjac/YOURPLACES",
         language: "JavaScript",
         color: "yellow"
@@ -118,7 +118,7 @@ function Home() {
                 <h1>Hello! I am</h1>
                 <h1>Emir Genjac</h1>
                 <div className="title-container">
-                    <p>Software Engineer</p>
+                    <p>Software Developer</p>
                     <div className="circle"></div>
                     <p>Full-Stack Developer</p>
                 </div>
@@ -139,17 +139,17 @@ function Home() {
                         <img src={HeroPhoto} className="hero-photo" alt="Emir Genjac" width={840} height={1050} fetchPriority="high" decoding="async"/>
                     </div>
                 </div>
+                <button
+                    type="button"
+                    className="mouse-icon-container"
+                    onClick={scrollToProjects}
+                    aria-label="Scroll to projects"
+                >
+                    <img src={MouseIcon} className="mouse-icon" alt=""/>
+                    <img src={DoubleArrow} className="double-arrow" alt=""/>
+                </button>
             </div>
         </div>
-
-        <section className="mouse-icon-section">
-
-            <div className="mouse-icon-container" onClick={scrollToProjects}>
-                <img src={MouseIcon} className="mouse-icon" alt={"Mouse Icon"}/>
-                <img src={DoubleArrow} className="double-arrow" alt={"Double Arrow"}/>
-            </div>
-
-        </section>
 
         <section className="gh-project-section" id="projects-section">
         <h1 className="projects-header">Projects</h1>

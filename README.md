@@ -6,7 +6,7 @@
 
 This is a project I decided to make to showcase my skills. I have been learning React for a while, and more recently Spring Boot. It is a portfolio site with a blog: anyone can read and share posts, and only I can create or edit them.
 
-Writing everything down from the start mattered as much as the code. Documentation of the whole project is complete. The [development journal](docs/journal.md) has timestamped notes for every change since the first homepage (27.04.2025) — JWT, HttpOnly cookies, CSRF, Docker, deploy, CI/CD, the mistakes included.
+Writing everything down from the start mattered as much as the code. Documentation of the whole project is complete. The [development journal](docs/journal.md) has timestamped notes for every change since the first homepage (27.04.2025) - JWT, HttpOnly cookies, CSRF, Docker, deploy, CI/CD, the mistakes included.
 
 ---
 
@@ -26,11 +26,11 @@ Writing everything down from the start mattered as much as the code. Documentati
 
 The React app is a static SPA. It talks to a Spring REST API:
 
-- `GET /blog`, `GET /blog/{id}` — public
-- `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`, `GET /auth/csrf` — public (login is rate-limited)
-- `POST/PUT/DELETE /blog/admin/**` — JWT required
+- `GET /blog`, `GET /blog/{id}` - public
+- `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`, `GET /auth/csrf` - public (login is rate-limited)
+- `POST/PUT/DELETE /blog/admin/**` - JWT required
 
-Business logic sits in services, not controllers. Requests use DTOs with Jakarta Validation. Errors go through `GlobalExceptionHandler` as a shared `ErrorResponse` JSON.
+Business logic sits in services, not controllers. Requests use DTOs with Jakarta Validation. Errors go through `GlobalExceptionHandler` as a shared `ErrorResponse` JSON. Create and update attach the post to the admin from the JWT (email in the cookie), not a hardcoded `id=1`. The display name on the post is still "Emir Genjac".
 
 Schema is Flyway (`V1__baseline_schema.sql`). Hibernate is `ddl-auto=validate` in dev and prod.
 
@@ -48,7 +48,7 @@ Cookies in prod: `Secure; SameSite=None` (cross-site). Locally: `SameSite=Lax` w
 
 ## CI / CD
 
-Push or PR to `main` runs backend tests (JUnit, H2) and frontend tests + production build in parallel. If both pass on `main`, Actions POSTs deploy hooks from the `production` GitHub Environment — Render for the API, Cloudflare Pages for the UI. Hook URLs are secrets, not in YAML. Host auto-deploy is off, so a red CI does not ship.
+Push or PR to `main` runs backend tests (JUnit, H2) and frontend tests + production build in parallel. If both pass on `main`, Actions POSTs deploy hooks from the `production` GitHub Environment - Render for the API, Cloudflare Pages for the UI. Hook URLs are secrets, not in YAML. Host auto-deploy is off, so a red CI does not ship.
 
 The free Render JVM sleeps when idle. UptimeRobot pings `/actuator/health` every 5 minutes so the blog is less likely to cold-start on a first visit.
 
@@ -105,4 +105,4 @@ Backend: login success/fail, `/auth/me` with and without the JWT cookie, admin C
 
 ## Journal
 
-[docs/journal.md](docs/journal.md) — full history of the project, dated and in order.
+[docs/journal.md](docs/journal.md) - full history of the project, dated and in order.

@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   # ---------------------------------------------------------------------------
-  # Backend: compile + JUnit (H2 test profile — no real Postgres needed)
+  # Backend: compile + JUnit (H2 test profile - no real Postgres needed)
   # ---------------------------------------------------------------------------
   backend:
     name: Backend tests

@@ -5,7 +5,7 @@ import ProtectedRoute from './ProtectedRoute';
 
 const mockShowAlert = jest.fn(() => Promise.resolve());
 
-// AuthContext imports axios (ESM); CRA Jest cannot parse it — stub the client.
+// AuthContext imports axios (ESM); CRA Jest cannot parse it - stub the client.
 jest.mock('../api/axios', () => ({
   __esModule: true,
   default: {

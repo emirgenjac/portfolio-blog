@@ -124,7 +124,7 @@ function PostDetail() {
             .catch(err => {
                 console.error(err);
                 if (!readCachedPost(id)) {
-                    setError('Could not fetch post. The server may be waking up — wait a moment and refresh.');
+                    setError('Could not fetch post. The server may be waking up - wait a moment and refresh.');
                 }
             });
     }, [id]);
@@ -154,7 +154,7 @@ function PostDetail() {
             <img src={post.coverImageUrl} alt={post.title || 'Cover'} className="post-cover-image" />
             <h1 className={"post-title"}>{post.title}</h1>
                 <hr className={"line"}/>
-            {/* React text children escape HTML — never use dangerouslySetInnerHTML for post body */}
+            {/* React text children escape HTML - never use dangerouslySetInnerHTML for post body */}
             <p className={"post-content"}>{post.content}</p>
                 {isAuthenticated && <div className={"actions"}>
                     <button id={"editBtn"} onClick={goToEdit}>EDIT</button>

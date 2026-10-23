@@ -38,7 +38,7 @@ public class SecurityConfig {
     /**
      * Comma-separated browser origins allowed to call the API with cookies.
      * Example: http://localhost:3000 or https://my-app.pages.dev,https://www.mydomain.com
-     * Never use "*" when allowCredentials is true — browsers will reject it.
+     * Never use "*" when allowCredentials is true - browsers will reject it.
      */
     @Value("${app.cors.allowed-origins:http://localhost:3000}")
     private String allowedOrigins;
@@ -80,7 +80,7 @@ public class SecurityConfig {
                             "Permissions-Policy",
                             "camera=(), microphone=(), geolocation=()"
                     ));
-                    // API returns JSON, not an HTML app — lock down document capabilities
+                    // API returns JSON, not an HTML app - lock down document capabilities
                     headers.contentSecurityPolicy(csp -> csp
                             .policyDirectives("default-src 'none'; frame-ancestors 'none'; base-uri 'none'")
                     );

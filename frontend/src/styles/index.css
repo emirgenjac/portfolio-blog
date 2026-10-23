@@ -70,7 +70,7 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Decorative grid only — never create a second scrollport */
+/* Decorative grid only - never create a second scrollport */
 body::before {
   content: "";
   position: fixed;
@@ -89,7 +89,7 @@ body::before {
   position: relative;
   z-index: 1;
   min-height: 100%;
-  /* do NOT set overflow here — it traps scroll on mobile / DevTools device mode */
+  /* do NOT set overflow here - it traps scroll on mobile / DevTools device mode */
 }
 
 h1, h2, h3, h4 {

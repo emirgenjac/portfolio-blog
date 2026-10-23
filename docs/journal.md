@@ -1,6 +1,13 @@
 ﻿# Development journal
 
-Timestamped notes from the first commit of this project (27.04.2025) through later work. I wrote these as I went — every meaningful change is in here. The project overview is in the [README](../README.md).
+Timestamped notes from the first commit of this project (27.04.2025) through later work. I wrote these as I went - every meaningful change is in here. The project overview is in the [README](../README.md).
+
+---
+
+### 23.10.2026.
+
+#### Time: 02:20
+Creating a post used to attach it to admin id=1 and ignore who actually logged in. The JWT already has the email, so create and update now look up that admin and hang the post off them. The name on the post is still "Emir Genjac". Added a test that plants another admin as the first row and checks the post still belongs to whoever holds the cookie.
 
 ---
 
@@ -12,12 +19,12 @@ Moved this journal out of the README and rewrote the README so someone looking a
 ---
 
 #### Time: 23:11
-Wired CD on top of CI. Render and Cloudflare no longer deploy on every git push by themselves. After tests pass on `main`, GitHub Actions POSTs deploy hooks from the `production` Environment — one for Render, one for Pages. The hook URLs stay in GitHub secrets, not in the YAML. Both jobs went green, the live site and login still work, and the repo overview now shows Deployments.
+Wired CD on top of CI. Render and Cloudflare no longer deploy on every git push by themselves. After tests pass on `main`, GitHub Actions POSTs deploy hooks from the `production` Environment - one for Render, one for Pages. The hook URLs stay in GitHub secrets, not in the YAML. Both jobs went green, the live site and login still work, and the repo overview now shows Deployments.
 
 ---
 
 #### Time: 22:15
-On the live site, every login, logout, create and delete was doing a little dance in the Network tab: the request failed, then it fetched a CSRF token, then it sent the same request again and it worked. That retry was leftover from getting cookies to work across Pages and Render. I made the app grab the token first instead of waiting to fail, so those clicks are one request now. It was an interesting example of how a small detail can speed things up — those actions went from three round trips to one, about two thirds less waiting, roughly three times faster.
+On the live site, every login, logout, create and delete was doing a little dance in the Network tab: the request failed, then it fetched a CSRF token, then it sent the same request again and it worked. That retry was leftover from getting cookies to work across Pages and Render. I made the app grab the token first instead of waiting to fail, so those clicks are one request now. It was an interesting example of how a small detail can speed things up - those actions went from three round trips to one, about two thirds less waiting, roughly three times faster.
 
 GitHub Actions was supposed to ping the API every five minutes so Render wouldn't sleep, but the run history was closer to every few hours. I deleted that workflow and pointed UptimeRobot at `/actuator/health` instead.
 
@@ -46,7 +53,7 @@ Live Pages CSP was blocking Syne/Figtree (`style-src` / `font-src` had no Google
 ---
 
 #### Time: 13:42
-Shipped the frontend to Cloudflare Pages (`portfolio-blog-b33.pages.dev`) against the Render API. Cross-origin login returned 403: the SPA cannot read Render's `XSRF-TOKEN` cookie via `document.cookie`. Added public `GET /auth/csrf` (plain token JSON, not XOR) and had axios send that value as `X-XSRF-TOKEN`, with a one-shot 403 retry. MockMvc `.with(csrf())` had polluted the shared CSRF filter in tests — isolated helper `TestCsrf.perform` instead.
+Shipped the frontend to Cloudflare Pages (`portfolio-blog-b33.pages.dev`) against the Render API. Cross-origin login returned 403: the SPA cannot read Render's `XSRF-TOKEN` cookie via `document.cookie`. Added public `GET /auth/csrf` (plain token JSON, not XOR) and had axios send that value as `X-XSRF-TOKEN`, with a one-shot 403 retry. MockMvc `.with(csrf())` had polluted the shared CSRF filter in tests - isolated helper `TestCsrf.perform` instead.
 
 ---
 
@@ -63,12 +70,12 @@ Added missing image `alt` text on the portfolio and blog UI so the live pages ar
 ---
 
 #### Time: 19:15
-Set up GitHub Actions CI. On every push to `main` and every pull request, two jobs run in parallel on clean Ubuntu VMs: backend `./mvnw test` (Java 24, Maven cache) and frontend `npm ci` + `npm run test:ci` + `npm run build` (Node 22, npm cache). If either job fails, the workflow goes red. Added a CI status badge at the top of this README. Deploy/CD is still later — this step only verifies the code automatically.
+Set up GitHub Actions CI. On every push to `main` and every pull request, two jobs run in parallel on clean Ubuntu VMs: backend `./mvnw test` (Java 24, Maven cache) and frontend `npm ci` + `npm run test:ci` + `npm run build` (Node 22, npm cache). If either job fails, the workflow goes red. Added a CI status badge at the top of this README. Deploy/CD is still later - this step only verifies the code automatically.
 
 ---
 
 #### Time: 15:10
-After finishing the security work, especially the testing part, I finally learned what testing is actually all about: preventing broken behavior from staying broken unnoticed, and failing loudly so you cannot miss it. That ties straight into CI, which is the next step and something I have wanted to learn for a while. On the backend I used JUnit, H2, and Spring Test for unit and integration tests; on the frontend I added Jest / Testing Library smoke tests for ProtectedRoute and the Create link. I also verified the full stack by hand with Docker (login, create post, logout) — not automated E2E, but a real end-to-end check of the running app.
+After finishing the security work, especially the testing part, I finally learned what testing is actually all about: preventing broken behavior from staying broken unnoticed, and failing loudly so you cannot miss it. That ties straight into CI, which is the next step and something I have wanted to learn for a while. On the backend I used JUnit, H2, and Spring Test for unit and integration tests; on the frontend I added Jest / Testing Library smoke tests for ProtectedRoute and the Create link. I also verified the full stack by hand with Docker (login, create post, logout) - not automated E2E, but a real end-to-end check of the running app.
 
 ---
 

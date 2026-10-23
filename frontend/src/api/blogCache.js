@@ -22,7 +22,7 @@ function write(key, data) {
     try {
         window.localStorage.setItem(key, JSON.stringify({ savedAt: Date.now(), data }));
     } catch {
-        // Quota / private mode — skip cache.
+        // Quota / private mode - skip cache.
     }
 }
 

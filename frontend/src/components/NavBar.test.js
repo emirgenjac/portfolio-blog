@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import NavBar from './NavBar';
@@ -52,4 +52,17 @@ test('hides Create link on home even when authenticated', () => {
   renderNavBar({ isAuthenticated: true, path: '/' });
 
   expect(screen.queryByRole('link', { name: 'Create' })).not.toBeInTheDocument();
+});
+
+test('toggles the phone menu from the hamburger button', () => {
+  renderNavBar({ isAuthenticated: false, path: '/' });
+
+  const toggle = screen.getByRole('button', { name: 'Open menu' });
+  expect(toggle).toHaveAttribute('aria-expanded', 'false');
+
+  fireEvent.click(toggle);
+
+  expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  expect(toggle).toHaveAttribute('aria-label', 'Close menu');
+  expect(screen.getByRole('button', { name: 'Dismiss menu' })).toBeInTheDocument();
 });

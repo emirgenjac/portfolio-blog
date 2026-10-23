@@ -31,7 +31,7 @@ const Blog = () => {
             .catch(err => {
                 console.error(err);
                 if (!readCachedPosts()) {
-                    setError('Could not fetch posts. The server may be waking up — wait a moment and refresh.');
+                    setError('Could not fetch posts. The server may be waking up - wait a moment and refresh.');
                 }
             })
             .finally(() => setLoading(false));
