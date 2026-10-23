@@ -1,7 +1,9 @@
 package com.emirgenjac.blog.controllers;
 
 import com.emirgenjac.blog.entity.Admin;
+import com.emirgenjac.blog.entity.BlogPost;
 import com.emirgenjac.blog.repository.AdminRepository;
+import com.emirgenjac.blog.repository.BlogPostRepository;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +15,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -43,6 +51,9 @@ class BlogPostAdminSecurityTest {
 
     @Autowired
     private AdminRepository adminRepository;
+
+    @Autowired
+    private BlogPostRepository blogPostRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -93,6 +104,35 @@ class BlogPostAdminSecurityTest {
                 .andExpect(jsonPath("$.error").value("Bad Request"))
                 .andExpect(jsonPath("$.message").value(containsString("required")))
                 .andExpect(jsonPath("$.path").value("/blog/admin/posts"));
+    }
+
+    @Test
+    @Transactional
+    void createPostAttachesJwtAdminNotTheFirstRow() throws Exception {
+        adminRepository.deleteAll();
+        blogPostRepository.deleteAll();
+
+        Admin decoy = new Admin();
+        decoy.setEmail("other@example.com");
+        decoy.setPassword(passwordEncoder.encode("not-used"));
+        adminRepository.save(decoy);
+
+        Admin loggedIn = new Admin();
+        loggedIn.setEmail(ADMIN_EMAIL);
+        loggedIn.setPassword(passwordEncoder.encode(ADMIN_PASSWORD));
+        adminRepository.save(loggedIn);
+
+        Cookie jwt = loginAndGetJwtCookie();
+        TestCsrf.perform(mockMvc, post("/blog/admin/posts")
+                        .cookie(jwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_POST_JSON))
+                .andExpect(status().isOk());
+
+        List<BlogPost> posts = blogPostRepository.findAll();
+        assertFalse(posts.isEmpty());
+        assertEquals(ADMIN_EMAIL, posts.get(0).getAdmin().getEmail());
+        assertEquals("Emir Genjac", posts.get(0).getAuthor());
     }
 
     private Cookie loginAndGetJwtCookie() throws Exception {
