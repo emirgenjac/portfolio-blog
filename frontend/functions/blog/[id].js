@@ -6,7 +6,7 @@
  * Humans still get the normal CRA index.html via context.next().
  */
 
-const SITE_URL = "https://portfolio-blog-b33.pages.dev";
+const SITE_URL = "https://emirgenjac.com";
 const API_URL = "https://portfolio-blog-it8m.onrender.com";
 const FALLBACK_IMAGE = `${SITE_URL}/og-image.jpg`;
 const SITE_NAME = "Emir Genjac";

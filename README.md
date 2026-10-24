@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/emirgenjac/portfolio-blog/actions/workflows/ci.yml/badge.svg)](https://github.com/emirgenjac/portfolio-blog/actions/workflows/ci.yml)
 
-**Live:** [portfolio-blog-b33.pages.dev](https://portfolio-blog-b33.pages.dev) · API: [portfolio-blog-it8m.onrender.com](https://portfolio-blog-it8m.onrender.com)
+**Live:** [emirgenjac.com](https://emirgenjac.com) · API: [portfolio-blog-it8m.onrender.com](https://portfolio-blog-it8m.onrender.com)
 
 This is a project I decided to make to showcase my skills. I have been learning React for a while, and more recently Spring Boot. It is a portfolio site with a blog: anyone can read and share posts, and only I can create or edit them.
 
@@ -19,6 +19,15 @@ Writing everything down from the start mattered as much as the code. Documentati
 | Database | PostgreSQL, Flyway, Spring Data JPA |
 | Hosting | Cloudflare Pages, Render, Supabase ($0) |
 | CI/CD | GitHub Actions → deploy hooks after green `main` |
+| Domain | [emirgenjac.com](https://emirgenjac.com) (Cloudflare Registrar) |
+
+---
+
+## Custom domain
+
+The SPA is on Cloudflare Pages at [emirgenjac.com](https://emirgenjac.com). The name is registered with Cloudflare Registrar and attached as a Pages custom domain (`CNAME` to `portfolio-blog-b33.pages.dev`, including `www`). A Cloudflare Redirect Rule sends `www.emirgenjac.com` → `https://emirgenjac.com` (301).
+
+The API stays on Render. `APP_CORS_ALLOWED_ORIGINS` includes `https://emirgenjac.com` (and the old `pages.dev` origin during cutover). Cookies stay `SameSite=None` because Pages and Render are still different sites. Canonical / Open Graph URLs use `REACT_APP_SITE_URL=https://emirgenjac.com` at build time.
 
 ---
 
@@ -86,9 +95,9 @@ Do not commit real values. See `.env.example`, `backend/.env.example`, `frontend
 | `SPRING_DATASOURCE_USERNAME` / `PASSWORD` | API | DB login |
 | `JWT_SECRET` | API | Signing key (32+ chars) |
 | `SPRING_PROFILES_ACTIVE` | API | `prod` in production |
-| `APP_CORS_ALLOWED_ORIGINS` | API | Frontend origin, no trailing slash |
+| `APP_CORS_ALLOWED_ORIGINS` | API | Frontend origin, no trailing slash (prod: `https://emirgenjac.com`) |
 | `REACT_APP_API_URL` | SPA build | API origin (baked in at `npm run build`) |
-| `REACT_APP_SITE_URL` | SPA build | Canonical / Open Graph origin |
+| `REACT_APP_SITE_URL` | SPA build | Canonical / Open Graph origin (prod: `https://emirgenjac.com`) |
 
 ---
 

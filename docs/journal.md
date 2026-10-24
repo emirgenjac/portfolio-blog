@@ -4,6 +4,17 @@ Timestamped notes from the first commit of this project (27.04.2025) through lat
 
 ---
 
+### 24.10.2026.
+
+#### Time: 09:52
+Bought `emirgenjac.com` on Cloudflare Registrar (one year, WHOIS redaction included) and attached it to the existing Pages project. Both the apex and `www` CNAME to `portfolio-blog-b33.pages.dev`. Apex looked dead in my browser at first while `www` worked - the DNS records were already right; Windows had cached NXDOMAIN from the minutes after registration. After a flush it loaded.
+
+A Cloudflare Redirect Rule (their www-to-apex template) 301s `www.emirgenjac.com` to `https://emirgenjac.com`. The API stays on Render. I added `https://emirgenjac.com` to `APP_CORS_ALLOWED_ORIGINS` (kept `pages.dev` during cutover) and left cookies at `SameSite=None` because Pages and Render are still different sites. Set `REACT_APP_SITE_URL=https://emirgenjac.com` on Pages and redeployed; login, posts, and the www redirect all work.
+
+README live link and a short Custom domain section now describe that setup. Canonical / OG fallbacks, `index.html`, `robots.txt`, `sitemap.xml`, and the Pages Function for blog share previews point at the `.com` instead of `pages.dev`. Did not put the API on `api.emirgenjac.com` yet.
+
+---
+
 ### 23.10.2026.
 
 #### Time: 02:20
