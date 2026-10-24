@@ -49,6 +49,10 @@ export async function onRequestGet(context) {
   html = upsertMeta(html, "property", "og:description", description);
   html = upsertMeta(html, "property", "og:url", pageUrl);
   html = upsertMeta(html, "property", "og:image", image);
+  if (String(image).includes("/og-image.jpg")) {
+    html = upsertMeta(html, "property", "og:image:width", "1200");
+    html = upsertMeta(html, "property", "og:image:height", "630");
+  }
   html = upsertMeta(html, "property", "og:image:alt", post?.title || SITE_NAME);
   html = upsertMeta(html, "name", "description", description);
   html = upsertMeta(html, "name", "twitter:card", "summary_large_image");

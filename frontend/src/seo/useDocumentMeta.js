@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { absoluteUrl, OG_IMAGE_PATH } from "./site";
+import { absoluteUrl, OG_IMAGE_HEIGHT, OG_IMAGE_PATH, OG_IMAGE_WIDTH } from "./site";
 
 function upsertMeta(attr, key, content) {
     if (!content) {
@@ -34,7 +34,8 @@ export function useDocumentMeta({
 }) {
     useEffect(() => {
         const url = absoluteUrl(path || "/");
-        const img = image ? absoluteUrl(image) : absoluteUrl(OG_IMAGE_PATH);
+        const usingDefaultImage = !image;
+        const img = usingDefaultImage ? absoluteUrl(OG_IMAGE_PATH) : absoluteUrl(image);
 
         document.title = title;
         upsertMeta("name", "description", description);
@@ -44,6 +45,10 @@ export function useDocumentMeta({
         upsertMeta("property", "og:url", url);
         upsertMeta("property", "og:type", type);
         upsertMeta("property", "og:image", img);
+        if (usingDefaultImage) {
+            upsertMeta("property", "og:image:width", OG_IMAGE_WIDTH);
+            upsertMeta("property", "og:image:height", OG_IMAGE_HEIGHT);
+        }
         upsertMeta("name", "twitter:title", title);
         upsertMeta("name", "twitter:description", description);
         upsertMeta("name", "twitter:image", img);
