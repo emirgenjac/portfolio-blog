@@ -1,6 +1,7 @@
 package com.emirgenjac.blog.controllers;
 
 import com.emirgenjac.blog.dto.BlogPostDTO;
+import com.emirgenjac.blog.dto.BlogPostResponseDTO;
 import com.emirgenjac.blog.entity.Admin;
 import com.emirgenjac.blog.entity.BlogPost;
 import com.emirgenjac.blog.repository.AdminRepository;
@@ -26,21 +27,19 @@ public class BlogPostController {
     private AdminRepository adminRepository;
 
     @GetMapping
-    public List<BlogPost> getAllPosts() {
-        return blogPostService.getAllPosts();
+    public List<BlogPostResponseDTO> getAllPosts() {
+        return blogPostService.getAllPosts().stream()
+                .map(BlogPostResponseDTO::from)
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public BlogPost getPostById(@PathVariable int id) {
-        BlogPost post = blogPostService.getPostById(id);
-        if (post == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, " Post not found");
-        }
-        return post;
+    public BlogPostResponseDTO getPostById(@PathVariable int id) {
+        return BlogPostResponseDTO.from(blogPostService.getPostById(id));
     }
 
     @PostMapping("/admin/posts")
-    public BlogPost createPost(
+    public BlogPostResponseDTO createPost(
             @jakarta.validation.Valid @RequestBody BlogPostDTO postDto,
             Authentication authentication) {
         Admin admin = requireAdmin(authentication);
@@ -51,22 +50,22 @@ public class BlogPostController {
         post.setCoverImageUrl(postDto.getCoverImageUrl());
         post.setAuthor(AUTHOR_DISPLAY_NAME);
         post.setAdmin(admin);
-        return blogPostService.createPost(post);
+        return BlogPostResponseDTO.from(blogPostService.createPost(post));
     }
 
     @PutMapping("/admin/posts/{id}")
-    public BlogPost updatePost(
+    public BlogPostResponseDTO updatePost(
             @PathVariable int id,
             @jakarta.validation.Valid @RequestBody BlogPostDTO postDto,
             Authentication authentication) {
         requireAdmin(authentication);
-        BlogPost post = getPostById(id);
+        BlogPost post = blogPostService.getPostById(id);
         post.setTitle(postDto.getTitle());
         post.setTagline(postDto.getTagline());
         post.setContent(postDto.getContent());
         post.setCoverImageUrl(postDto.getCoverImageUrl());
         post.setAuthor(AUTHOR_DISPLAY_NAME);
-        return blogPostService.updatePost(id, post);
+        return BlogPostResponseDTO.from(blogPostService.updatePost(id, post));
     }
 
     @DeleteMapping("/admin/posts/{id}")

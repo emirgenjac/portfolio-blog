@@ -34,8 +34,10 @@ public class BlogPostService {
         BlogPost post = blogPostRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
 
         post.setTitle(updatedPost.getTitle());
+        post.setTagline(updatedPost.getTagline());
         post.setContent(updatedPost.getContent());
         post.setCoverImageUrl(updatedPost.getCoverImageUrl());
+        post.setAuthor(updatedPost.getAuthor());
         return blogPostRepository.save(post);
     }
 

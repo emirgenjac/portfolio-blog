@@ -127,7 +127,11 @@ class BlogPostAdminSecurityTest {
                         .cookie(jwt)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(VALID_POST_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Test title"))
+                .andExpect(jsonPath("$.tagline").value("Test tagline"))
+                .andExpect(jsonPath("$.author").value("Emir Genjac"))
+                .andExpect(jsonPath("$.admin").doesNotExist());
 
         List<BlogPost> posts = blogPostRepository.findAll();
         assertFalse(posts.isEmpty());
