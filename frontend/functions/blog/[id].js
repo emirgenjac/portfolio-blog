@@ -8,7 +8,7 @@
 
 const SITE_URL = "https://emirgenjac.com";
 const API_URL = "https://portfolio-blog-it8m.onrender.com";
-const FALLBACK_IMAGE = `${SITE_URL}/og-image.jpg`;
+const FALLBACK_IMAGE = `${SITE_URL}/og-card.jpg`;
 const SITE_NAME = "Emir Genjac";
 
 const CRAWLER_UA =
@@ -49,7 +49,7 @@ export async function onRequestGet(context) {
   html = upsertMeta(html, "property", "og:description", description);
   html = upsertMeta(html, "property", "og:url", pageUrl);
   html = upsertMeta(html, "property", "og:image", image);
-  if (String(image).includes("/og-image.jpg")) {
+  if (String(image).includes("/og-card.jpg")) {
     html = upsertMeta(html, "property", "og:image:width", "1200");
     html = upsertMeta(html, "property", "og:image:height", "630");
   }
