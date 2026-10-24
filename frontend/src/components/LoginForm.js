@@ -33,7 +33,6 @@ function LoginForm() {
                     variant: "error",
                 });
             } else if (status === 401 || status === 400) {
-                // 400 can be DTO validation; never show Spring's raw object dump
                 await showAlert({
                     title: "Login failed",
                     message:

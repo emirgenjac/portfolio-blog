@@ -1,5 +1,3 @@
-# Static-host headers (Cloudflare Pages / Netlify copy this file into the build output).
-# Tighten connect-src to your real API origin when you deploy (replace the https: wildcard if you want).
 /*
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff

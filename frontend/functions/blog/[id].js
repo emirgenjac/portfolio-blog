@@ -1,10 +1,3 @@
-/**
- * Cloudflare Pages Function: give LinkedIn/Slack/etc. real Open Graph tags
- * for /blog/:id. The SPA only sets those tags in JavaScript, which crawlers
- * never run, so share previews were the homepage card (or nothing).
- *
- * Humans still get the normal CRA index.html via context.next().
- */
 
 const SITE_URL = "https://emirgenjac.com";
 const API_URL = "https://portfolio-blog-it8m.onrender.com";

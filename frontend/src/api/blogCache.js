@@ -22,7 +22,6 @@ function write(key, data) {
     try {
         window.localStorage.setItem(key, JSON.stringify({ savedAt: Date.now(), data }));
     } catch {
-        // Quota / private mode - skip cache.
     }
 }
 
@@ -72,7 +71,6 @@ export function removeCachedPost(id) {
     try {
         window.localStorage.removeItem(postKey(id));
     } catch {
-        // ignore
     }
     const list = readCachedPosts();
     if (!list) {

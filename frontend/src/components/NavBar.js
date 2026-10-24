@@ -51,7 +51,6 @@ function NavBar() {
 
         if (location.pathname !== "/") {
             navigate("/", { state: { scrollTo: sectionId } });
-            // Home mounts after navigation - give it a beat to paint
             setTimeout(run, 150);
         } else {
             run();

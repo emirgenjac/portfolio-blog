@@ -1,4 +1,1 @@
-# SPA fallback for Cloudflare Pages / Netlify.
-# React Router owns paths like /blog and /login; the host has no real files there.
-# Without this, a refresh or shared link returns 404. Rewrite every unmatched path to index.html.
 /*    /index.html   200

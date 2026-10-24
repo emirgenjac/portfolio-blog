@@ -272,7 +272,6 @@
 .svgs {
   max-width: 28px;
   max-height: 28px;
-  /* assets are white-filled - force ink color on the light author bar */
   filter: brightness(0) saturate(100%);
   opacity: 0.72;
   transition: opacity 0.2s var(--ease), transform 0.2s var(--ease);

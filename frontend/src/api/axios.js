@@ -1,17 +1,14 @@
 import axios from 'axios';
 
-// CRA embeds REACT_APP_* at build time. Local default keeps npm start working with no .env.
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
 const API = axios.create({
     baseURL: API_BASE_URL,
-    withCredentials: true, // send/receive cookies (jwt + XSRF-TOKEN) cross-origin
+    withCredentials: true,
     xsrfCookieName: 'XSRF-TOKEN',
     xsrfHeaderName: 'X-XSRF-TOKEN',
 });
 
-// Separate instance so GET /auth/csrf is not nested inside API interceptors
-// (that nesting was sending mutations first, getting 403, then retrying).
 const csrfClient = axios.create({
     baseURL: API_BASE_URL,
     withCredentials: true,
@@ -25,8 +22,6 @@ function readCookie(name) {
     return match ? decodeURIComponent(match[1]) : null;
 }
 
-// Cookie read works on localhost (same host, different ports). Cross-site Pages → Render
-// cannot read the API cookie from JS, so we load the raw token from GET /auth/csrf.
 let csrfToken = null;
 let csrfHeaderName = 'X-XSRF-TOKEN';
 let csrfInflight = null;
@@ -79,7 +74,6 @@ async function resolveCsrfToken({ force = false } = {}) {
     return fetchCsrfFromApi();
 }
 
-/** Warm the CSRF token so the first POST/PUT/DELETE is one round trip. */
 export function prefetchCsrf() {
     return resolveCsrfToken();
 }
@@ -114,7 +108,6 @@ API.interceptors.response.use(
 
 const isDev = process.env.NODE_ENV !== 'production';
 
-// Dev-only request/response logging (never in production builds)
 if (isDev) {
     const SENSITIVE_KEYS = ['password', 'token', 'jwt', 'accessToken', 'refreshToken', 'authorization', 'auth', 'xsrf'];
 
@@ -151,7 +144,6 @@ if (isDev) {
                 safeData ?? ''
             );
         } catch (e) {
-            // ignore logging errors
         }
         return request;
     });
@@ -168,7 +160,6 @@ if (isDev) {
                     safeData ?? ''
                 );
             } catch (e) {
-                // ignore logging errors
             }
             return response;
         },
@@ -194,17 +185,14 @@ if (isDev) {
                     console.error('[api] Request setup error:', error.message);
                 }
             } catch (e) {
-                // ignore logging errors
             }
             return Promise.reject(error);
         }
     );
 
     try {
-        // eslint-disable-next-line no-undef
         window.__API = API;
     } catch (e) {
-        // ignore (e.g. window not available in some test runners)
     }
 }
 

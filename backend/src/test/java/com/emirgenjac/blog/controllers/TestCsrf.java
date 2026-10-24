@@ -10,11 +10,6 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/**
- * Production CSRF path for MockMvc: GET /auth/csrf, then cookie + header.
- * Avoids {@code .with(csrf())}, which replaces the cookie repository with a session
- * store on the shared Spring Security filter for the rest of the test JVM.
- */
 final class TestCsrf {
 
     private TestCsrf() {

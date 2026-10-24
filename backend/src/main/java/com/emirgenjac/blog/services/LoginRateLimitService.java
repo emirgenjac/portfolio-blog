@@ -9,10 +9,6 @@ import java.util.Deque;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Simple in-memory rate limiter for login attempts (per client key, usually IP).
- * Fine for a single app instance; use edge/WAF or Redis if you scale to multiple instances.
- */
 @Service
 public class LoginRateLimitService {
 
@@ -27,9 +23,6 @@ public class LoginRateLimitService {
         this.windowSeconds = windowSeconds;
     }
 
-    /**
-     * @return true if this attempt is allowed; false if the client is over the limit
-     */
     public boolean allowAttempt(String clientKey) {
         if (clientKey == null || clientKey.isBlank()) {
             clientKey = "unknown";

@@ -131,10 +131,8 @@ function Home() {
 
             <div className="hero-right">
                 <div className="image-container">
-                    {/* Purple background box */}
                     <div className="image-box" id="under-box"></div>
 
-                    {/* Main image box */}
                     <div className="image-box">
                         <img src={HeroPhoto} className="hero-photo" alt="Emir Genjac" width={840} height={1050} fetchPriority="high" decoding="async"/>
                     </div>

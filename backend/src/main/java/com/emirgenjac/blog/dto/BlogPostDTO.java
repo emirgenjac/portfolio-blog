@@ -19,7 +19,6 @@ public class BlogPostDTO {
     private String content;
 
     @NotBlank(message = "Cover image URL is required")
-    // TEXT column: allow normal https URLs and existing data:image/...;base64 covers
     @Size(max = 5_242_880, message = "Cover image URL must be at most 5MB")
     private String coverImageUrl;
 }

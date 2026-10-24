@@ -13,7 +13,6 @@ public class AdminLoginDTO {
     private String email;
 
     @NotBlank(message = "Password is required")
-    // No min length on login - reject only empty/oversized payloads; auth decides match/fail
     @Size(max = 128, message = "Password is too long")
     private String password;
 }

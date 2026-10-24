@@ -35,11 +35,6 @@ public class SecurityConfig {
     @Value("${app.cookie.same-site:Lax}")
     private String cookieSameSite;
 
-    /**
-     * Comma-separated browser origins allowed to call the API with cookies.
-     * Example: http://localhost:3000 or https://my-app.pages.dev,https://www.mydomain.com
-     * Never use "*" when allowCredentials is true - browsers will reject it.
-     */
     @Value("${app.cors.allowed-origins:http://localhost:3000}")
     private String allowedOrigins;
 
@@ -57,17 +52,13 @@ public class SecurityConfig {
                         .requestMatchers("/blog/admin/**").authenticated()
                         .anyRequest().permitAll()
                 )
-                // Anonymous / missing JWT → 401 (not 403) so clients can tell "not logged in"
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .headers(headers -> {
-                    // Stop browsers from MIME-sniffing JSON/files into executable content
                     headers.contentTypeOptions(Customizer.withDefaults());
-                    // Disallow embedding this API in iframes (clickjacking)
                     headers.frameOptions(frame -> frame.deny());
-                    // HSTS is only sent on HTTPS requests (no effect on local HTTP)
                     headers.httpStrictTransportSecurity(hsts -> hsts
                             .includeSubDomains(true)
                             .maxAgeInSeconds(31536000)
@@ -75,12 +66,10 @@ public class SecurityConfig {
                     headers.referrerPolicy(referrer -> referrer
                             .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
                     );
-                    // Static writer avoids deprecated permissionsPolicy() DSL (removed path in newer Spring Security)
                     headers.addHeaderWriter(new StaticHeadersWriter(
                             "Permissions-Policy",
                             "camera=(), microphone=(), geolocation=()"
                     ));
-                    // API returns JSON, not an HTML app - lock down document capabilities
                     headers.contentSecurityPolicy(csp -> csp
                             .policyDirectives("default-src 'none'; frame-ancestors 'none'; base-uri 'none'")
                     );
@@ -92,10 +81,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-    /**
-     * Double-submit cookie CSRF: non-HttpOnly {@code XSRF-TOKEN} cookie readable by the SPA,
-     * sent back as {@code X-XSRF-TOKEN} on state-changing requests.
-     */
     @Bean
     public CookieCsrfTokenRepository csrfTokenRepository() {
         CookieCsrfTokenRepository repository = CookieCsrfTokenRepository.withHttpOnlyFalse();
@@ -123,7 +108,6 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(origins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
-        // Required so the browser will send/store cookies (jwt, XSRF-TOKEN) on cross-origin calls
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

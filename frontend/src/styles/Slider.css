@@ -13,7 +13,6 @@
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-tight);
-  /* isolate layout so the max-content track cannot widen the page */
   contain: inline-size;
 }
 

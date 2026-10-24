@@ -1,4 +1,3 @@
-# Build the CRA bundle, then serve with nginx (SPA-friendly).
 FROM node:20-alpine AS build
 WORKDIR /app
 
@@ -8,7 +7,6 @@ RUN npm ci
 COPY public ./public
 COPY src ./src
 
-# Browser calls the API on the host, not the Docker service name.
 ARG REACT_APP_API_URL=http://localhost:8080
 ENV REACT_APP_API_URL=$REACT_APP_API_URL
 

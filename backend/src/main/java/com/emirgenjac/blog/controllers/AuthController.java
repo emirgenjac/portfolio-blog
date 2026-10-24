@@ -72,11 +72,6 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
-    /**
-     * CSRF token for the SPA. JS on a different origin (Pages vs Render) cannot read
-     * the {@code XSRF-TOKEN} cookie via {@code document.cookie}, so it uses this JSON
-     * value as the {@code X-XSRF-TOKEN} header. Same value as the cookie.
-     */
     @GetMapping("/csrf")
     public CsrfTokenDTO csrf(CsrfToken csrfToken) {
         return new CsrfTokenDTO(csrfToken.getToken(), csrfToken.getHeaderName());
@@ -102,10 +97,6 @@ public class AuthController {
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
-    /**
-     * Prefer first X-Forwarded-For hop when behind a reverse proxy (Render, etc.);
-     * otherwise use the direct remote address.
-     */
     private String resolveClientKey(HttpServletRequest request) {
         String forwarded = request.getHeader("X-Forwarded-For");
         if (forwarded != null && !forwarded.isBlank()) {

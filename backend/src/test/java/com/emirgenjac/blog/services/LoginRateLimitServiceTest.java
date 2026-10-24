@@ -38,7 +38,6 @@ class LoginRateLimitServiceTest {
         }
         assertFalse(limiter.allowAttempt("198.51.100.1"));
 
-        // Another IP must still be allowed
         assertTrue(limiter.allowAttempt("198.51.100.2"));
     }
 
@@ -67,7 +66,7 @@ class LoginRateLimitServiceTest {
         pool.shutdown();
 
         for (Future<Boolean> future : futures) {
-            future.get(); // surface any unexpected exception
+            future.get();
         }
 
         assertEquals(maxAttempts, allowed.get(),

@@ -1,4 +1,3 @@
-# Multi-stage build: compile with Maven, run on a slim JRE.
 FROM maven:3.9.9-eclipse-temurin-24 AS build
 WORKDIR /app
 
@@ -6,7 +5,6 @@ COPY pom.xml mvnw ./
 COPY .mvn .mvn
 RUN chmod +x mvnw
 
-# Warm the dependency cache before copying sources (faster rebuilds)
 RUN ./mvnw -B -q dependency:resolve dependency:resolve-plugins
 
 COPY src ./src

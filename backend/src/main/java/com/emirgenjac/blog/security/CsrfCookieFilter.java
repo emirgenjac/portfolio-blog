@@ -9,10 +9,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-/**
- * Loads the deferred CSRF token so {@link org.springframework.security.web.csrf.CookieCsrfTokenRepository}
- * writes the {@code XSRF-TOKEN} cookie on GET as well as on mutations (Spring SPA pattern).
- */
 final class CsrfCookieFilter extends OncePerRequestFilter {
 
     @Override
