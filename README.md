@@ -25,9 +25,9 @@ Writing everything down from the start mattered as much as the code. Documentati
 
 ## Custom domain
 
-The SPA is on Cloudflare Pages at [emirgenjac.com](https://emirgenjac.com). The name is registered with Cloudflare Registrar and attached as a Pages custom domain (`CNAME` to `portfolio-blog-b33.pages.dev`, including `www`). A Cloudflare Redirect Rule sends `www.emirgenjac.com` → `https://emirgenjac.com` (301).
+The SPA is on Cloudflare Pages at [emirgenjac.com](https://emirgenjac.com). The name is registered with Cloudflare Registrar and attached as a Pages custom domain (`CNAME` to `portfolio-blog-b33.pages.dev`, including `www`). A Cloudflare Redirect Rule sends `www` to `https://emirgenjac.com` (301). The target must be **HTTPS apex** for both `http://www` and `https://www` — Instagram’s in-app browser often opens typed `www.` links as HTTP, and a rule that only rewrites `https://www.*` 301s HTTP www to itself (“too many redirects”).
 
-The API stays on Render. `APP_CORS_ALLOWED_ORIGINS` includes `https://emirgenjac.com` (and the old `pages.dev` origin during cutover). Cookies stay `SameSite=None` because Pages and Render are still different sites. Canonical / Open Graph URLs use `REACT_APP_SITE_URL=https://emirgenjac.com` at build time.
+The API stays on Render. `APP_CORS_ALLOWED_ORIGINS` includes `https://emirgenjac.com` (and the old `pages.dev` origin during cutover). Cookies stay `SameSite=None` because Pages and Render are still different sites. Canonical / Open Graph URLs use `REACT_APP_SITE_URL=https://emirgenjac.com` at build time. Homepage share cards use a 1200×630 `og-card.jpg` (new filename so crawlers do not keep a cached `og-image.jpg`).
 
 ---
 

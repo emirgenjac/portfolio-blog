@@ -16,7 +16,7 @@ public class BlogPostService {
 
     //GET /api/posts
     public List<BlogPost> getAllPosts() {
-        return blogPostRepository.findAll();
+        return blogPostRepository.findAllByOrderByCreatedAtDesc();
     }
 
     //GET /api/posts/{id}

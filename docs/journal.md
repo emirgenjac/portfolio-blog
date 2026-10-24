@@ -6,6 +6,13 @@ Timestamped notes from the first commit of this project (27.04.2025) through lat
 
 ### 24.10.2026.
 
+#### Time: 15:06
+Share preview is fixed. The old `og-image.jpg` was a tight vest crop, and LinkedIn kept showing it after we replaced the file because they cache by URL. New 1200×630 card from a full portrait lives at `/og-card.jpg`. Title/description on the card is `Emir Genjac · Software Developer` / a short Spring Boot + React line (JWT/CSRF jargon stayed in the README, not in iMessage). LinkedIn Post Inspector on `https://emirgenjac.com` shows the new photo.
+
+`https://www.emirgenjac.com` is a single 301 to the apex and works. `http://www.emirgenjac.com` 301s to itself — that is the Cloudflare www template: it matches hostname `www` but only rewrites `https://www.*`, so HTTP www (Instagram in-app browser when you type www without https) loops. Fix in the dashboard: send every www request to `concat("https://emirgenjac.com", http.request.uri)`, not `wildcard_replace(..., "https://www.*", ...)`.
+
+---
+
 #### Time: 09:52
 Bought `emirgenjac.com` on Cloudflare Registrar (one year, WHOIS redaction included) and attached it to the existing Pages project. Both the apex and `www` CNAME to `portfolio-blog-b33.pages.dev`. Apex looked dead in my browser at first while `www` worked - the DNS records were already right; Windows had cached NXDOMAIN from the minutes after registration. After a flush it loaded.
 

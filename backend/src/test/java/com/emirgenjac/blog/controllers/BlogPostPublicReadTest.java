@@ -11,6 +11,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -64,6 +66,27 @@ class BlogPostPublicReadTest {
                 .andExpect(jsonPath("$.id").value(saved.getId()))
                 .andExpect(jsonPath("$.title").value("Public title"))
                 .andExpect(jsonPath("$.admin").doesNotExist());
+    }
+
+    @Test
+    void getAllPostsReturnsNewestFirst() throws Exception {
+        BlogPost older = blogPostRepository.findById(saved.getId()).orElseThrow();
+        older.setCreatedAt(LocalDateTime.now().minusDays(1));
+        blogPostRepository.save(older);
+
+        BlogPost newer = new BlogPost();
+        newer.setTitle("Newer title");
+        newer.setTagline("Newer tagline");
+        newer.setContent("Newer content");
+        newer.setCoverImageUrl("https://example.com/newer.jpg");
+        newer.setAuthor("Emir Genjac");
+        newer = blogPostRepository.save(newer);
+
+        mockMvc.perform(get("/blog"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(newer.getId()))
+                .andExpect(jsonPath("$[0].title").value("Newer title"))
+                .andExpect(jsonPath("$[1].id").value(older.getId()));
     }
 
     @Test

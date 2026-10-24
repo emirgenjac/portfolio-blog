@@ -8,9 +8,13 @@ import { useDocumentMeta } from '../seo/useDocumentMeta';
 import { DEFAULT_DESCRIPTION, pageTitle } from '../seo/site';
 import { readCachedPosts, writeCachedPosts } from '../api/blogCache';
 
+function newestFirst(posts) {
+    return [...posts].sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+}
+
 const Blog = () => {
     const cachedPosts = readCachedPosts();
-    const [posts, setPosts] = useState(cachedPosts || []);
+    const [posts, setPosts] = useState(cachedPosts ? newestFirst(cachedPosts) : []);
     const [loading, setLoading] = useState(!cachedPosts);
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -23,7 +27,7 @@ const Blog = () => {
     useEffect(() => {
         API.get('/blog')
             .then(response => {
-                const next = Array.isArray(response.data) ? response.data : [];
+                const next = newestFirst(Array.isArray(response.data) ? response.data : []);
                 writeCachedPosts(next);
                 setPosts(next);
                 setError('');
