@@ -7,18 +7,18 @@ Timestamped notes from the first commit of this project (27.04.2025) through lat
 ### 24.10.2026.
 
 #### Time: 15:06
-Share preview is fixed. The old `og-image.jpg` was a tight vest crop, and LinkedIn kept showing it after we replaced the file because they cache by URL. New 1200×630 card from a full portrait lives at `/og-card.jpg`. Title/description on the card is `Emir Genjac · Software Developer` / a short Spring Boot + React line (JWT/CSRF jargon stayed in the README, not in iMessage). LinkedIn Post Inspector on `https://emirgenjac.com` shows the new photo.
+Share preview is fixed.
 
 `https://www.emirgenjac.com` is a single 301 to the apex and works. `http://www.emirgenjac.com` 301s to itself — that is the Cloudflare www template: it matches hostname `www` but only rewrites `https://www.*`, so HTTP www (Instagram in-app browser when you type www without https) loops. Fix in the dashboard: send every www request to `concat("https://emirgenjac.com", http.request.uri)`, not `wildcard_replace(..., "https://www.*", ...)`.
 
 ---
 
 #### Time: 09:52
-Bought `emirgenjac.com` on Cloudflare Registrar (one year, WHOIS redaction included) and attached it to the existing Pages project. Both the apex and `www` CNAME to `portfolio-blog-b33.pages.dev`. Apex looked dead in my browser at first while `www` worked - the DNS records were already right; Windows had cached NXDOMAIN from the minutes after registration. After a flush it loaded.
+Bought `emirgenjac.com` on Cloudflare Registrar and attached it to the existing Pages project. Both the apex and `www` CNAME to `portfolio-blog-b33.pages.dev`. Apex looked dead in my browser at first while `www` worked - the DNS records were already right; Windows had cached NXDOMAIN from the minutes after registration. After a flush it loaded.
 
-A Cloudflare Redirect Rule (their www-to-apex template) 301s `www.emirgenjac.com` to `https://emirgenjac.com`. The API stays on Render. I added `https://emirgenjac.com` to `APP_CORS_ALLOWED_ORIGINS` (kept `pages.dev` during cutover) and left cookies at `SameSite=None` because Pages and Render are still different sites. Set `REACT_APP_SITE_URL=https://emirgenjac.com` on Pages and redeployed; login, posts, and the www redirect all work.
+A Cloudflare Redirect Rule (their www-to-apex template) 301s `www.emirgenjac.com` to `https://emirgenjac.com`. The API stays on Render.
 
-README live link and a short Custom domain section now describe that setup. Canonical / OG fallbacks, `index.html`, `robots.txt`, `sitemap.xml`, and the Pages Function for blog share previews point at the `.com` instead of `pages.dev`. Did not put the API on `api.emirgenjac.com` yet.
+README live link and a short Custom domain section now describe that setup. Canonical / OG fallbacks, `index.html`, `robots.txt`, `sitemap.xml`, and the Pages Function for blog share previews point at the `.com` instead of `pages.dev`.
 
 ---
 
@@ -56,7 +56,7 @@ Public blog reads now use a `localStorage` stale-while-revalidate cache (`blogCa
 ---
 
 #### Time: 15:03
-Speed and recruiter SEO on the CRA app, still without a rewrite. Homepage no longer calls `/auth/me` (NavBar does not need a session there). Admin/login/blog routes are `React.lazy` chunks. Syne and Figtree are self-hosted `.woff2` files (Google Fonts `@import` gone; CSP `font-src 'self'`). Hero and site screenshots are WebP. Replaced the CRA default `<title>` / description with real copy, Open Graph, Twitter tags, canonical, Person JSON-LD, `sitemap.xml`, and per-route `document.title`. LinkedIn **post** previews still need HTML in the first response (Pages Function / SSR later).
+Homepage no longer calls `/auth/me` (NavBar does not need a session there). Admin/login/blog routes are `React.lazy` chunks. Syne and Figtree are self-hosted `.woff2` files (Google Fonts `@import` gone; CSP `font-src 'self'`). Hero and site screenshots are WebP. Replaced the CRA default `<title>` / description with real copy, Open Graph, Twitter tags, canonical, Person JSON-LD, `sitemap.xml`, and per-route `document.title`. LinkedIn **post** previews still need HTML in the first response (Pages Function / SSR later).
 
 ---
 
@@ -66,7 +66,7 @@ Speed and recruiter SEO on the CRA app, still without a rewrite. Homepage no lon
 ---
 
 #### Time: 13:58
-Live Pages CSP was blocking Syne/Figtree (`style-src` / `font-src` had no Google Fonts). Allowed `fonts.googleapis.com` and `fonts.gstatic.com`. Superseded later the same day when fonts were self-hosted.
+Allowed `fonts.googleapis.com` and `fonts.gstatic.com` because Pages was throwing an error. Removed the same day when fonts were self-hosted.
 
 ---
 
@@ -88,7 +88,7 @@ Added missing image `alt` text on the portfolio and blog UI so the live pages ar
 ---
 
 #### Time: 19:15
-Set up GitHub Actions CI. On every push to `main` and every pull request, two jobs run in parallel on clean Ubuntu VMs: backend `./mvnw test` (Java 24, Maven cache) and frontend `npm ci` + `npm run test:ci` + `npm run build` (Node 22, npm cache). If either job fails, the workflow goes red. Added a CI status badge at the top of this README. Deploy/CD is still later - this step only verifies the code automatically.
+Set up GitHub Actions CI. On every push to `main` and every pull request, two jobs run in parallel: backend `./mvnw test` (Java 24, Maven cache) and frontend `npm ci` + `npm run test:ci` + `npm run build` (Node 22, npm cache). If either job fails, the workflow goes red. Added a CI status badge at the top of this README. Deploy/CD is still later - this step only verifies the code automatically.
 
 ---
 
@@ -120,7 +120,7 @@ Moved schema ownership off Hibernate. Added Flyway with a baseline migration for
 ### 19.10.2026.
 
 #### Time: 22:45
-Dockerized the stack for local parity. Multi-stage `Dockerfile`s for the Spring backend (Maven â†’ JRE 24) and the React frontend (npm build â†’ nginx with SPA fallback), plus a root `docker-compose.yml` that wires Postgres, API, and the static UI. Compose uses host ports 3000 / 8080 / 5433 and env from `.env.example`.
+Dockerized the stack. Multi-stage `Dockerfile`s for the Spring backend and the React frontend, plus a root `docker-compose.yml` that wires Postgres, API, and the static UI. Compose uses host ports 3000 / 8080 / 5433 and env from `.env.example`.
 
 ---
 
@@ -145,7 +145,7 @@ Refreshed the portfolio content on Home. GitHub projects and Sites now lead with
 ---
 
 #### Time: 20:30
-Polish pass on the CSS redesign: title wrapping, killed the green logo hover, tighter nav/logout on small screens, iPhone-safe contact reachability and hero centering, and a shorter author bar on posts. Mostly layout and overflow fixes so the new look holds up on mobile.
+CSS redesign: title wrapping, killed the green logo hover, tighter nav/logout on small screens, iPhone-safe contact reachability and hero centering, and a shorter author bar on posts. Mostly layout and overflow fixes so the new look holds up on mobile.
 
 ---
 
@@ -197,7 +197,7 @@ Got back to this project after a while. Today I cleaned up the backend config so
 ### 20.05.2026.
 
 #### Time: 00:17
-I took on the first feature from the todo list. I migrated the unsafe localStorage-kept JWT token, to a HttpOnly cookie. This way, the JavaScript doesnt even see the token. The backend handles it fully, it is not included in the response. This is much safer and a better practice overall. I had to do a lot of code refactoring to delete the LS tokens and apply the cookies, but that's my own fault since I didn't do that from the start. Atleast I learned something.
+I created a todo list to keep track of everything I want done. I migrated the unsafe localStorage-kept JWT token, to a HttpOnly cookie. This way, the JavaScript doesnt even see the token. The backend handles it fully, it is not included in the response. This is much safer and a better practice overall. I had to do a lot of code refactoring to delete the LS tokens and apply the cookies, but that's my own fault since I didn't do that from the start. Atleast I learned something.
 
 ---
 
@@ -237,7 +237,7 @@ So, after a long break where I had to focus on some other stuff, I came back to 
 ### 05.05.2025.
 
 #### Time: 22:15
-I changed the RequestMapping from `/api` to `/blog` as it makes more sense and follows RESTful naming conventions.
+I changed the RequestMapping from `/api` to `/blog` as it makes more sense.
 
 ---
 
@@ -258,7 +258,7 @@ So I realized that adding authentication so early was a huge mistake, but at lea
 ---
 
 #### Time: 01:29
-Added JWT Authentication. It is the best option, given that I need to stay logged in for prolonged periods of time. Basic auth would not work, so session-based is the way.
+Added JWT Authentication. It is the best option, given that I need to stay logged in for prolonged periods of time.
 
 ---
 
