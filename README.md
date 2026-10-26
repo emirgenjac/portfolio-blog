@@ -2,11 +2,11 @@
 
 [![CI](https://github.com/emirgenjac/portfolio-blog/actions/workflows/ci.yml/badge.svg)](https://github.com/emirgenjac/portfolio-blog/actions/workflows/ci.yml)
 
-**Live:** [emirgenjac.com](https://emirgenjac.com) · API: [portfolio-blog-it8m.onrender.com](https://portfolio-blog-it8m.onrender.com)
+**Live:** [emirgenjac.com](https://emirgenjac.com)
 
-This is a project I decided to make to showcase my skills. I have been learning React for a while, and more recently Spring Boot. It is a portfolio site with a blog: anyone can read and share posts, and only I can create or edit them.
+This is a project I decided to make to showcase my skills. I have been learning React for a while, and more recently Spring Boot. It is a portfolio site with a blog: anyone can read and share posts, and only I can create or edit them. I started this project a year ago, and have been taking my time, because I wanted to implement a lot of stuff, and I was leraning how to do that along the way.
 
-Writing everything down from the start mattered as much as the code. Documentation of the whole project is complete. The [development journal](docs/journal.md) has timestamped notes for every change since the first homepage (27.04.2025) - JWT, HttpOnly cookies, CSRF, Docker, deploy, CI/CD, the mistakes included.
+I wanted to document the whole project from start to finish, to have a clear roadmap of how I did everything. The [development journal](docs/journal.md) has timestamped notes for every change since the first homepage (27.04.2025) - JWT, HttpOnly cookies, CSRF, Docker, deploy, CI/CD, and the mistakes included.
 
 ---
 
@@ -17,39 +17,37 @@ Writing everything down from the start mattered as much as the code. Documentati
 | Frontend | React 19, React Router 7, axios |
 | Backend | Spring Boot 3.4, Java 24, Spring Security, JWT |
 | Database | PostgreSQL, Flyway, Spring Data JPA |
-| Hosting | Cloudflare Pages, Render, Supabase ($0) |
-| CI/CD | GitHub Actions → deploy hooks after green `main` |
-| Domain | [emirgenjac.com](https://emirgenjac.com) (Cloudflare Registrar) |
+| Hosting | Cloudflare Pages, Render, Supabase |
+| CI/CD | GitHub Actions |
+| Domain | [emirgenjac.com](https://emirgenjac.com) (Cloudflare) |
 
 ---
 
 ## Custom domain
 
-The SPA is on Cloudflare Pages at [emirgenjac.com](https://emirgenjac.com). The name is registered with Cloudflare Registrar and attached as a Pages custom domain (`CNAME` to `portfolio-blog-b33.pages.dev`, including `www`). A Cloudflare Redirect Rule sends `www` to `https://emirgenjac.com` (301). The target must be **HTTPS apex** for both `http://www` and `https://www` — Instagram’s in-app browser often opens typed `www.` links as HTTP, and a rule that only rewrites `https://www.*` 301s HTTP www to itself (“too many redirects”).
-
-The API stays on Render. `APP_CORS_ALLOWED_ORIGINS` includes `https://emirgenjac.com` (and the old `pages.dev` origin during cutover). Cookies stay `SameSite=None` because Pages and Render are still different sites. Canonical / Open Graph URLs use `REACT_APP_SITE_URL=https://emirgenjac.com` at build time. Homepage share cards use a 1200×630 `og-card.jpg` (new filename so crawlers do not keep a cached `og-image.jpg`).
+The app is on Cloudflare Pages at [emirgenjac.com](https://emirgenjac.com). The name is registered with Cloudflare Registrar and attached as a Pages custom domain to the already existing pages project on Cloudflare. I added a Cloudflare Redirect Rule that redirects `www.emirgenjac.com` to `https://emirgenjac.com`. I came to this idea because i sent someone the URL through Instagram DM's, but got the error message "too many redirects". That happened because Instagram prepends www to the link.
 
 ---
 
 ## How it fits together
 
-The React app is a static SPA. It talks to a Spring REST API:
+The React app is a static Single Page Application. It talks to a Spring REST API:
 
 - `GET /blog`, `GET /blog/{id}` - public
 - `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`, `GET /auth/csrf` - public (login is rate-limited)
 - `POST/PUT/DELETE /blog/admin/**` - JWT required
 
-Business logic sits in services, not controllers. Requests use DTOs with Jakarta Validation. Errors go through `GlobalExceptionHandler` as a shared `ErrorResponse` JSON. Create and update attach the post to the admin from the JWT (email in the cookie), not a hardcoded `id=1`. The display name on the post is still "Emir Genjac".
+I used Layered architecture: Repository -> Service -> Controller. Requests use Data-Transfer-Objects with Jakarta Validation. Errors go through `GlobalExceptionHandler` as a shared `ErrorResponse` JSON.
 
-Schema is Flyway (`V1__baseline_schema.sql`). Hibernate is `ddl-auto=validate` in dev and prod.
+Schema is Flyway.
 
 ---
 
 ## Security
 
-The JWT used to live in `localStorage`. That was a bad default, so I moved it to an **HttpOnly** cookie. JavaScript never sees the token and it is not returned in the JSON body.
+The JWT used to live in `localStorage`. I was still learning what JWT is so I didn't know better. That was a bad decision, so I moved it to an **HttpOnly** cookie. JavaScript never sees the token and it is not returned in the JSON body.
 
-The browser sends that cookie on its own, so CSRF had to come back on. Spring sets an `XSRF-TOKEN` cookie; the SPA sends it back as `X-XSRF-TOKEN` on POST/PUT/DELETE. Pages and Render are different sites, so the frontend cannot read that cookie with `document.cookie`. It loads the token from `GET /auth/csrf` instead (double-submit, not a session stored in JS).
+The browser sends that cookie on its own, so CSRF had to be included. Spring sets an `XSRF-TOKEN` cookie; the SPA sends it back as `X-XSRF-TOKEN` on POST/PUT/DELETE. Pages and Render are different sites, so the frontend cannot read that cookie with `document.cookie`. It loads the token from `GET /auth/csrf` instead.
 
 Cookies in prod: `Secure; SameSite=None` (cross-site). Locally: `SameSite=Lax` without `Secure`. CORS origins come from env. Login is limited to 5 attempts per IP per minute. Security headers are set on the API and on the SPA (`_headers`).
 
@@ -57,9 +55,15 @@ Cookies in prod: `Secure; SameSite=None` (cross-site). Locally: `SameSite=Lax` w
 
 ## CI / CD
 
-Push or PR to `main` runs backend tests (JUnit, H2) and frontend tests + production build in parallel. If both pass on `main`, Actions POSTs deploy hooks from the `production` GitHub Environment - Render for the API, Cloudflare Pages for the UI. Hook URLs are secrets, not in YAML. Host auto-deploy is off, so a red CI does not ship.
+This was an important step for me. I have been creating projects for a long time, but I always had problems with hosting and deployment. I finally learned how to do it, and also implement Continuous Integration and Continuous Deployment.
 
-The free Render JVM sleeps when idle. UptimeRobot pings `/actuator/health` every 5 minutes so the blog is less likely to cold-start on a first visit.
+Push or PR to `main` runs backend tests (JUnit, H2) and frontend tests + production build in parallel. If both pass on `main`, GitHub Actions POSTs deploy hooks from the `production` GitHub Environment - Render for the API, Cloudflare Pages for the UI. Hook URLs are secrets. Host auto-deploy is off, so a red CI does not ship, which is very important, and the reason I implemented a lot of tests. If even one fails, the deployment is stopped.
+
+---
+
+## UptimeRobot
+
+I had a big problem with Render. Since it is the free tier, after 15 minutes of inactivity, it goes to sleep. When the next request comes in, it takes around 2-3 minutes to wake up. Nobody is going to wait for 3 minutes to see some blog posts. The solution to this was creating an UptimeRobot service, which I set up to ping the /actuator/health endpoint every 5 minutes. This resulted in Render never falling asleep.
 
 ---
 
@@ -87,21 +91,23 @@ Without Docker: Postgres on `localhost:5432`, database `blog`, `JWT_SECRET` in t
 
 ## Environment
 
-Do not commit real values. See `.env.example`, `backend/.env.example`, `frontend/.env.example`.
+Keeping environment variables safe was very important, since there were so many.
 
 | Variable | Where | Purpose |
 |----------|--------|---------|
 | `SPRING_DATASOURCE_URL` | API | JDBC URL |
 | `SPRING_DATASOURCE_USERNAME` / `PASSWORD` | API | DB login |
-| `JWT_SECRET` | API | Signing key (32+ chars) |
+| `JWT_SECRET` | API | Signing key |
 | `SPRING_PROFILES_ACTIVE` | API | `prod` in production |
-| `APP_CORS_ALLOWED_ORIGINS` | API | Frontend origin, no trailing slash (prod: `https://emirgenjac.com`) |
-| `REACT_APP_API_URL` | SPA build | API origin (baked in at `npm run build`) |
-| `REACT_APP_SITE_URL` | SPA build | Canonical / Open Graph origin (prod: `https://emirgenjac.com`) |
+| `APP_CORS_ALLOWED_ORIGINS` | API | Frontend origin |
+| `REACT_APP_API_URL` | SPA build | API origin  |
+| `REACT_APP_SITE_URL` | SPA build | Canonical / Open Graph origin |
 
 ---
 
 ## Tests
+
+Testing is very important, and I have started to learn more and more about it recently. 
 
 ```bash
 cd backend && ./mvnw test
@@ -114,4 +120,4 @@ Backend: login success/fail, `/auth/me` with and without the JWT cookie, admin C
 
 ## Journal
 
-[docs/journal.md](docs/journal.md) - full history of the project, dated and in order.
+[docs/journal.md](docs/journal.md) - This is where I was keeping track of every change in the app, since the beginning.
