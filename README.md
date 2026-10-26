@@ -109,12 +109,48 @@ Keeping environment variables safe was very important, since there were so many.
 
 Testing is very important, and I have started to learn more and more about it recently. 
 
+### Backend Tests
+
+#### Used
+JUnit 5, Spring Boot Test, MockMvc, spring-security-test, H2, JsonPath / Hamcrest, JJWT.
+
+#### Tests
+AuthApiIntegrationTest - Integration - Tests authentication, login and logout flow functionality with JWT and CSRF.
+
+BlogPostAdminSecurityTest - Integration - Tests authorization and access to admin features.
+
+BlogPostPublicReadTest - Integration - Reading the blog stays public and does not leak the admin data.
+
+LoginRateLimitServiceTest - Unit - Tests protection from login abuse and too many requests.
+
+JwtUtilTest - Unit - Tests whether the token is valid, expired, tampered with or the wrong key.
+
+ActuatorHealthTest - Integration - Tests that health is public and does not leak details. Important because it is being hit by UptimeRobot.
+
+### Frontend Tests
+
+#### Used 
+Jest, React Testing Library, MemoryRouter, jest.mock
+
+#### Tests
+ProtectedRoute.test.js - Component - Tests if admin pages stay locked.
+
+AuthContext.test.js - Component - Tests if auth is being requested only where actually needed.
+
+LoginForm.test.js - Component - Tests if entering a wrong password results in a different status code than being rate-limited. (401 vs 429).
+
+axios.test.js - Unit - Tests correct handling of CSRF header on requests.
+
+Navbar.test.js - Component - Tests UI depending on logged in or out.
+
+PostDetail.test.js - Component - Ensures that destructive action is confirmed first.
+
+### Run Tests
+
 ```bash
 cd backend && ./mvnw test
 cd frontend && npm run test:ci
 ```
-
-Backend: login success/fail, `/auth/me` with and without the JWT cookie, admin CRUD without JWT → 401, invalid DTOs → 400 `ErrorResponse`, login rate limit. Frontend: `ProtectedRoute` redirect, Create link only when authenticated.
 
 ---
 
