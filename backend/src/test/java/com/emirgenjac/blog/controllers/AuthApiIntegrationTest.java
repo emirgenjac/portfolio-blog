@@ -94,6 +94,34 @@ class AuthApiIntegrationTest {
     }
 
     @Test
+    void logoutClearsJwtCookieThenMeReturns401() throws Exception {
+        MvcResult login = TestCsrf.perform(mockMvc, post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"%s","password":"%s"}
+                                """.formatted(ADMIN_EMAIL, ADMIN_PASSWORD)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String jwt = login.getResponse().getCookie("jwt").getValue();
+
+        mockMvc.perform(get("/auth/me").cookie(new jakarta.servlet.http.Cookie("jwt", jwt)))
+                .andExpect(status().isOk());
+
+        TestCsrf.perform(mockMvc, post("/auth/logout")
+                        .cookie(new jakarta.servlet.http.Cookie("jwt", jwt)))
+                .andExpect(status().isOk())
+                .andExpect(cookie().exists("jwt"))
+                .andExpect(cookie().value("jwt", ""))
+                .andExpect(cookie().maxAge("jwt", 0));
+
+        mockMvc.perform(get("/auth/me"))
+                .andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/auth/me").cookie(new jakarta.servlet.http.Cookie("jwt", "")))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void csrfEndpointReturnsTokenAndCookie() throws Exception {
         mockMvc.perform(get("/auth/csrf"))
                 .andExpect(status().isOk())

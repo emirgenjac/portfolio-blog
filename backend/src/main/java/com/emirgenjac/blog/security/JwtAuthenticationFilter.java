@@ -39,7 +39,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         }
 
-        if (token != null && jwtService.validateToken(token)) {
+        if (token != null && !token.isBlank() && jwtService.validateToken(token)) {
             email = jwtService.extractEmail(token);
         }
 
