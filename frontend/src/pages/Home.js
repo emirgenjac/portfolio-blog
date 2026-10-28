@@ -126,7 +126,16 @@ function Home() {
                 <p className="p-information">
                     Software Developer with a genuine love for building and understanding software on a deeper level.
                 </p>
-                <Link to="/blog" className="cta">Check out my blog</Link>
+                <div className="cta-row">
+                    <Link to="/blog" className="cta">Check out my blog</Link>
+                    <a
+                        className="cta cta--secondary"
+                        href="/Emir_Genjac_Resume.pdf"
+                        download="Emir_Genjac_Resume.pdf"
+                    >
+                        Download CV
+                    </a>
+                </div>
             </div>
 
             <div className="hero-right">

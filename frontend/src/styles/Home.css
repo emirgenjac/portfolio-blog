@@ -94,6 +94,14 @@
 .purple { background-color: #0f766e; }
 .yellow { background-color: #eab308; }
 
+.cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.85rem 1rem;
+  margin-top: 2rem;
+}
+
 .cta {
   display: inline-flex;
   justify-content: center;
@@ -101,7 +109,7 @@
   width: fit-content;
   min-width: 168px;
   height: 3.1rem;
-  margin-top: 2rem;
+  margin-top: 0;
   padding: 0 1.5rem;
   background: var(--ink);
   color: var(--surface);
@@ -144,6 +152,18 @@
 .cta:active {
   transform: translate(1px, 1px);
   box-shadow: 2px 2px 0 var(--signal);
+}
+
+.cta--secondary {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+.cta--secondary:hover {
+  background: var(--signal);
+  border-color: var(--signal);
+  color: var(--signal-ink);
 }
 
 .hero-right {
@@ -652,6 +672,10 @@
   .hero-container {
     padding-top: 1.25rem;
     gap: 1.75rem;
+  }
+
+  .cta-row {
+    width: 100%;
   }
 
   .cta {
