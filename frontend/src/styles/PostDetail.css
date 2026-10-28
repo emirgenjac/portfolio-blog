@@ -231,7 +231,7 @@
 .share-btn--open {
   background: var(--ink);
   border-color: var(--ink);
-  color: #fff;
+  color: var(--surface);
 }
 
 .share-dropdown {
@@ -281,6 +281,14 @@
   cursor: pointer;
   opacity: 1;
   transform: translateY(-2px);
+}
+
+[data-theme="dark"] .back-btn img {
+  filter: none;
+}
+
+[data-theme="dark"] .svgs {
+  filter: brightness(0) invert(1);
 }
 
 @media (max-width: 640px) {

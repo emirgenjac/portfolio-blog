@@ -236,6 +236,15 @@
   animation-play-state: paused;
 }
 
+[data-theme="dark"] .mouse-icon,
+[data-theme="dark"] .double-arrow {
+  filter: invert(1);
+}
+
+[data-theme="dark"] .site-box {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
 @keyframes bob-arrow {
   0%, 100% { transform: rotate(-180deg) translateY(0); }
   50% { transform: rotate(-180deg) translateY(6px); }
@@ -300,7 +309,7 @@
 }
 
 .site-box {
-  background: var(--ink);
+  background: var(--inverse);
   border-radius: var(--radius-lg);
   overflow: hidden;
   border: 1px solid transparent;
@@ -378,7 +387,7 @@
 
 .site-info {
   flex: 1;
-  color: #f4f6f8;
+  color: var(--inverse-fg);
 }
 
 .site-title {
@@ -484,7 +493,7 @@
   max-width: none;
   padding: 2.25rem 1.75rem 2.25rem;
   box-sizing: border-box;
-  background: var(--ink);
+  background: var(--inverse);
   border-radius: var(--radius-lg);
   border: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: var(--shadow);

@@ -78,6 +78,10 @@
   opacity: 0.85;
 }
 
+[data-theme="dark"] .visit-gh-project img:not(.visit-live-icon) {
+  filter: invert(1);
+}
+
 .project-card__title {
   color: var(--ink);
   font-family: var(--font-display);

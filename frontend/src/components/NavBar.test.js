@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import { ThemeProvider } from '../context/ThemeContext';
 import NavBar from './NavBar';
 
 jest.mock('../api/axios', () => ({
@@ -26,9 +27,11 @@ jest.mock('../context/ModalContext', () => ({
 function renderNavBar({ isAuthenticated, loading = false, path = '/blog' }) {
   return render(
     <AuthContext.Provider value={{ isAuthenticated, loading, login: jest.fn(), logout: jest.fn() }}>
-      <MemoryRouter initialEntries={[path]}>
-        <NavBar />
-      </MemoryRouter>
+      <ThemeProvider>
+        <MemoryRouter initialEntries={[path]}>
+          <NavBar />
+        </MemoryRouter>
+      </ThemeProvider>
     </AuthContext.Provider>
   );
 }
@@ -65,4 +68,18 @@ test('toggles the phone menu from the hamburger button', () => {
   expect(toggle).toHaveAttribute('aria-expanded', 'true');
   expect(toggle).toHaveAttribute('aria-label', 'Close menu');
   expect(screen.getByRole('button', { name: 'Dismiss menu' })).toBeInTheDocument();
+});
+
+test('theme switch is compact and toggles dark mode', () => {
+  renderNavBar({ isAuthenticated: false, path: '/' });
+
+  const themeSwitch = screen.getByRole('switch', { name: 'Switch to dark mode' });
+  expect(themeSwitch).toHaveAttribute('aria-checked', 'false');
+  expect(document.documentElement.dataset.theme).toBe('light');
+
+  fireEvent.click(themeSwitch);
+
+  expect(screen.getByRole('switch', { name: 'Switch to light mode' })).toHaveAttribute('aria-checked', 'true');
+  expect(document.documentElement.dataset.theme).toBe('dark');
+  expect(window.localStorage.getItem('theme')).toBe('dark');
 });

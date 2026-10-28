@@ -9,7 +9,7 @@
   padding: 0.85rem 1.25rem;
   display: flex;
   align-items: center;
-  background: rgba(251, 252, 253, 0.78);
+  background: var(--nav-bg);
   backdrop-filter: blur(14px) saturate(1.2);
   -webkit-backdrop-filter: blur(14px) saturate(1.2);
   border-bottom: 1px solid var(--line);
@@ -33,6 +33,7 @@
 
 .navbar-toggle {
   display: none;
+  order: 3;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -84,6 +85,7 @@
 }
 
 .navbar-logo {
+  order: 0;
   margin: 0;
   font-size: clamp(1.2rem, 2.2vw, 1.7rem);
   font-family: var(--font-display);
@@ -128,6 +130,88 @@
   justify-content: flex-end;
   gap: 0.35rem 1.25rem;
   min-width: 0;
+  order: 1;
+  margin-left: auto;
+}
+
+.theme-switch {
+  order: 2;
+  flex-shrink: 0;
+  align-self: center;
+  width: 36px;
+  height: 20px;
+  margin: 0;
+  padding: 2px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface-raised);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-flex;
+  align-items: center;
+  transition: background 0.22s var(--ease), border-color 0.22s var(--ease);
+}
+
+.theme-switch:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+}
+
+.theme-switch__thumb {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--ink);
+  transform: translateX(0);
+  box-shadow: 0 1px 2px rgba(18, 21, 28, 0.2);
+  overflow: hidden;
+  transition: transform 0.22s var(--ease), background 0.22s var(--ease);
+}
+
+.theme-switch__icon {
+  grid-area: 1 / 1;
+  width: 10px;
+  height: 10px;
+  display: block;
+  pointer-events: none;
+}
+
+.theme-switch__sun {
+  color: var(--signal);
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+  transition: opacity 0.22s var(--ease), transform 0.22s var(--ease);
+}
+
+.theme-switch__moon {
+  color: var(--signal-ink);
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.35);
+  transition: opacity 0.22s var(--ease), transform 0.22s var(--ease);
+}
+
+.theme-switch.is-dark {
+  background: var(--inverse);
+  border-color: var(--signal);
+}
+
+.theme-switch.is-dark .theme-switch__thumb {
+  background: var(--signal);
+  transform: translateX(16px);
+}
+
+.theme-switch.is-dark .theme-switch__sun {
+  opacity: 0;
+  transform: rotate(90deg) scale(0.35);
+}
+
+.theme-switch.is-dark .theme-switch__moon {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
 }
 
 a.navbar-link,
@@ -205,6 +289,12 @@ button.navbar-link:hover::after {
     white-space: nowrap;
   }
 
+  .theme-switch {
+    order: 0;
+    position: relative;
+    z-index: 2;
+  }
+
   .navbar-toggle {
     display: inline-flex;
     margin-left: auto;
@@ -226,6 +316,8 @@ button.navbar-link:hover::after {
   }
 
   .navbar-links {
+    order: 4;
+    margin-left: 0;
     position: absolute;
     top: calc(100% + 0.7rem);
     left: 0;
