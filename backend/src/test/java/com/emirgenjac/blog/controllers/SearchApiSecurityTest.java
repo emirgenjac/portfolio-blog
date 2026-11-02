@@ -90,6 +90,7 @@ class SearchApiSecurityTest {
         mockMvc.perform(get("/search").param("q", payload))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(0))
                 .andExpect(jsonPath("$[*].id", not(hasItem(decoyPost.getId()))))
                 .andExpect(jsonPath("$[*].id", not(hasItem(jwtPost.getId()))));
     }
@@ -111,5 +112,24 @@ class SearchApiSecurityTest {
                 .andExpect(jsonPath("$[0].href").value("/blog/" + jwtPost.getId()))
                 .andExpect(jsonPath("$[*].id", not(hasItem(decoyPost.getId()))))
                 .andExpect(jsonPath("$[0].admin").doesNotExist());
+    }
+
+    @Test
+    void projectBlurbIsSearchable() throws Exception {
+        mockMvc.perform(get("/search").param("q", "FAZUOI"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].kind").value("project"))
+                .andExpect(jsonPath("$[0].title").value("Digital Seized Assets Catalogue"))
+                .andExpect(jsonPath("$[0].href").value("https://katalog.fazuoi.gov.ba/"))
+                .andExpect(jsonPath("$[0].snippet").exists());
+    }
+
+    @Test
+    void aboutThisSiteIsSearchable() throws Exception {
+        mockMvc.perform(get("/search").param("q", "emirgenjac.com"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].kind").value("about"))
+                .andExpect(jsonPath("$[0].title").value("About this site"))
+                .andExpect(jsonPath("$[0].href").value("/"));
     }
 }

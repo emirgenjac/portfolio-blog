@@ -6,6 +6,7 @@ import com.emirgenjac.blog.repository.BlogPostRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -23,11 +24,33 @@ public class SearchService {
 
     public List<SearchHitDTO> searchPosts(String rawQuery) {
         String query = SearchQuery.requireValid(rawQuery);
+        List<SearchHitDTO> hits = new ArrayList<>();
+
         String pattern = SearchQuery.likePattern(query);
         List<BlogPost> posts = blogPostRepository.searchByTerm(pattern, PageRequest.of(0, MAX_HITS));
-        return posts.stream()
-                .map(post -> toHit(post, query))
-                .toList();
+        for (BlogPost post : posts) {
+            hits.add(toHit(post, query));
+        }
+
+        if (hits.size() < MAX_HITS) {
+            int remaining = MAX_HITS - hits.size();
+            SiteSearchCorpus.documents().stream()
+                    .filter(document -> matches(document, query))
+                    .limit(remaining)
+                    .map(document -> toHit(document, query))
+                    .forEach(hits::add);
+        }
+
+        return List.copyOf(hits);
+    }
+
+    private boolean matches(SiteSearchCorpus.Document document, String query) {
+        String needle = query.toLowerCase(Locale.ROOT);
+        return contains(document.title(), needle) || contains(document.body(), needle);
+    }
+
+    private boolean contains(String text, String needle) {
+        return text != null && text.toLowerCase(Locale.ROOT).contains(needle);
     }
 
     private SearchHitDTO toHit(BlogPost post, String query) {
@@ -35,26 +58,38 @@ public class SearchService {
                 "post",
                 post.getId(),
                 post.getTitle(),
-                snippet(post, query),
+                snippet(post.getTagline(), post.getContent(), post.getTitle(), query),
                 "/blog/" + post.getId()
         );
     }
 
-    private String snippet(BlogPost post, String query) {
-        String fromTagline = excerpt(post.getTagline(), query);
-        if (fromTagline != null) {
-            return fromTagline;
+    private SearchHitDTO toHit(SiteSearchCorpus.Document document, String query) {
+        return new SearchHitDTO(
+                document.kind(),
+                document.id(),
+                document.title(),
+                snippet(document.body(), null, document.title(), query),
+                document.href()
+        );
+    }
+
+    private String snippet(String primary, String secondary, String fallback, String query) {
+        String fromPrimary = excerpt(primary, query);
+        if (fromPrimary != null) {
+            return fromPrimary;
         }
-        String fromContent = excerpt(post.getContent(), query);
-        if (fromContent != null) {
-            return fromContent;
+        String fromSecondary = excerpt(secondary, query);
+        if (fromSecondary != null) {
+            return fromSecondary;
         }
-        String fromTitle = excerpt(post.getTitle(), query);
-        if (fromTitle != null) {
-            return fromTitle;
+        String fromFallback = excerpt(fallback, query);
+        if (fromFallback != null) {
+            return fromFallback;
         }
-        String tagline = post.getTagline();
-        return tagline == null ? "" : tagline;
+        if (primary != null && !primary.isBlank()) {
+            return primary;
+        }
+        return fallback == null ? "" : fallback;
     }
 
     private String excerpt(String text, String query) {
