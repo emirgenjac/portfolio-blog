@@ -4,6 +4,7 @@ import '../styles/NavBar.css';
 import {AuthContext} from "../context/AuthContext";
 import { useModal } from "../context/ModalContext";
 import { useTheme } from "../context/ThemeContext";
+import SearchPalette from "./SearchPalette";
 
 const MENU_BREAKPOINT = 720;
 
@@ -14,6 +15,14 @@ function NavBar() {
     const { showConfirm } = useModal();
     const { theme, toggleTheme } = useTheme();
     const [menuOpen, setMenuOpen] = useState(false);
+    const [searchOpen, setSearchOpen] = useState(false);
+
+    const openSearch = useCallback(() => {
+        setMenuOpen(false);
+        setSearchOpen(true);
+    }, []);
+
+    const closeSearch = useCallback(() => setSearchOpen(false), []);
 
     const closeMenu = useCallback(() => setMenuOpen(false), []);
 
@@ -80,6 +89,7 @@ function NavBar() {
     const isBlogPage = location.pathname.startsWith("/blog");
 
     return (
+        <>
         <nav className={`navbar${menuOpen ? " navbar--open" : ""}`}>
             {menuOpen && (
                 <button
@@ -134,6 +144,18 @@ function NavBar() {
 
                 <button
                     type="button"
+                    className="navbar-search"
+                    onClick={openSearch}
+                >
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <circle cx="11" cy="11" r="6.25" stroke="currentColor" strokeWidth="2" />
+                        <path d="M16 16l4.2 4.2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
+                    <span className="navbar-search__label">search</span>
+                </button>
+
+                <button
+                    type="button"
                     className={`theme-switch${theme === "dark" ? " is-dark" : ""}`}
                     role="switch"
                     aria-checked={theme === "dark"}
@@ -157,6 +179,8 @@ function NavBar() {
                 </button>
             </div>
         </nav>
+        <SearchPalette open={searchOpen} onOpen={openSearch} onClose={closeSearch} />
+        </>
     );
 }
 

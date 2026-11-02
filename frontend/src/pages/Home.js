@@ -33,14 +33,14 @@ const projects = [
     },
     {
         title: "Heronn.ai",
-        description: "AI agents can run dangerous shell commands unsupervised. Built a local fail-closed policy daemon that blacklists risky commands, auto-allows safe ones, and parks the rest for human approval - with Cursor and Claude Code integration.",
+        description: "AI agents can run dangerous shell commands unsupervised. Built a local fail-closed policy daemon that blacklists risky commands, auto-allows safe ones, and parks the rest for human approval so agents cannot hack the host - with Cursor and Claude Code integration.",
         link: "https://github.com/emirgenjac/Heronn.ai",
         language: "TypeScript",
         color: "blue"
     },
     {
         title: "Portfolio & Blog",
-        description: "Needed a recruiter-ready full-stack showcase. Spring Boot + React app with HttpOnly JWT cookies, CSRF double-submit, rate-limited login, and hardened security headers - this site is the product.",
+        description: "Needed a recruiter-ready full-stack showcase. Made with Spring Boot and React. HttpOnly JWT cookies, CSRF double-submit, rate-limited login, and hardened security headers - this site is the product.",
         link: "https://github.com/emirgenjac/portfolio-blog",
         language: "JavaScript",
         color: "yellow"
