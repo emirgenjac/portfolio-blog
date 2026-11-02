@@ -4,7 +4,10 @@ import java.util.List;
 
 final class SiteSearchCorpus {
 
-
+    /**
+     * Home project/site blurbs plus a short about-this-site note you control.
+     * Keep titles and descriptions in sync with {@code frontend/src/pages/Home.js}.
+     */
     record Document(String kind, int id, String title, String body, String href) {
     }
 

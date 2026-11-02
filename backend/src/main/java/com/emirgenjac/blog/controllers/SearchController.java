@@ -33,7 +33,7 @@ public class SearchController {
                     HttpStatus.TOO_MANY_REQUESTS,
                     "Too many search requests. Please try again later.");
         }
-        return searchService.searchPosts(query);
+        return searchService.search(query);
     }
 
     private String resolveClientKey(HttpServletRequest request) {

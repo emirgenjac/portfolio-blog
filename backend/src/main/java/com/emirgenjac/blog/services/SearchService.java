@@ -22,7 +22,7 @@ public class SearchService {
         this.blogPostRepository = blogPostRepository;
     }
 
-    public List<SearchHitDTO> searchPosts(String rawQuery) {
+    public List<SearchHitDTO> search(String rawQuery) {
         String query = SearchQuery.requireValid(rawQuery);
         List<SearchHitDTO> hits = new ArrayList<>();
 
