@@ -12,6 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -71,6 +72,32 @@ class SearchApiContractTest {
                 .andExpect(jsonPath("$.message").value("Query is required"))
                 .andExpect(jsonPath("$.path").value("/search"))
                 .andExpect(jsonPath("$.timestamp").exists());
+    }
+
+    @Test
+    void questionQueryMatchesMadeWithCopy() throws Exception {
+        BlogPost makingOf = new BlogPost();
+        makingOf.setTitle("Kako sam pravio ovaj sajt (i šta sam stvarno naučio)");
+        makingOf.setTagline("Portfolio, blog i admin panel na jednom mjestu");
+        makingOf.setContent("Ovaj sajt nisam krenuo da pravim kao projekat za GitHub.");
+        makingOf.setCoverImageUrl("https://example.com/site.jpg");
+        makingOf.setAuthor("Emir Genjac");
+        makingOf = blogPostRepository.save(makingOf);
+
+        mockMvc.perform(get("/search").param("q", "What was this made with?"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].title").exists())
+                .andExpect(jsonPath("$[0].snippet").exists())
+                .andExpect(jsonPath("$[*].title", hasItem("About this site")))
+                .andExpect(jsonPath("$[*].href", hasItem("/blog/" + makingOf.getId())));
+    }
+
+    @Test
+    void hackQueryMatchesHeronn() throws Exception {
+        mockMvc.perform(get("/search").param("q", "hack"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].kind").value("project"))
+                .andExpect(jsonPath("$[0].title").value("Heronn.ai"));
     }
 
     @Test

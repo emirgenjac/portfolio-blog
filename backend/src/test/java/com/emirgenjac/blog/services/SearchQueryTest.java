@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -34,6 +36,14 @@ class SearchQueryTest {
     @Test
     void stripsNullBytesThenValidates() {
         assertEquals("jwt", SearchQuery.requireValid("jwt\u0000"));
+    }
+
+    @Test
+    void termsDropStopwordsAndPunctuation() {
+        assertEquals(List.of("made"), SearchQuery.terms("What was this made with?"));
+        assertEquals(List.of("hack"), SearchQuery.terms("hack"));
+        assertEquals(List.of("jwt", "cookie"), SearchQuery.terms("JWT cookie"));
+        assertEquals(List.of("' or 1=1 --"), SearchQuery.terms("' OR 1=1 --"));
     }
 
     @Test

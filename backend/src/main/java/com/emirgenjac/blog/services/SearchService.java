@@ -24,67 +24,115 @@ public class SearchService {
 
     public List<SearchHitDTO> search(String rawQuery) {
         String query = SearchQuery.requireValid(rawQuery);
+        List<String> terms = SearchQuery.terms(query);
         List<SearchHitDTO> hits = new ArrayList<>();
 
-        String pattern = SearchQuery.likePattern(query);
-        List<BlogPost> posts = blogPostRepository.searchByTerm(pattern, PageRequest.of(0, MAX_HITS));
+        List<BlogPost> posts = matchingPosts(terms);
         for (BlogPost post : posts) {
-            hits.add(toHit(post, query));
+            hits.add(toHit(post, terms));
         }
 
         if (hits.size() < MAX_HITS) {
             int remaining = MAX_HITS - hits.size();
             SiteSearchCorpus.documents().stream()
-                    .filter(document -> matches(document, query))
+                    .filter(document -> matches(document, terms))
                     .limit(remaining)
-                    .map(document -> toHit(document, query))
+                    .map(document -> toHit(document, terms))
                     .forEach(hits::add);
         }
 
         return List.copyOf(hits);
     }
 
-    private boolean matches(SiteSearchCorpus.Document document, String query) {
-        String needle = query.toLowerCase(Locale.ROOT);
-        return contains(document.title(), needle) || contains(document.body(), needle);
+    private List<BlogPost> matchingPosts(List<String> terms) {
+        String pattern = SearchQuery.likePattern(terms.get(0));
+        List<BlogPost> candidates = blogPostRepository.searchByTerm(pattern, PageRequest.of(0, 50));
+        if (terms.size() == 1) {
+            return candidates.size() <= MAX_HITS ? candidates : candidates.subList(0, MAX_HITS);
+        }
+        List<BlogPost> matches = new ArrayList<>();
+        for (BlogPost post : candidates) {
+            if (containsAll(haystack(post.getTitle(), post.getTagline(), post.getContent()), terms)) {
+                matches.add(post);
+                if (matches.size() == MAX_HITS) {
+                    break;
+                }
+            }
+        }
+        return matches;
     }
 
-    private boolean contains(String text, String needle) {
-        return text != null && text.toLowerCase(Locale.ROOT).contains(needle);
+    private boolean matches(SiteSearchCorpus.Document document, List<String> terms) {
+        return containsAll(haystack(document.title(), document.body()), terms);
     }
 
-    private SearchHitDTO toHit(BlogPost post, String query) {
+    private boolean containsAll(String haystack, List<String> terms) {
+        for (String term : terms) {
+            if (!haystack.contains(term)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private String haystack(String... parts) {
+        StringBuilder text = new StringBuilder();
+        for (String part : parts) {
+            if (part != null) {
+                text.append(part.toLowerCase(Locale.ROOT)).append('\n');
+            }
+        }
+        return text.toString();
+    }
+
+    private SearchHitDTO toHit(BlogPost post, List<String> terms) {
         return new SearchHitDTO(
                 "post",
                 post.getId(),
                 post.getTitle(),
-                snippet(post.getTagline(), post.getContent(), post.getTitle(), query),
+                snippet(post.getTagline(), post.getContent(), post.getTitle(), terms),
                 "/blog/" + post.getId()
         );
     }
 
-    private SearchHitDTO toHit(SiteSearchCorpus.Document document, String query) {
+    private SearchHitDTO toHit(SiteSearchCorpus.Document document, List<String> terms) {
         return new SearchHitDTO(
                 document.kind(),
                 document.id(),
                 document.title(),
-                snippet(document.body(), null, document.title(), query),
-                document.href()
+                snippet(document.body(), null, document.title(), terms),
+                hrefFor(document)
         );
     }
 
-    private String snippet(String primary, String secondary, String fallback, String query) {
-        String fromPrimary = excerpt(primary, query);
-        if (fromPrimary != null) {
-            return fromPrimary;
+    private String hrefFor(SiteSearchCorpus.Document document) {
+        if (!"about".equals(document.kind())) {
+            return document.href();
         }
-        String fromSecondary = excerpt(secondary, query);
-        if (fromSecondary != null) {
-            return fromSecondary;
+        List<BlogPost> posts = blogPostRepository.searchByTerm(
+                SearchQuery.likePattern("ovaj sajt"),
+                PageRequest.of(0, 1)
+        );
+        if (!posts.isEmpty()) {
+            return "/blog/" + posts.get(0).getId();
         }
-        String fromFallback = excerpt(fallback, query);
-        if (fromFallback != null) {
-            return fromFallback;
+        return "/blog";
+    }
+
+    private String snippet(String primary, String secondary, String fallback, List<String> terms) {
+        for (String term : terms) {
+            String fromPrimary = excerpt(primary, term);
+            if (fromPrimary != null) {
+                return fromPrimary;
+            }
+            String fromSecondary = excerpt(secondary, term);
+            if (fromSecondary != null) {
+                return fromSecondary;
+            }
+            String fromFallback = excerpt(fallback, term);
+            if (fromFallback != null) {
+                return fromFallback;
+            }
         }
         if (primary != null && !primary.isBlank()) {
             return primary;

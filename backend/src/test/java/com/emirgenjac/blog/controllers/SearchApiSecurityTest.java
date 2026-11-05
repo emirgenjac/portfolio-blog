@@ -130,6 +130,6 @@ class SearchApiSecurityTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].kind").value("about"))
                 .andExpect(jsonPath("$[0].title").value("About this site"))
-                .andExpect(jsonPath("$[0].href").value("/"));
+                .andExpect(jsonPath("$[0].href").value("/blog"));
     }
 }

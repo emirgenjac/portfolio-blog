@@ -4,10 +4,6 @@ import java.util.List;
 
 final class SiteSearchCorpus {
 
-    /**
-     * Home project/site blurbs plus a short about-this-site note you control.
-     * Keep titles and descriptions in sync with {@code frontend/src/pages/Home.js}.
-     */
     record Document(String kind, int id, String title, String body, String href) {
     }
 
@@ -16,10 +12,10 @@ final class SiteSearchCorpus {
                     "FAZUOI needed a transparent public view of seized assets. Built backend infrastructure - secure data models and APIs - for the Federal Agency's catalogue as a UN Tech4R volunteer; live on a .gov.ba domain.",
                     "https://katalog.fazuoi.gov.ba/"),
             project(2, "Heronn.ai",
-                    "AI agents can run dangerous shell commands unsupervised. Built a local fail-closed policy daemon that blacklists risky commands, auto-allows safe ones, and parks the rest for human approval - with Cursor and Claude Code integration.",
+                    "AI agents can run dangerous shell commands unsupervised. Built a local fail-closed policy daemon that blacklists risky commands, auto-allows safe ones, and parks the rest for human approval so agents cannot hack the host - with Cursor and Claude Code integration.",
                     "https://github.com/emirgenjac/Heronn.ai"),
             project(3, "Portfolio & Blog",
-                    "Needed a recruiter-ready full-stack showcase. Spring Boot + React app with HttpOnly JWT cookies, CSRF double-submit, rate-limited login, and hardened security headers - this site is the product.",
+                    "Needed a recruiter-ready full-stack showcase. Made with Spring Boot and React. HttpOnly JWT cookies, CSRF double-submit, rate-limited login, and hardened security headers - this site is the product.",
                     "https://github.com/emirgenjac/portfolio-blog"),
             project(4, "SMARTBRAIN",
                     "Built a full-stack face-detection app: users register, upload an image, and an AI API returns face bounds - auth plus third-party AI in one flow.",
@@ -37,14 +33,14 @@ final class SiteSearchCorpus {
                     "Wanted a native-feeling music UI without a full native stack. Electron shell around HTML/CSS/JS for a desktop Spotify-style experience.",
                     "https://github.com/emirgenjac/Spotify-Desktop-App"),
             new Document("site", 1, "Emirdev",
-                    "Personal Webflow portfolio for client landing pages.",
+                    "Made with: Webflow. Personal Webflow portfolio for client landing pages.",
                     "https://emirgenjac.webflow.io"),
             new Document("site", 2, "Boldo",
-                    "Website for creating templates. Made with Webflow.",
+                    "Made with: Webflow. Website for creating templates.",
                     "https://boldoofficial.webflow.io"),
             new Document("about", 1, "About this site",
-                    "Emir Genjac, software developer. This portfolio and blog is a Spring Boot and React app. Login uses an HttpOnly JWT cookie, not localStorage. Mutations use CSRF double-submit. Login is rate-limited. Live at emirgenjac.com.",
-                    "/")
+                    "Made with Spring Boot and React, Java, PostgreSQL, and Docker. Emir Genjac, software developer. This portfolio and blog is a Spring Boot and React app. Login uses an HttpOnly JWT cookie, not localStorage. Mutations use CSRF double-submit. Login is rate-limited. Live at emirgenjac.com.",
+                    "/blog")
     );
 
     private SiteSearchCorpus() {
