@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import API from '../api/axios';
+import { writeCachedPosts } from '../api/blogCache';
 import SearchPalette from './SearchPalette';
 
 jest.mock('../api/axios', () => ({
@@ -20,6 +21,7 @@ function renderPalette({ open = true, onOpen = jest.fn(), onClose = jest.fn() } 
 
 beforeEach(() => {
   API.get.mockReset();
+  window.localStorage.clear();
 });
 
 test('closed palette is not in the document', () => {
@@ -100,4 +102,22 @@ test('about hit points at the making-of blog post', async () => {
 
   const link = await screen.findByRole('link', { name: /About this site/ });
   expect(link).toHaveAttribute('href', '/blog/9');
+});
+
+test('falls back to cached results when the API is down', async () => {
+  writeCachedPosts([{
+    id: 9,
+    title: 'Kako sam pravio ovaj sajt (i šta sam stvarno naučio)',
+    tagline: 'Portfolio blog',
+    content: 'Ovaj sajt uses HttpOnly JWT cookies.',
+  }]);
+  API.get.mockRejectedValue({ request: {} });
+
+  renderPalette();
+  fireEvent.change(screen.getByLabelText('Search posts and projects'), {
+    target: { value: 'jwt' },
+  });
+
+  expect(await screen.findByText('Server asleep — showing cached results.')).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: /Kako sam pravio ovaj sajt/ })).toHaveAttribute('href', '/blog/9');
 });

@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import API from "../api/axios";
+import { searchLocal } from "../api/localSearch";
 import { SEARCH_EXAMPLES, SEARCH_MAX_LENGTH } from "../api/search";
 import "../styles/SearchPalette.css";
 
@@ -22,6 +23,7 @@ function SearchPalette({ open, onOpen, onClose }) {
     const [hits, setHits] = useState([]);
     const [status, setStatus] = useState("idle");
     const [error, setError] = useState("");
+    const [notice, setNotice] = useState("");
 
     useEffect(() => {
         const onKeyDown = (event) => {
@@ -66,6 +68,7 @@ function SearchPalette({ open, onOpen, onClose }) {
         setQuery("");
         setHits([]);
         setError("");
+        setNotice("");
         setStatus("idle");
         return undefined;
     }, [open]);
@@ -78,12 +81,14 @@ function SearchPalette({ open, onOpen, onClose }) {
         if (!trimmed) {
             setHits([]);
             setError("");
+            setNotice("");
             setStatus("idle");
             return undefined;
         }
         if (trimmed.length > SEARCH_MAX_LENGTH) {
             setHits([]);
             setError("Query is too long");
+            setNotice("");
             setStatus("error");
             return undefined;
         }
@@ -96,6 +101,7 @@ function SearchPalette({ open, onOpen, onClose }) {
                     if (cancelled) return;
                     setHits(Array.isArray(response.data) ? response.data : []);
                     setError("");
+                    setNotice("");
                     setStatus("ok");
                 })
                 .catch((err) => {
@@ -103,14 +109,31 @@ function SearchPalette({ open, onOpen, onClose }) {
                     const message = err.response?.data?.message;
                     const code = err.response?.status;
                     if (code === 429) {
+                        setHits([]);
                         setError(message || "Too many search requests. Please try again later.");
-                    } else if (code === 400) {
-                        setError(message || "Query is required");
-                    } else {
-                        setError("Could not search. The server may be waking up.");
+                        setNotice("");
+                        setStatus("error");
+                        return;
                     }
-                    setHits([]);
-                    setStatus("error");
+                    if (code === 400) {
+                        setHits([]);
+                        setError(message || "Query is required");
+                        setNotice("");
+                        setStatus("error");
+                        return;
+                    }
+                    const local = searchLocal(trimmed);
+                    if (local.error) {
+                        setHits([]);
+                        setError(local.error);
+                        setNotice("");
+                        setStatus("error");
+                        return;
+                    }
+                    setHits(local.hits);
+                    setError("");
+                    setNotice("Server asleep — showing cached results.");
+                    setStatus("ok");
                 });
         }, 250);
 
@@ -170,6 +193,7 @@ function SearchPalette({ open, onOpen, onClose }) {
                 )}
                 {status === "loading" && <p className="search-palette__status">Searching…</p>}
                 {error && <p className="search-palette__status search-palette__status--error">{error}</p>}
+                {!error && notice && <p className="search-palette__status">{notice}</p>}
                 {showEmpty && (
                     <p className="search-palette__status">
                         No matching work. Try JWT, CSRF, FAZUOI.

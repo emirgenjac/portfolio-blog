@@ -126,10 +126,18 @@ class SearchApiSecurityTest {
 
     @Test
     void aboutThisSiteIsSearchable() throws Exception {
+        BlogPost makingOf = new BlogPost();
+        makingOf.setTitle("Kako sam pravio ovaj sajt (i šta sam stvarno naučio)");
+        makingOf.setTagline("Portfolio, blog i admin panel na jednom mjestu");
+        makingOf.setContent("Ovaj sajt nisam krenuo da pravim kao projekat za GitHub.");
+        makingOf.setCoverImageUrl("https://example.com/site.jpg");
+        makingOf.setAuthor("Emir Genjac");
+        makingOf = blogPostRepository.save(makingOf);
+
         mockMvc.perform(get("/search").param("q", "emirgenjac.com"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].kind").value("about"))
                 .andExpect(jsonPath("$[0].title").value("About this site"))
-                .andExpect(jsonPath("$[0].href").value("/blog"));
+                .andExpect(jsonPath("$[0].href").value("/blog/" + makingOf.getId()));
     }
 }
