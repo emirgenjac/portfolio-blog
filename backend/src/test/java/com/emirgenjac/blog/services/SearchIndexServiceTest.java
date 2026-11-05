@@ -6,13 +6,17 @@ import com.emirgenjac.blog.repository.SearchChunkRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -28,8 +32,13 @@ class SearchIndexServiceTest {
     @Autowired
     private SearchChunkRepository searchChunkRepository;
 
+    @MockBean
+    private EmbeddingService embeddingService;
+
     @Test
     void createUpdateDeleteReindexesChunks() {
+        when(embeddingService.embedDocument(anyString())).thenReturn(Optional.empty());
+
         BlogPost post = new BlogPost();
         post.setTitle("Chunked JWT guide");
         post.setTagline("HttpOnly cookies");
@@ -59,5 +68,22 @@ class SearchIndexServiceTest {
         blogPostService.deletePost(postId);
         assertEquals(0, searchChunkRepository.countByBlogPostId(postId));
         assertTrue(blogPostRepository.findById(postId).isEmpty());
+    }
+
+    @Test
+    void reindexStoresEmbeddingWhenVendorSucceeds() {
+        when(embeddingService.embedDocument(anyString()))
+                .thenReturn(Optional.of(new float[]{0.1f, 0.2f, 0.3f}));
+
+        BlogPost post = new BlogPost();
+        post.setTitle("Embedded JWT notes");
+        post.setTagline("Cookies");
+        post.setContent("HttpOnly JWT cookies stay out of localStorage.");
+        post.setCoverImageUrl("https://example.com/cover.jpg");
+        post.setAuthor("Emir Genjac");
+
+        BlogPost saved = blogPostService.createPost(post);
+        assertEquals(1, searchChunkRepository.countByBlogPostId(saved.getId()));
+        assertEquals(1, searchChunkRepository.countEmbeddedByBlogPostId(saved.getId()));
     }
 }

@@ -17,13 +17,20 @@ public class SearchService {
     private static final int SNIPPET_LENGTH = 180;
 
     private final BlogPostRepository blogPostRepository;
+    private final EmbeddingService embeddingService;
 
-    public SearchService(BlogPostRepository blogPostRepository) {
+    public SearchService(BlogPostRepository blogPostRepository, EmbeddingService embeddingService) {
         this.blogPostRepository = blogPostRepository;
+        this.embeddingService = embeddingService;
     }
 
     public List<SearchHitDTO> search(String rawQuery) {
         String query = SearchQuery.requireValid(rawQuery);
+        embeddingService.embedQuery(query);
+        return wordSearch(query);
+    }
+
+    private List<SearchHitDTO> wordSearch(String query) {
         List<String> terms = SearchQuery.terms(query);
         List<SearchHitDTO> hits = new ArrayList<>();
 
