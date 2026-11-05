@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Repository
@@ -73,6 +75,73 @@ public class SearchChunkRepository {
         }
     }
 
+    public List<SearchChunkMatch> findNearest(float[] queryEmbedding, int limit) {
+        if (queryEmbedding == null || queryEmbedding.length == 0 || limit <= 0) {
+            return List.of();
+        }
+        if (pgvector) {
+            return findNearestPg(queryEmbedding, limit);
+        }
+        return findNearestInMemory(queryEmbedding, limit);
+    }
+
+    private List<SearchChunkMatch> findNearestPg(float[] queryEmbedding, int limit) {
+        String literal = VectorLiteral.toPgVector(queryEmbedding);
+        return jdbcTemplate.query(
+                """
+                SELECT sc.blog_post_id, bp.title, sc.content
+                FROM search_chunk sc
+                INNER JOIN blog_post bp ON bp.id = sc.blog_post_id
+                WHERE sc.embedding IS NOT NULL
+                ORDER BY sc.embedding <=> CAST(? AS vector)
+                LIMIT ?
+                """,
+                (rs, rowNum) -> new SearchChunkMatch(
+                        rs.getInt("blog_post_id"),
+                        rs.getString("title"),
+                        rs.getString("content")
+                ),
+                literal,
+                limit
+        );
+    }
+
+    private List<SearchChunkMatch> findNearestInMemory(float[] queryEmbedding, int limit) {
+        List<ScoredChunk> scored = jdbcTemplate.query(
+                """
+                SELECT sc.blog_post_id, bp.title, sc.content, sc.embedding
+                FROM search_chunk sc
+                INNER JOIN blog_post bp ON bp.id = sc.blog_post_id
+                WHERE sc.embedding IS NOT NULL
+                """,
+                (rs, rowNum) -> {
+                    float[] embedding = VectorLiteral.parse(rs.getString("embedding"));
+                    double score = VectorLiteral.cosineSimilarity(queryEmbedding, embedding);
+                    return new ScoredChunk(
+                            new SearchChunkMatch(
+                                    rs.getInt("blog_post_id"),
+                                    rs.getString("title"),
+                                    rs.getString("content")
+                            ),
+                            score
+                    );
+                }
+        );
+
+        scored.sort(Comparator.comparingDouble(ScoredChunk::score).reversed());
+        List<SearchChunkMatch> matches = new ArrayList<>();
+        for (ScoredChunk item : scored) {
+            if (item.score() < 0) {
+                continue;
+            }
+            matches.add(item.match());
+            if (matches.size() == limit) {
+                break;
+            }
+        }
+        return matches;
+    }
+
     public int countByBlogPostId(int blogPostId) {
         Integer count = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM search_chunk WHERE blog_post_id = ?",
@@ -104,5 +173,8 @@ public class SearchChunkRepository {
                 (rs, rowNum) -> rs.getString("content"),
                 blogPostId
         );
+    }
+
+    private record ScoredChunk(SearchChunkMatch match, double score) {
     }
 }

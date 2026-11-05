@@ -7,7 +7,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,8 +18,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -30,11 +30,12 @@ class SearchServiceEmbeddingFallbackTest {
     @Autowired
     private BlogPostRepository blogPostRepository;
 
-    @MockBean
-    private EmbeddingService embeddingService;
+    @Autowired
+    private FakeEmbeddingClient embeddingClient;
 
     @BeforeEach
     void seed() {
+        embeddingClient.reset();
         blogPostRepository.deleteAll();
         BlogPost post = new BlogPost();
         post.setTitle("HttpOnly JWT cookies");
@@ -47,7 +48,7 @@ class SearchServiceEmbeddingFallbackTest {
 
     @Test
     void vendorDownStillReturnsWordSearchHits() {
-        when(embeddingService.embedQuery(anyString())).thenReturn(Optional.empty());
+        embeddingClient.setQueryFn(text -> Optional.empty());
 
         List<SearchHitDTO> hits = searchService.search("jwt");
         assertFalse(hits.isEmpty());
@@ -55,12 +56,20 @@ class SearchServiceEmbeddingFallbackTest {
     }
 
     @Test
-    void vendorUpStillReturnsWordSearchHitsUntilHybrid() {
-        when(embeddingService.embedQuery(anyString()))
-                .thenReturn(Optional.of(new float[]{0.4f, 0.5f, 0.6f}));
+    void vendorUpWithNoChunkVectorsStillReturnsWordSearchHits() {
+        embeddingClient.setQueryFn(text -> Optional.of(new float[]{0.4f, 0.5f, 0.6f}));
 
         List<SearchHitDTO> hits = searchService.search("jwt");
         assertFalse(hits.isEmpty());
         assertEquals("HttpOnly JWT cookies", hits.get(0).title());
+    }
+
+    @TestConfiguration
+    static class FakeEmbeddingConfig {
+        @Bean
+        @Primary
+        FakeEmbeddingClient embeddingClient() {
+            return new FakeEmbeddingClient();
+        }
     }
 }

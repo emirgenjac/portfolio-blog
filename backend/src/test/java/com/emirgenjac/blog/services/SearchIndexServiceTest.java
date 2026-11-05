@@ -3,10 +3,13 @@ package com.emirgenjac.blog.services;
 import com.emirgenjac.blog.entity.BlogPost;
 import com.emirgenjac.blog.repository.BlogPostRepository;
 import com.emirgenjac.blog.repository.SearchChunkRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,8 +18,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -32,13 +33,16 @@ class SearchIndexServiceTest {
     @Autowired
     private SearchChunkRepository searchChunkRepository;
 
-    @MockBean
-    private EmbeddingService embeddingService;
+    @Autowired
+    private FakeEmbeddingClient embeddingClient;
+
+    @BeforeEach
+    void resetEmbeddings() {
+        embeddingClient.reset();
+    }
 
     @Test
     void createUpdateDeleteReindexesChunks() {
-        when(embeddingService.embedDocument(anyString())).thenReturn(Optional.empty());
-
         BlogPost post = new BlogPost();
         post.setTitle("Chunked JWT guide");
         post.setTagline("HttpOnly cookies");
@@ -72,8 +76,7 @@ class SearchIndexServiceTest {
 
     @Test
     void reindexStoresEmbeddingWhenVendorSucceeds() {
-        when(embeddingService.embedDocument(anyString()))
-                .thenReturn(Optional.of(new float[]{0.1f, 0.2f, 0.3f}));
+        embeddingClient.setDocumentFn(text -> Optional.of(new float[]{0.1f, 0.2f, 0.3f}));
 
         BlogPost post = new BlogPost();
         post.setTitle("Embedded JWT notes");
@@ -85,5 +88,14 @@ class SearchIndexServiceTest {
         BlogPost saved = blogPostService.createPost(post);
         assertEquals(1, searchChunkRepository.countByBlogPostId(saved.getId()));
         assertEquals(1, searchChunkRepository.countEmbeddedByBlogPostId(saved.getId()));
+    }
+
+    @TestConfiguration
+    static class FakeEmbeddingConfig {
+        @Bean
+        @Primary
+        FakeEmbeddingClient embeddingClient() {
+            return new FakeEmbeddingClient();
+        }
     }
 }

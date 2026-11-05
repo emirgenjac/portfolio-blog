@@ -11,13 +11,13 @@ import java.util.List;
 public class SearchIndexService {
 
     private final SearchChunkRepository searchChunkRepository;
-    private final EmbeddingService embeddingService;
+    private final EmbeddingClient embeddingClient;
 
     public SearchIndexService(
             SearchChunkRepository searchChunkRepository,
-            EmbeddingService embeddingService) {
+            EmbeddingClient embeddingClient) {
         this.searchChunkRepository = searchChunkRepository;
-        this.embeddingService = embeddingService;
+        this.embeddingClient = embeddingClient;
     }
 
     @Transactional
@@ -29,7 +29,7 @@ public class SearchIndexService {
         searchChunkRepository.deleteByBlogPostId(post.getId());
         for (int i = 0; i < chunks.size(); i++) {
             String chunk = chunks.get(i);
-            float[] embedding = embeddingService.embedDocument(chunk).orElse(null);
+            float[] embedding = embeddingClient.embedDocument(chunk).orElse(null);
             searchChunkRepository.insertChunk(post.getId(), i, chunk, embedding);
         }
     }

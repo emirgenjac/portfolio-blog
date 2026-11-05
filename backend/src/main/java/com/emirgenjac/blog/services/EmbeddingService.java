@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Service
-public class EmbeddingService {
+public class EmbeddingService implements EmbeddingClient {
 
     private static final Logger log = LoggerFactory.getLogger(EmbeddingService.class);
 
@@ -51,14 +51,17 @@ public class EmbeddingService {
                 .build();
     }
 
+    @Override
     public boolean isAvailable() {
         return enabled && !apiKey.isBlank();
     }
 
+    @Override
     public Optional<float[]> embedDocument(String text) {
         return embed(text, "RETRIEVAL_DOCUMENT");
     }
 
+    @Override
     public Optional<float[]> embedQuery(String text) {
         return embed(text, "RETRIEVAL_QUERY");
     }
