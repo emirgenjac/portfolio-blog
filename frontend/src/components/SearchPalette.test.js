@@ -121,3 +121,33 @@ test('falls back to cached results when the API is down', async () => {
   expect(await screen.findByText('Server asleep — showing cached results.')).toBeInTheDocument();
   expect(screen.getByRole('link', { name: /Kako sam pravio ovaj sajt/ })).toHaveAttribute('href', '/blog/9');
 });
+
+test('rejects overlong queries before calling the API', () => {
+  renderPalette();
+  fireEvent.change(screen.getByLabelText('Search posts and projects'), {
+    target: { value: 'a'.repeat(101) },
+  });
+
+  expect(screen.getByText('Query is too long')).toBeInTheDocument();
+  expect(API.get).not.toHaveBeenCalled();
+});
+
+test('rate limit errors do not fall back to cache', async () => {
+  writeCachedPosts([{
+    id: 1,
+    title: 'Cached JWT post',
+    tagline: 'jwt',
+    content: 'jwt cookie',
+  }]);
+  API.get.mockRejectedValue({
+    response: { status: 429, data: { message: 'Too many search requests. Please try again later.' } },
+  });
+
+  renderPalette();
+  fireEvent.change(screen.getByLabelText('Search posts and projects'), {
+    target: { value: 'jwt' },
+  });
+
+  expect(await screen.findByText('Too many search requests. Please try again later.')).toBeInTheDocument();
+  expect(screen.queryByRole('link', { name: /Cached JWT post/ })).not.toBeInTheDocument();
+});

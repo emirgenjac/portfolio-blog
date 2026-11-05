@@ -34,3 +34,30 @@ test('finds cached posts and static projects', () => {
 test('returns empty hits when nothing matches', () => {
   expect(searchLocal('zzzz-no-hit').hits).toEqual([]);
 });
+
+test('injection-style strings do not throw or invent hits', () => {
+  writeCachedPosts([{
+    id: 1,
+    title: 'Safe post',
+    tagline: 'plain text',
+    content: 'nothing special here',
+  }]);
+
+  for (const payload of ["' OR 1=1 --", '%', '_', '&|!:()*']) {
+    const result = searchLocal(payload);
+    expect(result.error).toBe('');
+    expect(result.hits).toEqual([]);
+  }
+});
+
+test('snippet text keeps markup as plain text', () => {
+  writeCachedPosts([{
+    id: 2,
+    title: 'XSS bait',
+    tagline: 'safe tagline',
+    content: 'jwt cookie <img alt="xss" src="x" />',
+  }]);
+
+  const result = searchLocal('jwt');
+  expect(result.hits[0].snippet).toContain('<img alt="xss" src="x" />');
+});
