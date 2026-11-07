@@ -175,6 +175,16 @@
   line-height: 1;
 }
 
+button.navbar-link.navbar-menu-search {
+  display: none;
+}
+
+.navbar-menu-search svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
 .theme-switch {
   order: 2;
   flex-shrink: 0;
@@ -331,10 +341,12 @@ button.navbar-link:hover::after {
   }
 
   .navbar-search {
-    position: relative;
-    z-index: 2;
-    min-width: 0;
-    padding: 0 0.7rem 0 0.55rem;
+    display: none;
+  }
+
+  button.navbar-link.navbar-menu-search {
+    display: inline-flex;
+    gap: 0.55rem;
   }
 
   .theme-switch {
