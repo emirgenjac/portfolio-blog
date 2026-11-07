@@ -34,14 +34,20 @@ class EmbeddingSecretsGuardTest {
 
     private static Path projectRoot() {
         Path cwd = Path.of("").toAbsolutePath().normalize();
-        if (Files.exists(cwd.resolve("AGENTS.md"))) {
+        if (isRepoRoot(cwd)) {
             return cwd;
         }
         Path parent = cwd.getParent();
-        if (parent != null && Files.exists(parent.resolve("AGENTS.md"))) {
+        if (parent != null && isRepoRoot(parent)) {
             return parent;
         }
         throw new AssertionError("Could not locate project root from " + cwd);
+    }
+
+    private static boolean isRepoRoot(Path path) {
+        return Files.exists(path.resolve("README.md"))
+                && Files.exists(path.resolve("docker-compose.yml"))
+                && Files.isDirectory(path.resolve("backend"));
     }
 
     private static void assertPlaceholderOnly(Path path, String key) throws Exception {
