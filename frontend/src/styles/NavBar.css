@@ -134,6 +134,47 @@
   margin-left: auto;
 }
 
+.navbar-search {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.45rem;
+  order: 2;
+  flex-shrink: 0;
+  width: auto;
+  min-width: 8.75rem;
+  height: 36px;
+  margin: 0;
+  padding: 0 0.8rem 0 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-raised);
+  color: var(--ink-soft);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: background 0.2s var(--ease), border-color 0.2s var(--ease), color 0.2s var(--ease);
+}
+
+.navbar-search:hover {
+  border-color: var(--signal);
+  background: var(--signal);
+  color: var(--signal-ink);
+}
+
+.navbar-search svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+.navbar-search__label {
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
 .theme-switch {
   order: 2;
   flex-shrink: 0;
@@ -287,6 +328,13 @@ button.navbar-link:hover::after {
   .navbar-logo .logo-letters {
     overflow-wrap: normal;
     white-space: nowrap;
+  }
+
+  .navbar-search {
+    position: relative;
+    z-index: 2;
+    min-width: 0;
+    padding: 0 0.7rem 0 0.55rem;
   }
 
   .theme-switch {

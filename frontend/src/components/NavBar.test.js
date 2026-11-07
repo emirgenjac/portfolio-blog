@@ -70,6 +70,14 @@ test('toggles the phone menu from the hamburger button', () => {
   expect(screen.getByRole('button', { name: 'Dismiss menu' })).toBeInTheDocument();
 });
 
+test('search bar opens the palette', () => {
+  renderNavBar({ isAuthenticated: false, path: '/' });
+
+  expect(screen.queryByRole('dialog', { name: 'Search' })).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'search' }));
+  expect(screen.getByRole('dialog', { name: 'Search' })).toBeInTheDocument();
+});
+
 test('theme switch is compact and toggles dark mode', () => {
   renderNavBar({ isAuthenticated: false, path: '/' });
 
