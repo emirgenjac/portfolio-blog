@@ -123,6 +123,13 @@ function NavBar() {
                     id="navbar-menu"
                     className={`navbar-links${menuOpen ? " is-open" : ""}`}
                 >
+                    <button type="button" className="navbar-link navbar-menu-search" onClick={openSearch}>
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <circle cx="11" cy="11" r="6.25" stroke="currentColor" strokeWidth="2" />
+                            <path d="M16 16l4.2 4.2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                        </svg>
+                        Search
+                    </button>
                     <a href="#projects-section" onClick={handleSectionClick("projects-section")} className="navbar-link">Projects</a>
                     <Link to="/blog" className="navbar-link" onClick={closeMenu}>Blog</Link>
                     <a href="#contact-section" onClick={handleSectionClick("contact-section")} className="navbar-link">Contact</a>
@@ -145,6 +152,7 @@ function NavBar() {
                 <button
                     type="button"
                     className="navbar-search"
+                    aria-label="Search"
                     onClick={openSearch}
                 >
                     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">

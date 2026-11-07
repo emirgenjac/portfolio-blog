@@ -74,8 +74,19 @@ test('search bar opens the palette', () => {
   renderNavBar({ isAuthenticated: false, path: '/' });
 
   expect(screen.queryByRole('dialog', { name: 'Search' })).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: 'search' }));
+  fireEvent.click(document.querySelector('.navbar-search'));
   expect(screen.getByRole('dialog', { name: 'Search' })).toBeInTheDocument();
+});
+
+test('search in the phone menu opens the palette and closes the menu', () => {
+  renderNavBar({ isAuthenticated: false, path: '/' });
+
+  fireEvent.click(screen.getByRole('button', { name: 'Open menu' }));
+  fireEvent.click(document.querySelector('.navbar-menu-search'));
+
+  expect(screen.getByRole('dialog', { name: 'Search' })).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Dismiss menu' })).not.toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Open menu' })).toHaveAttribute('aria-expanded', 'false');
 });
 
 test('theme switch is compact and toggles dark mode', () => {
