@@ -3,7 +3,6 @@ import {Link, useLocation} from "react-router-dom";
 
 import "../styles/Home.css";
 
-import HeroPhoto from '../assets/hero.webp';
 import DoubleArrow from '../assets/DoubleArrow.svg';
 import MouseIcon from '../assets/MouseIcon.svg'
 import Fazuoi from '../assets/fazuoi.webp';
@@ -143,7 +142,7 @@ function Home() {
                     <div className="image-box" id="under-box"></div>
 
                     <div className="image-box">
-                        <img src={HeroPhoto} className="hero-photo" alt="Emir Genjac" width={840} height={1050} fetchPriority="high" decoding="async"/>
+                        <img src="/hero.webp" className="hero-photo" alt="Emir Genjac" width={840} height={1050} fetchPriority="high" decoding="async"/>
                     </div>
                 </div>
                 <button
