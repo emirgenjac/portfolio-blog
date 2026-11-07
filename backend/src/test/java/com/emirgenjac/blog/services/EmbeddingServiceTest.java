@@ -12,7 +12,7 @@ class EmbeddingServiceTest {
                 true,
                 "",
                 "https://example.invalid",
-                "text-embedding-004",
+                "gemini-embedding-001",
                 768,
                 500
         );
@@ -27,7 +27,7 @@ class EmbeddingServiceTest {
                 false,
                 "not-a-real-key",
                 "https://example.invalid",
-                "text-embedding-004",
+                "gemini-embedding-001",
                 768,
                 500
         );

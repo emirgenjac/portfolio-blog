@@ -7,19 +7,27 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class SearchChunkRepository {
 
     private final JdbcTemplate jdbcTemplate;
     private final boolean pgvector;
+    private final double minCosineSimilarity;
+    private final double maxCosineGapFromBest;
 
     public SearchChunkRepository(
             JdbcTemplate jdbcTemplate,
-            @Value("${app.embeddings.pgvector:true}") boolean pgvector) {
+            @Value("${app.embeddings.pgvector:true}") boolean pgvector,
+            @Value("${app.embeddings.min-cosine-similarity:0.55}") double minCosineSimilarity,
+            @Value("${app.embeddings.max-cosine-gap-from-best:0.08}") double maxCosineGapFromBest) {
         this.jdbcTemplate = jdbcTemplate;
         this.pgvector = pgvector;
+        this.minCosineSimilarity = minCosineSimilarity;
+        this.maxCosineGapFromBest = Math.max(0.0, maxCosineGapFromBest);
     }
 
     public void deleteByBlogPostId(int blogPostId) {
@@ -87,23 +95,36 @@ public class SearchChunkRepository {
 
     private List<SearchChunkMatch> findNearestPg(float[] queryEmbedding, int limit) {
         String literal = VectorLiteral.toPgVector(queryEmbedding);
-        return jdbcTemplate.query(
+        double maxDistance = Math.max(0.0, 1.0 - minCosineSimilarity);
+        List<ScoredChunk> scored = jdbcTemplate.query(
                 """
-                SELECT sc.blog_post_id, bp.title, sc.content
+                SELECT sc.blog_post_id, bp.title, sc.content,
+                       (sc.embedding <=> CAST(? AS vector)) AS dist
                 FROM search_chunk sc
                 INNER JOIN blog_post bp ON bp.id = sc.blog_post_id
                 WHERE sc.embedding IS NOT NULL
-                ORDER BY sc.embedding <=> CAST(? AS vector)
+                  AND (sc.embedding <=> CAST(? AS vector)) <= ?
+                ORDER BY dist ASC
                 LIMIT ?
                 """,
-                (rs, rowNum) -> new SearchChunkMatch(
-                        rs.getInt("blog_post_id"),
-                        rs.getString("title"),
-                        rs.getString("content")
-                ),
+                (rs, rowNum) -> {
+                    double distance = rs.getDouble("dist");
+                    double score = 1.0 - distance;
+                    return new ScoredChunk(
+                            new SearchChunkMatch(
+                                    rs.getInt("blog_post_id"),
+                                    rs.getString("title"),
+                                    rs.getString("content")
+                            ),
+                            score
+                    );
+                },
                 literal,
-                limit
+                literal,
+                maxDistance,
+                Math.max(limit * 5, 20)
         );
+        return selectBestMatches(scored, limit);
     }
 
     private List<SearchChunkMatch> findNearestInMemory(float[] queryEmbedding, int limit) {
@@ -127,19 +148,35 @@ public class SearchChunkRepository {
                     );
                 }
         );
+        return selectBestMatches(scored, limit);
+    }
 
-        scored.sort(Comparator.comparingDouble(ScoredChunk::score).reversed());
-        List<SearchChunkMatch> matches = new ArrayList<>();
+    private List<SearchChunkMatch> selectBestMatches(List<ScoredChunk> scored, int limit) {
+        List<ScoredChunk> strongEnough = new ArrayList<>();
         for (ScoredChunk item : scored) {
-            if (item.score() < 0) {
+            if (item.score() >= minCosineSimilarity) {
+                strongEnough.add(item);
+            }
+        }
+        if (strongEnough.isEmpty()) {
+            return List.of();
+        }
+
+        strongEnough.sort(Comparator.comparingDouble(ScoredChunk::score).reversed());
+        double best = strongEnough.get(0).score();
+        double floor = best - maxCosineGapFromBest;
+
+        Map<Integer, SearchChunkMatch> bestByPost = new LinkedHashMap<>();
+        for (ScoredChunk item : strongEnough) {
+            if (item.score() < floor) {
                 continue;
             }
-            matches.add(item.match());
-            if (matches.size() == limit) {
+            bestByPost.putIfAbsent(item.match().blogPostId(), item.match());
+            if (bestByPost.size() == limit) {
                 break;
             }
         }
-        return matches;
+        return List.copyOf(bestByPost.values());
     }
 
     public int countByBlogPostId(int blogPostId) {

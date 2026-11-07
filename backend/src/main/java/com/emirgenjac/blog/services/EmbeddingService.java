@@ -33,7 +33,7 @@ public class EmbeddingService implements EmbeddingClient {
             @Value("${app.embeddings.enabled:true}") boolean enabled,
             @Value("${app.embeddings.api-key:}") String apiKey,
             @Value("${app.embeddings.base-url:https://generativelanguage.googleapis.com/v1beta}") String baseUrl,
-            @Value("${app.embeddings.model:text-embedding-004}") String model,
+            @Value("${app.embeddings.model:gemini-embedding-001}") String model,
             @Value("${app.embeddings.dimensions:768}") int dimensions,
             @Value("${app.embeddings.timeout-ms:4000}") long timeoutMs) {
         this.enabled = enabled;
