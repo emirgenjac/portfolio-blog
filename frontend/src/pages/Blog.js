@@ -62,9 +62,16 @@ const Blog = () => {
     return (<>
             <h1 className={"main-title"}>Blog Posts</h1>
         <div className="posts-container">
-            {posts.map(post => (
+            {posts.map((post, index) => (
                 <div key={post.id} className="blog_post" onClick={() => navigate(`/blog/${post.id}`)}>
-                    <img src={post.coverImageUrl} alt={post.title || 'Cover'} className={"post-cover-image"} loading="lazy" decoding="async"/>
+                    <img
+                        src={post.coverImageUrl}
+                        alt={post.title || 'Cover'}
+                        className={"post-cover-image"}
+                        loading={index === 0 ? "eager" : "lazy"}
+                        fetchPriority={index === 0 ? "high" : "low"}
+                        decoding="async"
+                    />
                     <h2 className={"post-title"}>{post.title}</h2>
                     <hr className={"hr"}/>
                     <p className="post-tagline">{post.tagline}</p>

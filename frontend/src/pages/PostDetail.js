@@ -154,7 +154,7 @@ function PostDetail() {
                 <p>Back</p>
             </div>
             <div className="post-detail">
-            <img src={post.coverImageUrl} alt={post.title || 'Cover'} className="post-cover-image" />
+            <img src={post.coverImageUrl} alt={post.title || 'Cover'} className="post-cover-image" fetchPriority="high" decoding="async" />
             <h1 className={"post-title"}>{post.title}</h1>
                 <hr className={"line"}/>
             <p className={"post-content"}>{post.content}</p>
