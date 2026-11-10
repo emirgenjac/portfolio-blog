@@ -17,7 +17,7 @@ const FALLBACK_IMAGE = `${SITE_URL}/og-card.jpg`;
 export async function onRequestGet(context) {
   const { request, env, params, next } = context;
   const id = String(params.id || "");
-  if (!/^\d+$/.test(id) || !isCrawler(request.headers.get("user-agent"))) {
+  if (!/^\d+$/.test(id)) {
     return next();
   }
 
@@ -28,7 +28,8 @@ export async function onRequestGet(context) {
 
   const { siteUrl, apiUrl } = siteConfig(env);
   const pageUrl = `${siteUrl}/blog/${id}`;
-  const post = await fetchPost(apiUrl, id);
+  const crawler = isCrawler(request.headers.get("user-agent"));
+  const post = await fetchPost(apiUrl, id, crawler ? 12000 : 600);
   const title = post?.title ? `${post.title} · ${SITE_NAME}` : `${SITE_NAME} - Blog`;
   const description =
     (post?.tagline && String(post.tagline).trim()) ||
@@ -63,9 +64,9 @@ function absoluteImage(url, siteUrl) {
   return `${siteUrl}${url.startsWith("/") ? url : `/${url}`}`;
 }
 
-async function fetchPost(apiUrl, id) {
+async function fetchPost(apiUrl, id, timeoutMs) {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 12000);
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const res = await fetch(`${apiUrl}/blog/${id}`, {
       signal: controller.signal,
