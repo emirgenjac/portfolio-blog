@@ -63,10 +63,10 @@ export function upsertMeta(html, attr, key, content) {
 
 export function injectRoot(html, inner) {
   const block = `<div id="root">${inner}</div>`;
-  if (/<div id="root">\s*<\/div>/.test(html)) {
-    return html.replace(/<div id="root">\s*<\/div>/, block);
+  if (/<div id="root">[\s\S]*?<\/div>/.test(html)) {
+    return html.replace(/<div id="root">[\s\S]*?<\/div>/, block);
   }
-  return html.replace(/<div id="root">/, `<div id="root">${inner}`);
+  return html;
 }
 
 export function applyHead(html, { title, description, url, type } = {}) {

@@ -49,3 +49,13 @@ test("blog source uses its own canonical and escapes post text", () => {
 test("a normal browser is not treated as a crawler", () => {
   assert.equal(isCrawler("Mozilla/5.0 Chrome/120.0.0.0"), false);
 });
+
+test("injectRoot replaces an h1 already in the shell", () => {
+  const filled = SHELL.replace(
+    '<div id="root"></div>',
+    "<div id=\"root\"><h1>Old</h1></div>",
+  );
+  const html = injectRoot(filled, "<h1>Blog Posts</h1>");
+  assert.match(html, /<div id="root"><h1>Blog Posts<\/h1><\/div>/);
+  assert.doesNotMatch(html, /<h1>Old<\/h1>/);
+});

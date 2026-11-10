@@ -14,10 +14,6 @@ const BLOG_DESCRIPTION = "Technical posts by Emir Genjac on Spring Boot, React, 
 
 export async function onRequestGet(context) {
   const { request, env, next } = context;
-  if (!isCrawler(request.headers.get("user-agent"))) {
-    return next();
-  }
-
   const html = await loadIndexHtml(env, request);
   if (!html) {
     return next();
@@ -25,7 +21,8 @@ export async function onRequestGet(context) {
 
   const { siteUrl, apiUrl } = siteConfig(env);
   const pageUrl = `${siteUrl}/blog`;
-  const posts = await fetchPosts(apiUrl);
+  const crawler = isCrawler(request.headers.get("user-agent"));
+  const posts = await fetchPosts(apiUrl, crawler ? 12000 : 600);
   const withHead = applyHead(html, {
     title: BLOG_TITLE,
     description: BLOG_DESCRIPTION,
@@ -35,9 +32,9 @@ export async function onRequestGet(context) {
   return htmlResponse(injectRoot(withHead, blogBody(siteUrl, posts)));
 }
 
-async function fetchPosts(apiUrl) {
+async function fetchPosts(apiUrl, timeoutMs) {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 12000);
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const res = await fetch(`${apiUrl}/blog`, {
       signal: controller.signal,
