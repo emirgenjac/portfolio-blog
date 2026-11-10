@@ -12,10 +12,17 @@ import ApiLoading from '../components/ApiLoading';
 import { useDocumentMeta } from '../seo/useDocumentMeta';
 import { absoluteUrl, DEFAULT_DESCRIPTION, pageTitle } from '../seo/site';
 import { readCachedPost, removeCachedPost, writeCachedPost } from '../api/blogCache';
+import { readBootJson } from '../api/bootData';
 
 function PostDetail() {
     const { id } = useParams();
-    const [post, setPost] = useState(() => readCachedPost(id));
+    const [post, setPost] = useState(() => {
+        const boot = readBootJson("boot-post");
+        if (boot && String(boot.id) === String(id)) {
+            return boot;
+        }
+        return readCachedPost(id);
+    });
     const [error, setError] = useState(null);
     const navigate = useNavigate();
     const [shareOpen, setShareOpen] = useState(false);

@@ -21,6 +21,7 @@ function renderBlog() {
 beforeEach(() => {
   API.get.mockReset();
   window.localStorage.clear();
+  document.getElementById("boot-posts")?.remove();
 });
 
 test('shows a loading status while posts are fetching', async () => {
@@ -38,6 +39,25 @@ test('shows a loading status while posts are fetching', async () => {
   await waitFor(() => {
     expect(screen.getByText('No posts yet.')).toBeInTheDocument();
   });
+});
+
+test('paints posts from the document before the API responds', () => {
+  const script = document.createElement("script");
+  script.id = "boot-posts";
+  script.type = "application/json";
+  script.textContent = JSON.stringify([{
+    id: 4,
+    title: "Boot post",
+    tagline: "Ready",
+    coverImageUrl: "https://i.imgur.com/QuyvZM6.png",
+  }]);
+  document.body.appendChild(script);
+  API.get.mockReturnValue(new Promise(() => {}));
+
+  renderBlog();
+
+  expect(screen.getByRole("img", { name: "Boot post" })).toHaveAttribute("src", "https://i.imgur.com/QuyvZM6.png");
+  expect(screen.queryByRole("status")).not.toBeInTheDocument();
 });
 
 test('shows cached posts immediately while a refresh is in flight', () => {

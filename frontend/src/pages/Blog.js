@@ -7,15 +7,24 @@ import ApiLoading from '../components/ApiLoading';
 import { useDocumentMeta } from '../seo/useDocumentMeta';
 import { DEFAULT_DESCRIPTION, pageTitle } from '../seo/site';
 import { readCachedPosts, writeCachedPosts } from '../api/blogCache';
+import { readBootJson } from '../api/bootData';
 
 function newestFirst(posts) {
     return [...posts].sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
 }
 
-const Blog = () => {
+function initialPosts() {
+    const boot = readBootJson("boot-posts");
+    if (Array.isArray(boot) && boot.length) {
+        return newestFirst(boot);
+    }
     const cachedPosts = readCachedPosts();
-    const [posts, setPosts] = useState(cachedPosts ? newestFirst(cachedPosts) : []);
-    const [loading, setLoading] = useState(!cachedPosts);
+    return cachedPosts ? newestFirst(cachedPosts) : [];
+}
+
+const Blog = () => {
+    const [posts, setPosts] = useState(initialPosts);
+    const [loading, setLoading] = useState(() => initialPosts().length === 0);
     const [error, setError] = useState('');
     const navigate = useNavigate();
     useDocumentMeta({

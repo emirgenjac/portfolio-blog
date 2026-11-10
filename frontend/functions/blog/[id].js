@@ -1,3 +1,4 @@
+import { slimPost, withBootScript, withPreloadImage } from "../_lib/boot.js";
 import {
   SITE_NAME,
   SITE_URL,
@@ -29,7 +30,7 @@ export async function onRequestGet(context) {
   const { siteUrl, apiUrl } = siteConfig(env);
   const pageUrl = `${siteUrl}/blog/${id}`;
   const crawler = isCrawler(request.headers.get("user-agent"));
-  const post = await fetchPost(apiUrl, id, crawler ? 12000 : 600);
+  const post = await loadPost(apiUrl, id, crawler ? 12000 : 600, context.waitUntil);
   const title = post?.title ? `${post.title} · ${SITE_NAME}` : `${SITE_NAME} - Blog`;
   const description =
     (post?.tagline && String(post.tagline).trim()) ||
@@ -52,7 +53,11 @@ export async function onRequestGet(context) {
   page = upsertMeta(page, "property", "og:image:alt", post?.title || SITE_NAME);
   page = upsertMeta(page, "name", "twitter:card", "summary_large_image");
   page = upsertMeta(page, "name", "twitter:image", image);
+  page = withPreloadImage(page, /^https:\/\//i.test(post?.coverImageUrl || "") ? post.coverImageUrl : "");
   page = injectRoot(page, `<h1>${escapeAttr(heading)}</h1><p>${escapeAttr(description)}</p>`);
+  if (post?.id != null) {
+    page = withBootScript(page, "boot-post", slimPost(post, { content: true }));
+  }
 
   return htmlResponse(page);
 }
@@ -62,6 +67,56 @@ function absoluteImage(url, siteUrl) {
   if (/^https?:\/\//i.test(url)) return url;
   if (url.startsWith("//")) return `https:${url}`;
   return `${siteUrl}${url.startsWith("/") ? url : `/${url}`}`;
+}
+
+const FRESH_MS = 120000;
+
+async function loadPost(apiUrl, id, timeoutMs, waitUntil) {
+  const url = `${apiUrl}/blog/${id}`;
+  const cached = await readCache(url);
+  if (cached?.post?.id != null) {
+    if (Date.now() - cached.savedAt > FRESH_MS && waitUntil) {
+      waitUntil(refreshPost(url, apiUrl, id, timeoutMs));
+    }
+    return cached.post;
+  }
+  const fresh = await fetchPost(apiUrl, id, timeoutMs);
+  if (fresh?.id != null && waitUntil) {
+    waitUntil(writeCache(url, { savedAt: Date.now(), post: fresh }));
+  }
+  return fresh;
+}
+
+async function refreshPost(url, apiUrl, id, timeoutMs) {
+  const fresh = await fetchPost(apiUrl, id, timeoutMs);
+  if (fresh?.id != null) {
+    await writeCache(url, { savedAt: Date.now(), post: fresh });
+  }
+}
+
+async function readCache(url) {
+  try {
+    const hit = await caches.default.match(new Request(url));
+    if (!hit) {
+      return null;
+    }
+    return await hit.json();
+  } catch {
+    return null;
+  }
+}
+
+async function writeCache(url, data) {
+  try {
+    await caches.default.put(new Request(url), new Response(JSON.stringify(data), {
+      headers: {
+        "content-type": "application/json",
+        "cache-control": "public, max-age=86400",
+      },
+    }));
+  } catch {
+    // A cache miss still returns the live response.
+  }
 }
 
 async function fetchPost(apiUrl, id, timeoutMs) {
