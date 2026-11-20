@@ -1,4 +1,5 @@
-FROM maven:3.9.9-eclipse-temurin-24 AS build
+# CVE-2026-114938 is fixed in 25.0.5.1. The floating 25 tag can still track 25.0.5.
+FROM eclipse-temurin:25.0.5.1_2-jdk-noble AS build
 WORKDIR /app
 
 COPY pom.xml mvnw ./
@@ -12,7 +13,7 @@ RUN ./mvnw -B -DskipTests package \
     && jar=$(ls target/*.jar | grep -v '\.original$' | head -n 1) \
     && cp "$jar" /app/app.jar
 
-FROM eclipse-temurin:24-jre-noble
+FROM eclipse-temurin:25.0.5.1_2-jre-noble
 WORKDIR /app
 
 RUN groupadd --system spring && useradd --system --gid spring spring

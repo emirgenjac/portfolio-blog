@@ -15,7 +15,7 @@ I wanted to document the whole project from start to finish, to have a clear roa
 | | |
 |---|---|
 | Frontend | React 19, React Router 7, axios |
-| Backend | Spring Boot 3.4, Java 24, Spring Security, JWT |
+| Backend | Spring Boot 3.5, Java 25, Spring Security, JWT |
 | Database | PostgreSQL, Flyway, Spring Data JPA |
 | Hosting | Cloudflare Pages, Render, Supabase |
 | CI/CD | GitHub Actions |
