@@ -128,6 +128,59 @@ function containsAll(text, needles) {
   return needles.every((needle) => text.includes(needle));
 }
 
+function containsTerm(text, needle) {
+  return text != null && String(text).toLowerCase().includes(needle);
+}
+
+function termFieldScore(title, tagline, body, needle, taglineTier) {
+  if (containsTerm(title, needle)) {
+    return 3;
+  }
+  if (taglineTier && containsTerm(tagline, needle)) {
+    return 2;
+  }
+  if (containsTerm(body, needle)) {
+    return 1;
+  }
+  return 0;
+}
+
+function weakestFieldScore(title, tagline, body, needles, taglineTier) {
+  let weakest = Infinity;
+  for (const needle of needles) {
+    const score = termFieldScore(title, tagline, body, needle, taglineTier);
+    if (score === 0) {
+      return 0;
+    }
+    if (score < weakest) {
+      weakest = score;
+    }
+  }
+  return weakest === Infinity ? 0 : weakest;
+}
+
+function createdAtKey(value) {
+  if (value == null || value === "") {
+    return null;
+  }
+  return String(value);
+}
+
+function compareCreatedAt(left, right) {
+  const a = createdAtKey(left);
+  const b = createdAtKey(right);
+  if (a === null && b === null) {
+    return 0;
+  }
+  if (a === null) {
+    return 1;
+  }
+  if (b === null) {
+    return -1;
+  }
+  return b.localeCompare(a);
+}
+
 function excerpt(text, needle) {
   if (!text) {
     return null;
@@ -187,6 +240,7 @@ function postHit(post, needles) {
     title: post.title,
     snippet: snippet(post.tagline, post.content, post.title, needles),
     href: `/blog/${post.id}`,
+    matchedBy: "word",
   };
 }
 
@@ -211,25 +265,44 @@ export function searchLocal(rawQuery) {
 
   const needles = terms(query);
   const posts = readCachedPosts() || [];
-  const hits = [];
+  const ranked = [];
 
   for (const post of posts) {
-    if (containsAll(haystack(post.title, post.tagline, post.content), needles)) {
-      hits.push(postHit(post, needles));
-      if (hits.length === MAX_HITS) {
-        return { hits, error: "" };
-      }
+    if (!containsAll(haystack(post.title, post.tagline, post.content), needles)) {
+      continue;
     }
+    const score = weakestFieldScore(post.title, post.tagline, post.content, needles, true);
+    if (score === 0) {
+      continue;
+    }
+    ranked.push({
+      score,
+      createdAt: post.createdAt,
+      hit: postHit(post, needles),
+    });
   }
 
   for (const document of STATIC_DOCUMENTS) {
-    if (hits.length === MAX_HITS) {
-      break;
+    if (!containsAll(haystack(document.title, document.body), needles)) {
+      continue;
     }
-    if (containsAll(haystack(document.title, document.body), needles)) {
-      hits.push(documentHit(document, needles, posts));
+    const score = weakestFieldScore(document.title, null, document.body, needles, false);
+    if (score === 0) {
+      continue;
     }
+    ranked.push({
+      score,
+      createdAt: null,
+      hit: documentHit(document, needles, posts),
+    });
   }
 
-  return { hits, error: "" };
+  ranked.sort((left, right) => {
+    if (left.score !== right.score) {
+      return right.score - left.score;
+    }
+    return compareCreatedAt(left.createdAt, right.createdAt);
+  });
+
+  return { hits: ranked.slice(0, MAX_HITS).map((item) => item.hit), error: "" };
 }

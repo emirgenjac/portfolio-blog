@@ -52,7 +52,8 @@ class SearchApiContractTest {
                 .andExpect(jsonPath("$[0].title").exists())
                 .andExpect(jsonPath("$[0].snippet").exists())
                 .andExpect(jsonPath("$[0].href").exists())
-                .andExpect(jsonPath("$[0].length()").value(5))
+                .andExpect(jsonPath("$[0].matchedBy").value("word"))
+                .andExpect(jsonPath("$[0].length()").value(6))
                 .andExpect(jsonPath("$[0].content").doesNotExist())
                 .andExpect(jsonPath("$[0].body").doesNotExist())
                 .andExpect(jsonPath("$[0].tagline").doesNotExist())
@@ -107,6 +108,7 @@ class SearchApiContractTest {
                 .andExpect(jsonPath("$[0].kind").value("site"))
                 .andExpect(jsonPath("$[0].title").exists())
                 .andExpect(jsonPath("$[0].href").exists())
+                .andExpect(jsonPath("$[0].matchedBy").doesNotExist())
                 .andExpect(jsonPath("$[0].length()").value(5))
                 .andExpect(jsonPath("$[0].content").doesNotExist());
     }

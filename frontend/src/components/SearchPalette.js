@@ -12,6 +12,19 @@ const KIND_LABEL = {
     about: "About",
 };
 
+const MATCH_LABEL = {
+    word: "Word",
+    meaning: "Meaning",
+    both: "Word + meaning",
+};
+
+function postMatchLabel(hit) {
+    if (hit.kind !== "post") {
+        return "";
+    }
+    return MATCH_LABEL[hit.matchedBy] || "";
+}
+
 function isExternalHref(href) {
     return /^https?:\/\//i.test(href || "");
 }
@@ -234,10 +247,18 @@ function scrollToHash(href) {
 
 function HitLink({ hit, onNavigate }) {
     const kind = KIND_LABEL[hit.kind] || hit.kind;
+    const match = postMatchLabel(hit);
     const href = hit.href || "/";
     const content = (
         <>
-            <span className="search-palette__kind">{kind}</span>
+            <span className="search-palette__meta">
+                <span className="search-palette__kind">{kind}</span>
+                {match ? (
+                    <span className={`search-palette__match search-palette__match--${hit.matchedBy}`}>
+                        {match}
+                    </span>
+                ) : null}
+            </span>
             <span className="search-palette__hit-title">{hit.title}</span>
             {hit.snippet ? <span className="search-palette__snippet">{hit.snippet}</span> : null}
         </>

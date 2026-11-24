@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import API from '../api/axios';
 import { writeCachedPosts } from '../api/blogCache';
@@ -104,6 +104,61 @@ test('about hit points at the making-of blog post', async () => {
   expect(link).toHaveAttribute('href', '/blog/9');
 });
 
+test('labels a blog post as word, meaning, or both', async () => {
+  API.get.mockResolvedValue({
+    data: [
+      {
+        kind: 'post',
+        id: 1,
+        title: 'Cookie post',
+        snippet: 'cookie',
+        href: '/blog/1',
+        matchedBy: 'meaning',
+      },
+      {
+        kind: 'post',
+        id: 2,
+        title: 'CSRF post',
+        snippet: 'csrf',
+        href: '/blog/2',
+        matchedBy: 'word',
+      },
+      {
+        kind: 'post',
+        id: 3,
+        title: 'Hybrid post',
+        snippet: 'both lists',
+        href: '/blog/3',
+        matchedBy: 'both',
+      },
+      {
+        kind: 'project',
+        id: 2,
+        title: 'Heronn.ai',
+        snippet: 'hack',
+        href: 'https://github.com/emirgenjac/Heronn.ai',
+        matchedBy: 'word',
+      },
+    ],
+  });
+
+  renderPalette();
+  fireEvent.change(screen.getByLabelText('Search posts and projects'), {
+    target: { value: 'cookie' },
+  });
+
+  const meaning = await screen.findByRole('link', { name: /Cookie post/ });
+  const word = screen.getByRole('link', { name: /CSRF post/ });
+  const both = screen.getByRole('link', { name: /Hybrid post/ });
+  const project = screen.getByRole('link', { name: /Heronn.ai/ });
+
+  expect(within(meaning).getByText('Meaning')).toBeInTheDocument();
+  expect(within(word).getByText('Word')).toBeInTheDocument();
+  expect(within(both).getByText('Word + meaning')).toBeInTheDocument();
+  expect(within(project).queryByText('Word')).not.toBeInTheDocument();
+  expect(within(project).getByText('Project')).toBeInTheDocument();
+});
+
 test('falls back to cached results when the API is down', async () => {
   writeCachedPosts([{
     id: 9,
@@ -119,7 +174,9 @@ test('falls back to cached results when the API is down', async () => {
   });
 
   expect(await screen.findByText('Server asleep — showing cached results.')).toBeInTheDocument();
-  expect(screen.getByRole('link', { name: /Kako sam pravio ovaj sajt/ })).toHaveAttribute('href', '/blog/9');
+  const cached = screen.getByRole('link', { name: /Kako sam pravio ovaj sajt/ });
+  expect(cached).toHaveAttribute('href', '/blog/9');
+  expect(within(cached).getByText('Word')).toBeInTheDocument();
 });
 
 test('rejects overlong queries before calling the API', () => {
