@@ -89,6 +89,7 @@ class HybridSearchTest {
         assertFalse(hits.isEmpty());
         assertEquals(jwtPostId, hits.get(0).id());
         assertEquals("post", hits.get(0).kind());
+        assertEquals("meaning", hits.get(0).matchedBy());
         assertTrue(hits.get(0).snippet().toLowerCase().contains("cookie")
                 || hits.get(0).title().toLowerCase().contains("jwt"));
         assertTrue(hits.stream().noneMatch(hit -> hit.id() == decoyPostId));

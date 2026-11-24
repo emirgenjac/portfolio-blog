@@ -50,6 +50,96 @@ test('injection-style strings do not throw or invent hits', () => {
   }
 });
 
+test('ranks an older title match ahead of newer body mentions', () => {
+  const posts = [];
+  for (let i = 0; i < 10; i += 1) {
+    posts.push({
+      id: 100 + i,
+      title: `Notes ${i}`,
+      tagline: 'misc',
+      content: 'zephyr zephyr zephyr shows up in the body only',
+      createdAt: `2026-06-01T00:${String(i).padStart(2, '0')}:00`,
+    });
+  }
+  posts.push({
+    id: 1,
+    title: 'Zephyr field guide',
+    tagline: 'Weather',
+    content: 'Clouds and wind only.',
+    createdAt: '2024-01-01T00:00:00',
+  });
+  writeCachedPosts(posts);
+
+  const result = searchLocal('zephyr');
+  expect(result.error).toBe('');
+  expect(result.hits).toHaveLength(10);
+  expect(result.hits[0].id).toBe(1);
+  expect(result.hits[0].title).toBe('Zephyr field guide');
+  expect(result.hits[1].id).toBe(109);
+});
+
+test('newer body match ranks first when field scores match', () => {
+  writeCachedPosts([
+    {
+      id: 1,
+      title: 'Older notes',
+      tagline: 'plain',
+      content: 'zephyr in the body',
+      createdAt: '2024-01-01T00:00:00',
+    },
+    {
+      id: 2,
+      title: 'Newer notes',
+      tagline: 'plain',
+      content: 'zephyr in the body',
+      createdAt: '2026-06-01T00:00:00',
+    },
+  ]);
+
+  expect(searchLocal('zephyr').hits.map((hit) => hit.id)).toEqual([2, 1]);
+});
+
+test('missing createdAt sorts after a dated post with the same field score', () => {
+  writeCachedPosts([
+    {
+      id: 1,
+      title: 'Undated notes',
+      tagline: 'plain',
+      content: 'zephyr in the body',
+    },
+    {
+      id: 2,
+      title: 'Dated notes',
+      tagline: 'plain',
+      content: 'zephyr in the body',
+      createdAt: '2020-01-01T00:00:00',
+    },
+  ]);
+
+  expect(searchLocal('zephyr').hits.map((hit) => hit.id)).toEqual([2, 1]);
+});
+
+test('weakest term field score beats a newer partial title match', () => {
+  writeCachedPosts([
+    {
+      id: 1,
+      title: 'Field notes',
+      tagline: 'zephyr lantern',
+      content: 'No extra copy.',
+      createdAt: '2020-01-01T00:00:00',
+    },
+    {
+      id: 2,
+      title: 'Zephyr notes',
+      tagline: 'partial',
+      content: 'Bring a lantern.',
+      createdAt: '2026-06-01T00:00:00',
+    },
+  ]);
+
+  expect(searchLocal('zephyr lantern').hits[0].id).toBe(1);
+});
+
 test('snippet text keeps markup as plain text', () => {
   writeCachedPosts([{
     id: 2,

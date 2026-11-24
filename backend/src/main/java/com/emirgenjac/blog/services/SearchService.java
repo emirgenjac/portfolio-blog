@@ -8,7 +8,9 @@ import com.emirgenjac.blog.repository.SearchChunkRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -19,6 +21,14 @@ import java.util.Optional;
 public class SearchService {
 
     private static final int MAX_HITS = 10;
+    private static final int CANDIDATE_LIMIT = 50;
+    private static final int RRF_K = 10;
+    private static final int TITLE_SCORE = 3;
+    private static final int TAGLINE_SCORE = 2;
+    private static final int BODY_SCORE = 1;
+    private static final String MATCH_WORD = "word";
+    private static final String MATCH_MEANING = "meaning";
+    private static final String MATCH_BOTH = "both";
     private static final int SNIPPET_LENGTH = 180;
 
     private final BlogPostRepository blogPostRepository;
@@ -40,74 +50,205 @@ public class SearchService {
 
         Optional<float[]> embedding = embeddingClient.embedQuery(query);
         if (embedding.isEmpty()) {
-            return wordHits;
+            return topHits(wordHits);
         }
 
         List<SearchChunkMatch> nearest = searchChunkRepository.findNearest(embedding.get(), MAX_HITS);
         if (nearest.isEmpty()) {
-            return wordHits;
+            return topHits(wordHits);
         }
-        return mergeHybrid(nearest, wordHits);
+        return fuse(nearest, wordHits);
     }
 
-    private List<SearchHitDTO> mergeHybrid(List<SearchChunkMatch> nearest, List<SearchHitDTO> wordHits) {
-        Map<String, SearchHitDTO> merged = new LinkedHashMap<>();
+    private List<SearchHitDTO> fuse(List<SearchChunkMatch> nearest, List<SearchHitDTO> wordHits) {
+        Map<String, FusionCandidate> candidates = new LinkedHashMap<>();
 
+        int wordRank = 1;
+        for (SearchHitDTO hit : wordHits) {
+            String key = hitKey(hit);
+            if (candidates.containsKey(key)) {
+                continue;
+            }
+            candidates.put(key, new FusionCandidate(hit, wordRank, null));
+            wordRank++;
+        }
+
+        int vectorRank = 1;
         for (SearchChunkMatch match : nearest) {
             String key = "post:" + match.blogPostId();
-            merged.putIfAbsent(key, toHit(match));
-            if (merged.size() == MAX_HITS) {
-                return List.copyOf(merged.values());
+            FusionCandidate existing = candidates.get(key);
+            if (existing != null && existing.vectorRank() != null) {
+                continue;
             }
+            if (existing == null) {
+                candidates.put(key, new FusionCandidate(toHit(match), null, vectorRank));
+            } else {
+                candidates.put(key, new FusionCandidate(existing.hit(), existing.wordRank(), vectorRank));
+            }
+            vectorRank++;
         }
 
-        for (SearchHitDTO hit : wordHits) {
-            String key = hit.kind() + ":" + hit.id();
-            merged.putIfAbsent(key, hit);
-            if (merged.size() == MAX_HITS) {
-                break;
+        List<FusionCandidate> ranked = new ArrayList<>(candidates.values());
+        ranked.sort((left, right) -> {
+            double leftScore = rrfScore(left);
+            double rightScore = rrfScore(right);
+            if (Math.abs(leftScore - rightScore) > 1.0e-12) {
+                return Double.compare(rightScore, leftScore);
             }
+            int byWord = compareRank(left.wordRank(), right.wordRank());
+            if (byWord != 0) {
+                return byWord;
+            }
+            return compareRank(left.vectorRank(), right.vectorRank());
+        });
+
+        List<SearchHitDTO> hits = new ArrayList<>();
+        int limit = Math.min(MAX_HITS, ranked.size());
+        for (int i = 0; i < limit; i++) {
+            hits.add(labelMatch(ranked.get(i)));
         }
-        return List.copyOf(merged.values());
+        return List.copyOf(hits);
+    }
+
+    private SearchHitDTO labelMatch(FusionCandidate candidate) {
+        SearchHitDTO hit = candidate.hit();
+        if (!"post".equals(hit.kind())) {
+            return hit;
+        }
+        if (candidate.wordRank() != null && candidate.vectorRank() != null) {
+            return withMatchedBy(hit, MATCH_BOTH);
+        }
+        if (candidate.vectorRank() != null) {
+            return withMatchedBy(hit, MATCH_MEANING);
+        }
+        return withMatchedBy(hit, MATCH_WORD);
+    }
+
+    private SearchHitDTO withMatchedBy(SearchHitDTO hit, String matchedBy) {
+        if (matchedBy.equals(hit.matchedBy())) {
+            return hit;
+        }
+        return new SearchHitDTO(hit.kind(), hit.id(), hit.title(), hit.snippet(), hit.href(), matchedBy);
+    }
+
+    private static double rrfScore(FusionCandidate candidate) {
+        double score = 0.0;
+        if (candidate.wordRank() != null) {
+            score += 1.0 / (RRF_K + candidate.wordRank());
+        }
+        if (candidate.vectorRank() != null) {
+            score += 1.0 / (RRF_K + candidate.vectorRank());
+        }
+        return score;
+    }
+
+    private static int compareRank(Integer left, Integer right) {
+        if (left == null && right == null) {
+            return 0;
+        }
+        if (left == null) {
+            return 1;
+        }
+        if (right == null) {
+            return -1;
+        }
+        return Integer.compare(left, right);
+    }
+
+    private static String hitKey(SearchHitDTO hit) {
+        return hit.kind() + ":" + hit.id();
+    }
+
+    private List<SearchHitDTO> topHits(List<SearchHitDTO> hits) {
+        if (hits.size() <= MAX_HITS) {
+            return hits;
+        }
+        return List.copyOf(hits.subList(0, MAX_HITS));
     }
 
     private List<SearchHitDTO> wordSearch(String query) {
         List<String> terms = SearchQuery.terms(query);
-        List<SearchHitDTO> hits = new ArrayList<>();
+        List<ScoredHit> scored = new ArrayList<>();
 
-        List<BlogPost> posts = matchingPosts(terms);
-        for (BlogPost post : posts) {
-            hits.add(toHit(post, terms));
+        for (BlogPost post : matchingPosts(terms)) {
+            int score = weakestFieldScore(post.getTitle(), post.getTagline(), post.getContent(), terms, true);
+            if (score == 0) {
+                continue;
+            }
+            scored.add(new ScoredHit(score, post.getCreatedAt(), toHit(post, terms)));
         }
 
-        if (hits.size() < MAX_HITS) {
-            int remaining = MAX_HITS - hits.size();
-            SiteSearchCorpus.documents().stream()
-                    .filter(document -> matches(document, terms))
-                    .limit(remaining)
-                    .map(document -> toHit(document, terms))
-                    .forEach(hits::add);
+        for (SiteSearchCorpus.Document document : SiteSearchCorpus.documents()) {
+            if (!matches(document, terms)) {
+                continue;
+            }
+            int score = weakestFieldScore(document.title(), null, document.body(), terms, false);
+            if (score == 0) {
+                continue;
+            }
+            scored.add(new ScoredHit(score, null, toHit(document, terms)));
         }
 
+        scored.sort(Comparator
+                .comparingInt(ScoredHit::score).reversed()
+                .thenComparing(ScoredHit::createdAt, Comparator.nullsLast(Comparator.reverseOrder())));
+
+        List<SearchHitDTO> hits = new ArrayList<>(scored.size());
+        for (ScoredHit item : scored) {
+            hits.add(item.hit());
+        }
         return List.copyOf(hits);
     }
 
     private List<BlogPost> matchingPosts(List<String> terms) {
         String pattern = SearchQuery.likePattern(terms.get(0));
-        List<BlogPost> candidates = blogPostRepository.searchByTerm(pattern, PageRequest.of(0, 50));
+        List<BlogPost> candidates = blogPostRepository.searchByTerm(pattern, PageRequest.of(0, CANDIDATE_LIMIT));
         if (terms.size() == 1) {
-            return candidates.size() <= MAX_HITS ? candidates : candidates.subList(0, MAX_HITS);
+            return candidates;
         }
         List<BlogPost> matches = new ArrayList<>();
         for (BlogPost post : candidates) {
             if (containsAll(haystack(post.getTitle(), post.getTagline(), post.getContent()), terms)) {
                 matches.add(post);
-                if (matches.size() == MAX_HITS) {
-                    break;
-                }
             }
         }
         return matches;
+    }
+
+    private int weakestFieldScore(
+            String title,
+            String tagline,
+            String body,
+            List<String> terms,
+            boolean taglineTier) {
+        int weakest = Integer.MAX_VALUE;
+        for (String term : terms) {
+            int score = termFieldScore(title, tagline, body, term, taglineTier);
+            if (score == 0) {
+                return 0;
+            }
+            if (score < weakest) {
+                weakest = score;
+            }
+        }
+        return weakest == Integer.MAX_VALUE ? 0 : weakest;
+    }
+
+    private int termFieldScore(String title, String tagline, String body, String term, boolean taglineTier) {
+        if (containsTerm(title, term)) {
+            return TITLE_SCORE;
+        }
+        if (taglineTier && containsTerm(tagline, term)) {
+            return TAGLINE_SCORE;
+        }
+        if (containsTerm(body, term)) {
+            return BODY_SCORE;
+        }
+        return 0;
+    }
+
+    private boolean containsTerm(String text, String term) {
+        return text != null && text.toLowerCase(Locale.ROOT).contains(term);
     }
 
     private boolean matches(SiteSearchCorpus.Document document, List<String> terms) {
@@ -139,7 +280,8 @@ public class SearchService {
                 match.blogPostId(),
                 match.title(),
                 quoteSnippet(match.content()),
-                "/blog/" + match.blogPostId()
+                "/blog/" + match.blogPostId(),
+                MATCH_MEANING
         );
     }
 
@@ -149,7 +291,8 @@ public class SearchService {
                 post.getId(),
                 post.getTitle(),
                 snippet(post.getTagline(), post.getContent(), post.getTitle(), terms),
-                "/blog/" + post.getId()
+                "/blog/" + post.getId(),
+                MATCH_WORD
         );
     }
 
@@ -159,7 +302,8 @@ public class SearchService {
                 document.id(),
                 document.title(),
                 snippet(document.body(), null, document.title(), terms),
-                hrefFor(document)
+                hrefFor(document),
+                null
         );
     }
 
@@ -229,5 +373,11 @@ public class SearchService {
             excerpt = excerpt + "…";
         }
         return excerpt;
+    }
+
+    private record ScoredHit(int score, LocalDateTime createdAt, SearchHitDTO hit) {
+    }
+
+    private record FusionCandidate(SearchHitDTO hit, Integer wordRank, Integer vectorRank) {
     }
 }
