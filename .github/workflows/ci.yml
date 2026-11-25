@@ -27,7 +27,6 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          # OpenJDK 25.0.5.1+2. setup-java only accepts Adoptium's semver, not 25.0.5.1.
           java-version: "25.0.5+100000002.0.LTS"
           cache: maven
           cache-dependency-path: backend/pom.xml

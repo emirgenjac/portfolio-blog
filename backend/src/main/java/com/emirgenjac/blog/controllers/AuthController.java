@@ -7,7 +7,6 @@ import com.emirgenjac.blog.services.JwtService;
 import com.emirgenjac.blog.services.LoginRateLimitService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -24,24 +23,27 @@ import org.springframework.web.server.ResponseStatusException;
 public class AuthController {
 
     private static final String JWT_COOKIE_NAME = "jwt";
+    private final AdminService adminService;
+    private final JwtService jwtService;
+    private final LoginRateLimitService loginRateLimitService;
+    private final boolean cookieSecure;
+    private final String cookieSameSite;
+    private final long cookieMaxAgeSeconds;
 
-    @Autowired
-    private AdminService adminService;
-
-    @Autowired
-    private JwtService jwtService;
-
-    @Autowired
-    private LoginRateLimitService loginRateLimitService;
-
-    @Value("${app.cookie.secure:false}")
-    private boolean cookieSecure;
-
-    @Value("${app.cookie.same-site:Lax}")
-    private String cookieSameSite;
-
-    @Value("${app.cookie.max-age-seconds:604800}")
-    private long cookieMaxAgeSeconds;
+    public AuthController(
+            AdminService adminService,
+            JwtService jwtService,
+            LoginRateLimitService loginRateLimitService,
+            @Value("${app.cookie.max-age-seconds:604800}") long cookieMaxAgeSeconds,
+            @Value("${app.cookie.secure:false}") boolean cookieSecure,
+    @Value("${app.cookie.same-site:Lax}") String cookieSameSite) {
+        this.adminService = adminService;
+        this.jwtService = jwtService;
+        this.loginRateLimitService = loginRateLimitService;
+        this.cookieMaxAgeSeconds = cookieMaxAgeSeconds;
+        this.cookieSecure = cookieSecure;
+        this.cookieSameSite = cookieSameSite;
+    }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(

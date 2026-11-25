@@ -21,10 +21,15 @@ import java.util.List;
 public class BlogPostController {
     private static final String AUTHOR_DISPLAY_NAME = "Emir Genjac";
 
-    @Autowired
-    private BlogPostService blogPostService;
-    @Autowired
-    private AdminRepository adminRepository;
+
+    private final BlogPostService blogPostService;
+
+    private final AdminRepository adminRepository;
+
+    public BlogPostController(BlogPostService blogPostService, AdminRepository adminRepository) {
+        this.blogPostService = blogPostService;
+        this.adminRepository = adminRepository;
+    }
 
     @GetMapping
     public List<BlogPostResponseDTO> getAllPosts() {

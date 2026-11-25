@@ -1,6 +1,5 @@
 package com.emirgenjac.blog.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,17 +25,21 @@ import java.util.List;
 @Configuration
 public class SecurityConfig {
 
-    @Autowired
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
-
-    @Value("${app.cookie.secure:false}")
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private boolean cookieSecure;
-
-    @Value("${app.cookie.same-site:Lax}")
     private String cookieSameSite;
-
-    @Value("${app.cors.allowed-origins:http://localhost:3000}")
     private String allowedOrigins;
+
+    public SecurityConfig(
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            @Value("${app.cookie.secure:false}") boolean cookieSecure,
+            @Value("${app.cookie.same-site:Lax}") String cookieSameSite,
+            @Value("${app.cors.allowed-origins:http://localhost:3000}") String allowedOrigins) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.cookieSecure = cookieSecure;
+        this.cookieSameSite = cookieSameSite;
+        this.allowedOrigins = allowedOrigins;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

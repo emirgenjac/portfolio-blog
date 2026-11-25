@@ -9,7 +9,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class AuthControllerTest {
 
-    private final AuthController authController = new AuthController();
+    private final AuthController authController;
+
+    public AuthControllerTest() {
+        this.authController = new AuthController(
+                null,
+                null,
+                null,
+                604800L,
+                false,
+                "Lax"
+        );
+    }
 
     @Test
     void meReturnsUnauthorizedWhenNoRealAuthenticationExists() {
